@@ -224,42 +224,393 @@ load(here("dados_microcosmos",
           "Boukal_Czech",
           "Boukal_Czech.RData"))
 
-# nested dataframes 
-nested_df <- bind_rows(boukal_czech_roof,
-                       boukal_czech_nonroof,
-                       boukal_czech_plesnelake) 
-View(nested_df)
-nested_df$traits[2]
-
 ###----
 #--- Caliman_Natal_BR
-# era pouca coisa, fiz direto na mao
+caliman_fa <- read_xlsx(
+  here(
+    "dados_microcosmos",
+    "Caliman_Natal_BR",
+    "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
+  "fauna_abundance")
+
+caliman_list <- read_xlsx(
+  here(
+    "dados_microcosmos",
+    "Caliman_Natal_BR",
+    "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
+  "Fauna_morphospecies_list")
+
+caliman_traits <- read_xlsx(
+  here(
+    "dados_microcosmos",
+    "Caliman_Natal_BR",
+    "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
+  "Fauna_traits")
+
+caliman_measures <- read_xlsx(
+  here(
+    "dados_microcosmos",
+    "Caliman_Natal_BR",
+    "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
+  "measures_decomposition_geograph")
+
+# TODO: abundance 
+# aqui temos 40 potinhos, 20 deles estão indicados como
+#  (allochthonous detritus). Precisa ser separado em dois experimentos?
+head(caliman_fa)
+
+# list
+head(caliman_list)
+
+# traits
+View(caliman_traits)
+
+# measures
+# rename variables with data dictionary
+# gambiarra para renomear as colunas
+caliman_measures <- 
+  caliman_measures %>%
+  rename("Elevation (m a.s.l.)" = "Elevation (m.s.l.)") #%>%
+  #select(-"Other water bodies.1", -"Other water bodies.2")
+caliman_measures <- 
+  caliman_measures %>%
+  rename(all_of(dict_names))
+
+caliman_natal_br <- tibble(
+  researcher = "Caliman",
+  locality = "Natal, Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(caliman_fa)),
+  list = list(tibble(caliman_list)),
+  traits=list(tibble(caliman_traits)),
+  measures=list(tibble(caliman_measures)))
+
+# save .RData from Boukal
+save(caliman_natal_br,
+     #boukal_czech_nonroof,
+     file = here("dados_microcosmos",
+                 "Caliman_Natal_BR",
+                 "Caliman_Natal_BR.RData")) 
 
 #--- Campos_do_Jordao_e_Sta_Virginia
-# dados indisponiveis
+# dados indisponiveis ainda
+# TODO: precisa separar em duas pastas
 
 #--- Cardinale_USA
-cardinale_fa <- read_xlsx("Cardinale_USA/Cardinale_modified_microcosm_data.xlsx",
-                          "fauna_abundance")
+cardinale_usa <- here("dados_microcosmos",
+                      "Cardinale_USA")
+
+cardinale_fa <- read_xlsx(
+  here(
+    cardinale_usa,
+    "Cardinale_modified_microcosm_data.xlsx"),
+  "fauna_abundance")
+
+cardinale_list <- read_xlsx(
+  here(
+    cardinale_usa,
+    "Cardinale_modified_microcosm_data.xlsx"),
+  "Fauna_morphospecies_list")
+
+cardinale_traits <- read_xlsx(
+  here(
+    cardinale_usa,
+    "Cardinale_modified_microcosm_data.xlsx"),
+  "Fauna_traits")
+
+cardinale_measures <- read_xlsx(
+  here(
+    cardinale_usa,
+    "Cardinale_modified_microcosm_data.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
 cardinale_fa[is.na(cardinale_fa)] <- 0
 
+# list
+cardinale_list
+
+# traits
+cardinale_traits
+
+# measures
+cardinale_measures
+
+# rename variables with data dictionary
+cardinale_measures <- 
+  cardinale_measures %>%
+  rename(all_of(dict_names))
+
+cardinale_usa_data <- tibble(
+  researcher = "Cardinale",
+  locality = "USA", 
+  roof_treatment = NA,
+  abundance = list(tibble(cardinale_fa)),
+  list = list(tibble(cardinale_list)),
+  traits=list(tibble(cardinale_traits)),
+  measures=list(tibble(cardinale_measures)))
+
+# save .RData from Boukal
+save(cardinale_usa_data,
+     file = here(cardinale_usa,
+                 "Cardinale_USA.RData")) 
+
 #--- Cardoso_Romero
-# Dados incompletos, mas as coordenadas foram convertidas direto no xlsx.
+# TODO: Dados incompletos, mas as coordenadas foram convertidas direto no xlsx.
 
 #--- Collyer_Japan
-# Dados estão ok
+collyer_japan <- here("dados_microcosmos",
+                      "Collyer_Japan")
 
-#--- Cornelissen_BR
+collyer_fa <- read_xlsx(
+  here(
+    collyer_japan,
+    "Giovanna Collyer & Takehito Yoshida_Japan.xlsx"),
+  "fauna_abundance")
+
+collyer_list <- read_xlsx(
+  here(
+    collyer_japan,
+    "Giovanna Collyer & Takehito Yoshida_Japan.xlsx"),
+  "Fauna_morphospecies_list")
+
+collyer_traits <- read_xlsx(
+  here(
+    collyer_japan,
+    "Giovanna Collyer & Takehito Yoshida_Japan.xlsx"),
+  "Fauna_traits")
+
+collyer_measures <- read_xlsx(
+  here(
+    collyer_japan,
+    "Giovanna Collyer & Takehito Yoshida_Japan.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+collyer_fa
+
+# list
+collyer_list
+
+# traits
+collyer_traits
+
+# measures
+collyer_measures
+# rename variables with data dictionary
+collyer_measures <- 
+  collyer_measures %>%
+  rename(all_of(dict_names))
+
+collyer_japan_data <- tibble(
+  researcher = "Collyer",
+  locality = "Japan", 
+  roof_treatment = NA,
+  abundance = list(tibble(collyer_fa)),
+  list = list(tibble(collyer_list)),
+  traits=list(tibble(collyer_traits)),
+  measures=list(tibble(collyer_measures)))
+
+save(collyer_japan_data,
+     #boukal_czech_nonroof,
+     file = here(collyer_japan,
+                 "Collyer_Japan.RData")) 
+
+#--- Cornelissen_BR with roof
 # No arquivo São Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx
 # a aba "measures_decomposition_geograph" coluna H linha 8 tem
 # um valor ausente que não está preenchido nem com NA. Precisa checar!
+cornelissen_br <- here("dados_microcosmos",
+                      "Cornelissen_BR",
+                      "dados_definitivos")
 
-#--- Cotriguaçu_Romero
-cotriguacu_list <- read_xlsx("Cotriguaçu_Romero/Romero.Amazon.xlsx",
-                             "Fauna_morphospecies_list")
+cornelissen_roof_fa <- read_xlsx(
+  here(
+    cornelissen_br,
+    "Sao Bartolomeu_Site.2_MICROCOSMS (with_roof).xlsx"),
+  "fauna_abundance")
 
+cornelissen_roof_list <- read_xlsx(
+  here(
+    cornelissen_br,
+    "Sao Bartolomeu_Site.2_MICROCOSMS (with_roof).xlsx"),
+  "Fauna_morphospecies_list")
+
+cornelissen_roof_traits <- read_xlsx(
+  here(
+    cornelissen_br,
+    "Sao Bartolomeu_Site.2_MICROCOSMS (with_roof).xlsx"),
+  "Fauna_traits")
+
+cornelissen_roof_measures <- read_xlsx(
+  here(
+    cornelissen_br,
+    "Sao Bartolomeu_Site.2_MICROCOSMS (with_roof).xlsx"),
+  "measures_decomposition_geograph")
+
+#abundance 
+cornelissen_roof_fa
+
+#list
+# substituir o Undetermined por NA
+cornelissen_roof_list <- cornelissen_roof_list %>%
+  mutate_all(~ifelse(. == "Undetermined", NA, .))
+
+# traits
+# substituir o undetermined por NA
+# remover colunas desnecessarias (informacao no data_log.txt)
+cornelissen_roof_traits <- cornelissen_roof_traits %>% 
+  mutate_all(~ifelse(.=="undetermined", NA, .)) %>%
+  select(-"...7", -"...8", -"...9", 
+         -"...10", -"...11", -"...12")
+
+# measures
+# substituir o undetermined por NA
+# o df nao tinha as colunas natural tree hole
+# adicionar para renomear e manter o padrao
+cornelissen_roof_measures <- cornelissen_roof_measures %>% 
+  mutate_all(~ifelse(.=="undetermined", NA, .)) %>%
+  mutate("Natural tree hole.1" = NA,
+         "Natural tree hole.2" = NA) %>%
+  rename(all_of(dict_names))
+
+cornelissen_roof_BR_data <- tibble(
+  researcher = "Cornelissen",
+  locality = "Minas Gerais, BR", 
+  roof_treatment = 1,
+  abundance = list(tibble(cornelissen_roof_fa)),
+  list = list(tibble(cornelissen_roof_list)),
+  traits=list(tibble(cornelissen_roof_traits)),
+  measures=list(tibble(cornelissen_roof_measures)))
+
+#View(cornelissen_roof_BR_data)
+
+#--- Cornelissen_BR without roof
+cornelissen_nonroof_fa <- read_xlsx(
+  here(
+    cornelissen_br,
+    "Sao Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx"),
+  "fauna_abundance")
+
+cornelissen_nonroof_list <- read_xlsx(
+  here(
+    cornelissen_br,
+    "Sao Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx"),
+  "Fauna_morphospecies_list")
+
+cornelissen_nonroof_traits <- read_xlsx(
+  here(
+    cornelissen_br,
+    "Sao Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx"),
+  "Fauna_traits")
+
+cornelissen_nonroof_measures <- read_xlsx(
+  here(
+    cornelissen_br,
+    "Sao Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx"),
+  "measures_decomposition_geograph")
+
+#abundance 
+cornelissen_nonroof_fa
+
+#list
+# substituir o Not_identified por NA
+cornelissen_nonroof_list <- cornelissen_nonroof_list %>%
+  mutate_all(~ifelse(. == "Not_identified", NA, .))
+
+# traits
+# substituir o Undetermined por NA
+# remover colunas desnecessarias (informacao no data_log.txt)
+cornelissen_nonroof_traits <- cornelissen_nonroof_traits %>% 
+  mutate_all(~ifelse(.=="Undetermined", NA, .)) %>%
+  select(-"...7", -"...8", -"...9", 
+         -"...10", -"...11", -"...12")
+
+# measures
+# substituir o undetermined por NA
+# o df nao tinha as colunas natural tree hole
+# adicionar para renomear e manter o padrao
+cornelissen_nonroof_measures <- cornelissen_nonroof_measures %>% 
+  mutate_all(~ifelse(.=="undetermined", NA, .)) %>%
+  mutate("Natural tree hole.1" = NA,
+         "Natural tree hole.2" = NA) %>%
+  rename(all_of(dict_names))
+
+cornelissen_nonroof_BR_data <- tibble(
+  researcher = "Cornelissen",
+  locality = "Minas Gerais, BR", 
+  roof_treatment = 0,
+  abundance = list(tibble(cornelissen_nonroof_fa)),
+  list = list(tibble(cornelissen_nonroof_list)),
+  traits=list(tibble(cornelissen_nonroof_traits)),
+  measures=list(tibble(cornelissen_nonroof_measures)))
+
+save(cornelissen_roof_BR_data,
+     cornelissen_nonroof_BR_data,
+     file = here("dados_microcosmos",
+                 "Cornelissen_BR",
+                 "Cornelissen_BR.RData"))
+
+#load(here("dados_microcosmos",
+#          "Cornelissen_BR",
+#          "Cornelissen_BR.RData"))
+
+# nested dataframes 
+nested_df <- bind_rows(boukal_czech_roof,
+                       boukal_czech_nonroof,
+                       boukal_czech_plesnelake,
+                       caliman_natal_br,
+                       cardinale_usa_data,
+                       collyer_japan_data,
+                       cornelissen_roof_BR_data,
+                       cornelissen_nonroof_BR_data) 
+View(nested_df)
+
+#--- Cotriguacu_Romero
+cotriguacu_br <- here("dados_microcosmos",
+                       "Cotriguacu_Romero")
+
+cotriguacu_fa <- read_xlsx(
+  here(
+    cotriguacu_br,
+    "Romero.Amazon.xlsx"),
+  "fauna_abundance")
+
+cotriguacu_list <- read_xlsx(
+  here(
+    cotriguacu_br,
+    "Romero.Amazon.xlsx"),
+  "Fauna_morphospecies_list")
+
+cotriguacu_traits <- read_xlsx(
+  here(
+    cotriguacu_br,
+    "Romero.Amazon.xlsx"),
+  "Fauna_traits")
+
+cotriguacu_measures <- read_xlsx(
+  here(
+    cotriguacu_br,
+    "Romero.Amazon.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+# TODO: precisa ver como organizar esses dados
+# como tem dados de diferentes alturas e tem mais de 20 potinhos.
+View(cotriguacu_fa)
+
+# list
 cotriguacu_list <- cotriguacu_list %>% mutate_all(~na_if(., "-"))
+View(cotriguacu_list)
 
+# traits
+View(cotriguacu_traits)
+
+# measures
+View(cotriguacu_measures)
+
+
+###----
 #--- Fabiola_Colombia
 # tem uma coluna a mais de traits
 
