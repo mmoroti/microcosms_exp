@@ -28,6 +28,7 @@ dict_names <- dict_data %>%
 # NA = non treatment apply
 
 #--- Boukal_Czech (with roof)
+#----
 boukal_roofs_fa <- read_xlsx(
   here(
   "dados_microcosmos",
@@ -224,8 +225,10 @@ load(here("dados_microcosmos",
           "Boukal_Czech",
           "Boukal_Czech.RData"))
 
-###----
+
+#----
 #--- Caliman_Natal_BR
+#----
 caliman_fa <- read_xlsx(
   here(
     "dados_microcosmos",
@@ -291,12 +294,15 @@ save(caliman_natal_br,
      file = here("dados_microcosmos",
                  "Caliman_Natal_BR",
                  "Caliman_Natal_BR.RData")) 
-
+#----
 #--- Campos_do_Jordao_e_Sta_Virginia
+#----
 # dados indisponiveis ainda
 # TODO: precisa separar em duas pastas
 
+#----
 #--- Cardinale_USA
+#----
 cardinale_usa <- here("dados_microcosmos",
                       "Cardinale_USA")
 
@@ -355,10 +361,14 @@ save(cardinale_usa_data,
      file = here(cardinale_usa,
                  "Cardinale_USA.RData")) 
 
+#----
 #--- Cardoso_Romero
+#----
 # TODO: Dados incompletos, mas as coordenadas foram convertidas direto no xlsx.
 
+#----
 #--- Collyer_Japan
+#----
 collyer_japan <- here("dados_microcosmos",
                       "Collyer_Japan")
 
@@ -416,14 +426,17 @@ save(collyer_japan_data,
      file = here(collyer_japan,
                  "Collyer_Japan.RData")) 
 
-#--- Cornelissen_BR with roof
-# No arquivo São Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx
-# a aba "measures_decomposition_geograph" coluna H linha 8 tem
-# um valor ausente que não está preenchido nem com NA. Precisa checar!
+#----
+#---- Cornelissen_BR
+#----
 cornelissen_br <- here("dados_microcosmos",
                       "Cornelissen_BR",
                       "dados_definitivos")
 
+#--- Cornelissen_BR with roof
+# TODO No arquivo São Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx
+# a aba "measures_decomposition_geograph" coluna H linha 8 tem
+# um valor ausente que não está preenchido nem com NA. Precisa checar!
 cornelissen_roof_fa <- read_xlsx(
   here(
     cornelissen_br,
@@ -554,19 +567,9 @@ save(cornelissen_roof_BR_data,
 #load(here("dados_microcosmos",
 #          "Cornelissen_BR",
 #          "Cornelissen_BR.RData"))
-
-# nested dataframes 
-nested_df <- bind_rows(boukal_czech_roof,
-                       boukal_czech_nonroof,
-                       boukal_czech_plesnelake,
-                       caliman_natal_br,
-                       cardinale_usa_data,
-                       collyer_japan_data,
-                       cornelissen_roof_BR_data,
-                       cornelissen_nonroof_BR_data) 
-View(nested_df)
-
+#----
 #--- Cotriguacu_Romero
+#----
 cotriguacu_br <- here("dados_microcosmos",
                        "Cotriguacu_Romero")
 
@@ -610,12 +613,169 @@ View(cotriguacu_traits)
 View(cotriguacu_measures)
 
 
-###----
-#--- Fabiola_Colombia
-# tem uma coluna a mais de traits
 
+#----
+#--- Fabiola_Colombia
+#----
+# os dados dos tratamentos com telhado e sem telhado estao na mesma
+# planilha, por isso irei separar em duas linhas distintas no df aninhado
+# para ficar comparavel com o que esta sendo feito
+
+# acrônimos usados para indicar os tratamentos sao:
+# BC, BR, PC, and PR were a personal ID that I used. 
+# B=forest; P=plantation; C=without roof; R=roof
+fabiola_colombia <- here("dados_microcosmos",
+                      "Fabiola_Colombia",
+                      "Fabiola_Site.Colombia.xlsx")
+
+fabiola_fa <- read_xlsx(
+  here(
+    fabiola_colombia),
+  "fauna_abundance")
+
+fabiola_list <- read_xlsx(
+  here(
+    fabiola_colombia),
+  "Fauna_morphospecies_list")
+
+fabiola_traits <- read_xlsx(
+  here(
+    fabiola_colombia),
+  "Fauna_traits")
+
+fabiola_measures <- read_xlsx(
+  here(
+    fabiola_colombia),
+  "measures_decomposition_geograph")
+
+# abundance
+# as spp daphinia.sp.1 e Wyeomyia.sp.1 nao foram amostradas 
+# no tratamento com telhado, por isso foram retiradas da abundance
+# isopoda e terrestre, por isso foi retirado
+fabiola_roof_fa <- fabiola_fa %>%
+  filter(str_detect(fabiola_fa$`ID. Own`,
+                    "^BR|^PR")) %>%
+  select(-"daphnia.sp.1", -"Wyeomyia.sp.1", 
+         -"Isopoda.sp.1", -"Replicate...3")
+
+colSums(fabiola_roof_fa[,5:15])
+rowSums(fabiola_roof_fa[,5:15])
+
+# as especies Eristalis.sp.1 Forcipomyia.sp.1 nao foram amostradas
+# no tratamento sem telhado, por isso foram retiradas da list
+# da traits 
+# isopoda e terrestre, por isso foi retirado
+fabiola_nonroof_fa <- fabiola_fa %>%
+  filter(str_detect(fabiola_fa$`ID. Own`,
+                    "^BC|^PC")) %>%
+  select(-"Eristalis.sp.1", -"Forcipomyia.sp.1", 
+         -"Isopoda.sp.1", -"Replicate...3")
+
+colSums(fabiola_nonroof_fa[,5:15])
+rowSums(fabiola_nonroof_fa[,5:15]) # alguns potes com zero
+
+# list
+fabiola_roof_list <- fabiola_list %>%
+  filter(Morfospecies_name != "daphnia.sp.1" &
+         Morfospecies_name != "Wyeomyia.sp.1" &
+           Morfospecies_name != "Isopoda.sp.1") # spp terrestre)
+
+fabiola_nonroof_list <- fabiola_list %>%
+  filter(Morfospecies_name != "Eristalis.sp.1" &
+           Morfospecies_name != "Forcipomyia.sp.1" &
+           Morfospecies_name != "Isopoda.sp.1") # spp terrestre
+
+# traits
+# tem mais especies com traits do que tem em abundance e list
+# tambem ha indicativos de spp terrestres, que nao serao consideradas
+# no experimento de microcosmos 
+
+# coluna habit retirada para ficar semelhante aos outros
+# Gasteropoda retirada pois nao esta presente na lista e nem na abundace
+fabiola_traits <- fabiola_traits %>%
+  rename("habit" = "...7") %>%
+  filter(habit != "terrestrial" & Morfospecies_name != "Gasteropoda") %>%
+  mutate(Morfospecies_name = case_when(
+    Morfospecies_name == "daphnia" ~ "daphnia.sp.1",
+    Morfospecies_name == "Culex" ~ "Culex.sp.1",
+    Morfospecies_name == "Ephydridae" ~ "Ephydridae.sp.1",
+    Morfospecies_name == "Eristalis" ~ "Eristalis.sp.1",
+    Morfospecies_name == "Forcipomyia" ~ "Forcipomyia.sp.1",
+    Morfospecies_name == "Haemagogus" ~ "Haemagogus.sp.1",
+    Morfospecies_name == "Orthocladiinae" ~ "Orthocladiinae.sp.1",
+    Morfospecies_name == "Orthopodomyia" ~ "Orthopodomyia.sp.1",
+    Morfospecies_name == "Pericoma" ~ "Pericoma.sp.1",
+    Morfospecies_name == "Wyeomyia" ~ "Wyeomyia.sp.1",
+    TRUE ~ Morfospecies_name)) %>%
+  select(-habit)
+
+fabiola_roof_traits <- fabiola_traits %>%
+  filter(Morfospecies_name != "Wyeomyia.sp.1" & 
+           Morfospecies_name != "daphnia.sp.1")
+
+fabiola_nonroof_traits <- fabiola_traits %>%
+  filter(Morfospecies_name != "Eristalis.sp.1" & 
+           Morfospecies_name != "Forcipomyia.sp.1")
+
+# conferindo
+list(fabiola_roof_list$Morfospecies_name) # ok
+names(fabiola_roof_fa) # ok
+list(fabiola_roof_traits$Morfospecies_name)# ok
+
+# conferindo
+list(fabiola_nonroof_list$Morfospecies_name) # ok
+names(fabiola_nonroof_fa) # ok
+list(fabiola_nonroof_traits$Morfospecies_name)# ok
+
+# measures
+fabiola_roof_measures <- fabiola_measures %>%
+  filter(str_detect(fabiola_fa$`ID. Own`, "^BR|^PR")) %>%
+  rename(all_of(dict_names))
+
+fabiola_nonroof_measures <- fabiola_measures %>%
+  filter(str_detect(fabiola_measures$`ID. Own`, "^BC|^PC")) %>%
+  rename(all_of(dict_names))
+
+# data 
+fabiola_roof_colombia_data <- tibble(
+  researcher = "Fabiola",
+  locality = "Colombia", 
+  roof_treatment = 1,
+  abundance = list(tibble(fabiola_roof_fa)),
+  list = list(tibble(fabiola_roof_list)),
+  traits=list(tibble(fabiola_roof_traits)),
+  measures=list(tibble(fabiola_roof_measures)))
+
+fabiola_nonroof_colombia_data <- tibble(
+  researcher = "Fabiola",
+  locality = "Colombia", 
+  roof_treatment = 0,
+  abundance = list(tibble(fabiola_nonroof_fa)),
+  list = list(tibble(fabiola_nonroof_list)),
+  traits=list(tibble(fabiola_nonroof_traits)),
+  measures=list(tibble(fabiola_nonroof_measures)))
+
+
+#----
 #--- French_Guyana_Celine
+#----
 # linhas 11-15 precisam ser deletadas, deletei direto no .xlsx
+
+#----
+# TODO
+#----
+# nested dataframes 
+nested_df <- bind_rows(boukal_czech_roof,
+                       boukal_czech_nonroof,
+                       boukal_czech_plesnelake,
+                       caliman_natal_br,
+                       cardinale_usa_data,
+                       collyer_japan_data,
+                       cornelissen_roof_BR_data,
+                       cornelissen_nonroof_BR_data,
+                       fabiola_roof_colombia_data,
+                       fabiola_nonroof_colombia_data) 
+View(nested_df)
 
 #--- Gonzalez_USA
 gonzales_list <- read_xlsx("Gonzalez_USA/González.NJ_Site_Microcosm_Updated.xlsx",
