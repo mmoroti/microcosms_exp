@@ -79,7 +79,7 @@ glimpse(boukal_roofs_measures)
 # boukal_czech_roof
 boukal_czech_roof <- tibble(
   researcher = "Boukal",
-  locality = "Czech", 
+  locality = "Hluboka_Czech", 
   roof_treatment = 1,
   abundance = list(tibble(boukal_roofs_fa)),
   list = list(tibble(boukal_roofs_list)),
@@ -87,7 +87,7 @@ boukal_czech_roof <- tibble(
   measures=list(tibble(boukal_roofs_measures))
   )
 
-View(boukal_czech_roof)
+#View(boukal_czech_roof)
 
 #--- Boukal_Czech (without roof)
 boukal_nonroofs_fa <- read_xlsx(
@@ -140,7 +140,7 @@ glimpse(boukal_roofs_measures)
 # NOTE: se eu colocar sem arg 'list' ele replica o dataset aninhado
 boukal_czech_nonroof <- tibble(
   researcher = "Boukal",
-  locality = "Czech", 
+  locality = "Hluboka_Czech", 
   roof_treatment = 0,
   abundance = list(tibble(boukal_nonroofs_fa)),
   list = list(tibble(boukal_nonroofs_list)),
@@ -205,7 +205,7 @@ glimpse(boukal_plesnelake_measures)
 
 boukal_czech_plesnelake <- tibble(
   researcher = "Boukal",
-  locality = "Czech", 
+  locality = "PlesneLake_Czech", 
   roof_treatment = NA,
   abundance = list(tibble(boukal_plesnelake_fa)),
   list = list(tibble(boukal_plesnelake_list)),
@@ -266,7 +266,7 @@ head(caliman_fa)
 head(caliman_list)
 
 # traits
-View(caliman_traits)
+head(caliman_traits)
 
 # measures
 # rename variables with data dictionary
@@ -286,7 +286,8 @@ caliman_natal_br <- tibble(
   abundance = list(tibble(caliman_fa)),
   list = list(tibble(caliman_list)),
   traits=list(tibble(caliman_traits)),
-  measures=list(tibble(caliman_measures)))
+  measures=list(tibble(caliman_measures)),
+  obs= "experimento com 40 potes")
 
 # save .RData from Boukal
 save(caliman_natal_br,
@@ -349,7 +350,7 @@ cardinale_measures <-
 
 cardinale_usa_data <- tibble(
   researcher = "Cardinale",
-  locality = "USA", 
+  locality = "Pennsylvania_USA", 
   roof_treatment = NA,
   abundance = list(tibble(cardinale_fa)),
   list = list(tibble(cardinale_list)),
@@ -414,7 +415,7 @@ collyer_measures <-
 
 collyer_japan_data <- tibble(
   researcher = "Collyer",
-  locality = "Japan", 
+  locality = "Tokyo_Japan", 
   roof_treatment = NA,
   abundance = list(tibble(collyer_fa)),
   list = list(tibble(collyer_list)),
@@ -600,19 +601,29 @@ cotriguacu_measures <- read_xlsx(
 # abundance
 # TODO: precisa ver como organizar esses dados
 # como tem dados de diferentes alturas e tem mais de 20 potinhos.
-View(cotriguacu_fa)
+head(cotriguacu_fa)
 
 # list
 cotriguacu_list <- cotriguacu_list %>% mutate_all(~na_if(., "-"))
-View(cotriguacu_list)
+head(cotriguacu_list)
 
 # traits
-View(cotriguacu_traits)
+head(cotriguacu_traits)
 
 # measures
-View(cotriguacu_measures)
+cotriguacu_measures <- cotriguacu_measures %>%
+  rename(all_of(dict_names))
 
-
+# data 
+cotriguacu_romero_data <- tibble(
+  researcher = "Romero",
+  locality = "Cotriguacu_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(cotriguacu_fa)),
+  list = list(tibble(cotriguacu_list)),
+  traits=list(tibble(cotriguacu_traits)),
+  measures=list(tibble(cotriguacu_measures)),
+  obs= "experimento com diferentes alturas")
 
 #----
 #--- Fabiola_Colombia
@@ -658,8 +669,8 @@ fabiola_roof_fa <- fabiola_fa %>%
   select(-"daphnia.sp.1", -"Wyeomyia.sp.1", 
          -"Isopoda.sp.1", -"Replicate...3")
 
-colSums(fabiola_roof_fa[,5:15])
-rowSums(fabiola_roof_fa[,5:15])
+#colSums(fabiola_roof_fa[,5:15])
+#rowSums(fabiola_roof_fa[,5:15])
 
 # as especies Eristalis.sp.1 Forcipomyia.sp.1 nao foram amostradas
 # no tratamento sem telhado, por isso foram retiradas da list
@@ -671,8 +682,8 @@ fabiola_nonroof_fa <- fabiola_fa %>%
   select(-"Eristalis.sp.1", -"Forcipomyia.sp.1", 
          -"Isopoda.sp.1", -"Replicate...3")
 
-colSums(fabiola_nonroof_fa[,5:15])
-rowSums(fabiola_nonroof_fa[,5:15]) # alguns potes com zero
+#colSums(fabiola_nonroof_fa[,5:15])
+#rowSums(fabiola_nonroof_fa[,5:15]) # alguns potes com zero
 
 # list
 fabiola_roof_list <- fabiola_list %>%
@@ -739,7 +750,7 @@ fabiola_nonroof_measures <- fabiola_measures %>%
 # data 
 fabiola_roof_colombia_data <- tibble(
   researcher = "Fabiola",
-  locality = "Colombia", 
+  locality = "MontaneForest_Colombia", 
   roof_treatment = 1,
   abundance = list(tibble(fabiola_roof_fa)),
   list = list(tibble(fabiola_roof_list)),
@@ -748,18 +759,297 @@ fabiola_roof_colombia_data <- tibble(
 
 fabiola_nonroof_colombia_data <- tibble(
   researcher = "Fabiola",
-  locality = "Colombia", 
+  locality = "MontaneForest_Colombia", 
   roof_treatment = 0,
   abundance = list(tibble(fabiola_nonroof_fa)),
   list = list(tibble(fabiola_nonroof_list)),
   traits=list(tibble(fabiola_nonroof_traits)),
   measures=list(tibble(fabiola_nonroof_measures)))
 
-
+save(fabiola_roof_colombia_data,
+     fabiola_nonroof_colombia_data,
+     file = here("dados_microcosmos",
+                 "Fabiola_Colombia",
+                 "Fabiola_Colombia.RData"))
 #----
 #--- French_Guyana_Celine
 #----
 # linhas 11-15 precisam ser deletadas, deletei direto no .xlsx
+# Canopy data
+celine_guyana <- here("dados_microcosmos",
+                         "French_Guyana_Celine")
+
+celine_canopy_fa <- read_xlsx(
+  here(
+    celine_guyana, "Celine Leroy_French Guiana_canopy.xlsx"),
+  "fauna_abundance")
+
+celine_canopy_list <- read_xlsx(
+  here(
+    celine_guyana, "Celine Leroy_French Guiana_canopy.xlsx"),
+  "Fauna_morphospecies_list")
+
+celine_canopy_traits <- read_xlsx(
+  here(
+    celine_guyana, "Celine Leroy_French Guiana_canopy.xlsx"),
+  "Fauna_traits")
+
+celine_canopy_measures <- read_xlsx(
+  here(
+    celine_guyana, "Celine Leroy_French Guiana_canopy.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(celine_canopy_fa)
+
+# list
+head(celine_canopy_list)
+
+# traits
+head(celine_canopy_traits)
+
+# measures
+celine_canopy_measures <- celine_canopy_measures %>%
+  rename(all_of(dict_names))
+
+# data 
+celine_canopy_frenchguyana_data <- tibble(
+  researcher = "Celine",
+  locality = "FrenchGuyana", 
+  roof_treatment = NA,
+  abundance = list(tibble(celine_canopy_fa)),
+  list = list(tibble(celine_canopy_list)),
+  traits=list(tibble(celine_canopy_traits)),
+  measures=list(tibble(celine_canopy_measures)),
+  obs = "canopy data")
+
+# general data
+celine_general_fa <- read_xlsx(
+  here(
+    celine_guyana, "Celine Leroy_French Guiana_general.xlsx"),
+  "fauna_abundance")
+
+celine_general_list <- read_xlsx(
+  here(
+    celine_guyana, "Celine Leroy_French Guiana_general.xlsx"),
+  "Fauna_morphospecies_list")
+
+celine_general_traits <- read_xlsx(
+  here(
+    celine_guyana, "Celine Leroy_French Guiana_general.xlsx"),
+  "Fauna_traits")
+
+celine_general_measures <- read_xlsx(
+  here(
+    celine_guyana, "Celine Leroy_French Guiana_general.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(celine_general_fa)
+
+# list
+head(celine_general_list)
+
+# traits
+head(celine_general_traits)
+
+# measures
+celine_general_measures <- celine_general_measures %>%
+  rename(all_of(dict_names))
+
+# data 
+celine_general_frenchguyana_data <- tibble(
+  researcher = "Celine",
+  locality = "FrenchGuyana", 
+  roof_treatment = NA,
+  abundance = list(tibble(celine_general_fa)),
+  list = list(tibble(celine_general_list)),
+  traits=list(tibble(celine_general_traits)),
+  measures=list(tibble(celine_general_measures)),
+  obs = "general data")
+
+save(celine_canopy_frenchguyana_data,
+     celine_general_frenchguyana_data,
+     file = here("dados_microcosmos",
+                 "French_Guyana_Celine",
+                 "Celine_FrenchGuyana.RData"))
+#----
+#--- Gonzalez_USA
+#----
+# aguardando retorno do email
+# aparentemente temos tratamentos com e sem telhado.
+gonzales_usa <- here("dados_microcosmos",
+  "Gonzalez_USA",
+  "González.NJ_Site_Microcosm_Updated.xlsx")
+
+gonzales_fa <- read_xlsx(
+  here(
+    gonzales_usa),
+  "fauna_abundance")
+
+gonzales_list <- read_xlsx(
+  here(
+    gonzales_usa),
+  "Fauna_morphospecies_list")
+
+gonzales_traits <- read_xlsx(
+  here(
+    gonzales_usa),
+  "Fauna_traits")
+
+gonzales_measures <- read_xlsx(
+  here(
+    gonzales_usa),
+  "measures_decomposition_geograph")
+
+# abundance
+head(gonzales_fa)
+
+# list
+gonzales_list <- mutate_all(
+  gonzales_list, ~(replace(., .=="?", NA)))
+
+# traits
+gonzales_traits <- mutate_all(
+  gonzales_traits, ~(replace(., .=="?", NA)))
+
+# measures
+gonzales_measures <- gonzales_measures %>%
+  rename(all_of(dict_names))
+
+# data 
+gonzales_data <- tibble(
+  researcher = "Gonzales",
+  locality = "Philadelphia_USA", 
+  roof_treatment = NA,
+  abundance = list(tibble(gonzales_fa)),
+  list = list(tibble(gonzales_list)),
+  traits=list(tibble(gonzales_traits)),
+  measures=list(tibble(gonzales_measures)),
+  obs = "aguardando email, aparentemente tem mais tratamentos
+  juntos na mesma planilha")
+
+save(gonzales_data,
+     file = here("dados_microcosmos",
+                 "Gonzalez_USA",
+                 "Gonzalez_USA.RData"))
+
+#----
+#--- Horvath_HU
+#----
+# dados do logger estão na mesma planilha
+horvath_hungria <- here("dados_microcosmos",
+                     "Horvath_HU",
+                     "Microcosm_HU_Horvath.xlsx")
+
+horvath_fa <- read_xlsx(
+  here(
+    horvath_hungria),
+  "fauna_abundance")
+
+horvath_list <- read_xlsx(
+  here(
+    horvath_hungria),
+  "Fauna_morphospecies_list")
+
+horvath_traits <- read_xlsx(
+  here(
+    horvath_hungria),
+  "Fauna_traits")
+
+horvath_measures <- read_xlsx(
+  here(
+    horvath_hungria),
+  "measures_decomposition_geograph")
+
+# abundance
+head(horvath_fa)
+
+# list
+head(horvath_list)
+
+# traits
+head(horvath_traits)
+
+# measures
+horvath_measures <- horvath_measures %>%
+  mutate("Natural tree hole.1" = NA,
+         "Natural tree hole.2" = NA) %>%
+  rename(all_of(dict_names))
+
+horvath_data <- tibble(
+  researcher = "Horvath",
+  locality = "PilisMountain_Hungria", 
+  roof_treatment = NA,
+  abundance = list(tibble(horvath_fa)),
+  list = list(tibble(horvath_list)),
+  traits=list(tibble(horvath_traits)),
+  measures=list(tibble(horvath_measures)),
+  obs = "dados do logger estão na mesma planilha")
+
+save(horvath_data,
+     file = here("dados_microcosmos",
+                 "Horvath_HU",
+                 "horvath_hungria.RData"))
+
+#----
+#--- Izzo_Chapada_BR
+# Fauna_morphospecies_list: substituído '-' por 'NA' (fiz direto na planilha a remoção do hífen)
+izzo_br <- here("dados_microcosmos",
+                        "Izzo_Chapada_BR",
+                        "TJIZZO.Chapada.xlsx")
+
+izzo_fa <- read_xlsx(
+  here(
+    izzo_br),
+  "fauna_abundance")
+
+izzo_list <- read_xlsx(
+  here(
+    izzo_br),
+  "Fauna_morphospecies_list")
+
+izzo_traits <- read_xlsx(
+  here(
+    izzo_br),
+  "Fauna_traits")
+
+izzo_measures <- read_xlsx(
+  here(
+    izzo_br),
+  "measures_decomposition_geograph")
+
+# abundance
+head(izzo_fa)
+
+# list
+head(izzo_list)
+
+# traits
+head(izzo_traits)
+
+# measures
+izzo_measures <- izzo_measures %>%
+  rename(all_of(dict_names))
+
+izzo_data <- tibble(
+  researcher = "Izzo",
+  locality = "Chapada_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(izzo_fa)),
+  list = list(tibble(izzo_list)),
+  traits=list(tibble(izzo_traits)),
+  measures=list(tibble(izzo_measures)),
+  obs = "o pot.5 do tratamento 'Natural forest' esta marcado de amarelo
+  e apenas com os parâmetros iniciais coletados")
+
+save(izzo_data,
+     file = here("dados_microcosmos",
+                 "Izzo_Chapada_BR",
+                 "izzo_brazil.RData"))
+
+#--- GRomero_Japi
+# coordenadas convertidas
 
 #----
 # TODO
@@ -773,27 +1063,15 @@ nested_df <- bind_rows(boukal_czech_roof,
                        collyer_japan_data,
                        cornelissen_roof_BR_data,
                        cornelissen_nonroof_BR_data,
+                       cotriguacu_romero_data,
                        fabiola_roof_colombia_data,
-                       fabiola_nonroof_colombia_data) 
+                       fabiola_nonroof_colombia_data,
+                       celine_canopy_frenchguyana_data,
+                       celine_general_frenchguyana_data,
+                       gonzales_data,
+                       horvath_data,
+                       izzo_data) 
 View(nested_df)
-
-#--- Gonzalez_USA
-gonzales_list <- read_xlsx("Gonzalez_USA/González.NJ_Site_Microcosm_Updated.xlsx",
-                           "Fauna_morphospecies_list")
-gonzales_list <- mutate_all(gonzales_list, ~(replace(., .=="?", NA)))
-
-gonzales_traits <- read_xlsx("Gonzalez_USA/González.NJ_Site_Microcosm_Updated.xlsx",
-                           "Fauna_traits")
-gonzales_traits <- mutate_all(gonzales_traits, ~(replace(., .=="?", NA)))
-
-#--- Horvath_HU
-# dados do logger estão na mesma planilha
-
-#--- Izzo_Chapada_BR
-# Fauna_morphospecies_list: substituído '-' por 'NA' (fiz direto na planilha a remoção do hífen)
-
-#--- GRomero_Japi
-# coordenadas convertidas
 
 #---Jari Finland
 # tirar dúvidas
