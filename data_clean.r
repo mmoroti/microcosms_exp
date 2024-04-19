@@ -490,7 +490,7 @@ cornelissen_roof_measures <- cornelissen_roof_measures %>%
 
 cornelissen_roof_BR_data <- tibble(
   researcher = "Cornelissen",
-  locality = "Minas Gerais, BR", 
+  locality = "MinasGerais_BR", 
   roof_treatment = 1,
   abundance = list(tibble(cornelissen_roof_fa)),
   list = list(tibble(cornelissen_roof_list)),
@@ -552,7 +552,7 @@ cornelissen_nonroof_measures <- cornelissen_nonroof_measures %>%
 
 cornelissen_nonroof_BR_data <- tibble(
   researcher = "Cornelissen",
-  locality = "Minas Gerais, BR", 
+  locality = "MinasGerais_BR", 
   roof_treatment = 0,
   abundance = list(tibble(cornelissen_nonroof_fa)),
   list = list(tibble(cornelissen_nonroof_list)),
@@ -994,6 +994,7 @@ save(horvath_data,
 
 #----
 #--- Izzo_Chapada_BR
+#----
 # Fauna_morphospecies_list: substituído '-' por 'NA' (fiz direto na planilha a remoção do hífen)
 izzo_br <- here("dados_microcosmos",
                         "Izzo_Chapada_BR",
@@ -1047,9 +1048,298 @@ save(izzo_data,
      file = here("dados_microcosmos",
                  "Izzo_Chapada_BR",
                  "izzo_brazil.RData"))
-
+#----
 #--- GRomero_Japi
-# coordenadas convertidas
+#----
+# coordenadas convertidas direto no xlsx
+romero_japi <- here("dados_microcosmos",
+                "Japi_romero",
+                "GRomero_Japi.xlsx")
+
+romero_japi_fa <- read_xlsx(
+  here(
+    romero_japi),
+  "fauna_abundance")
+
+romero_japi_list <- read_xlsx(
+  here(
+    romero_japi),
+  "Fauna_morphospecies_list")
+
+romero_japi_traits <- read_xlsx(
+  here(
+    romero_japi),
+  "Fauna_traits")
+
+romero_japi_measures <- read_xlsx(
+  here(
+    romero_japi),
+  "measures_decomposition_geograph")
+
+# abundance
+head(romero_japi_fa)
+
+# list
+head(romero_japi_list)
+
+# traits
+head(romero_japi_traits)
+
+# measures
+#romero_japi_measures <- romero_japi_measures %>%
+#  rename(all_of(dict_names))
+
+romero_japi_data <- tibble(
+  researcher = "Romero",
+  locality = "Japi_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(romero_japi_fa)),
+  list = list(tibble(romero_japi_list)),
+  traits=list(tibble(romero_japi_traits)),
+  measures=list(tibble(romero_japi_measures)),
+  obs = "dados incompletos")
+
+save(romero_japi_data,
+     file = here("dados_microcosmos",
+                 "Japi_romero",
+                 "romero_japi_brazil.RData"))
+#----
+#---Jari Finland
+#----
+# tirar dúvidas
+jari_finland <- here("dados_microcosmos",
+                    "Jari_Finland",
+                    "JariKouki-Finland-draft-data.xlsx")
+
+jari_fa <- read_xlsx(
+  here(
+    jari_finland),
+  "fauna_abundance")
+
+jari_list <- read_xlsx(
+  here(
+    jari_finland),
+  "Fauna_morphospecies_list")
+
+jari_traits <- read_xlsx(
+  here(
+    jari_finland),
+  "Fauna_traits")
+
+jari_measures <- read_xlsx(
+  here(
+    jari_finland),
+  "measures_decomposition_geograph")
+
+# abundance
+head(jari_fa)
+
+# list
+head(jari_list)
+
+# traits
+head(jari_traits)
+
+# measures
+jari_measures <- jari_measures %>%
+  mutate("detritus dry mass (fine)" = NA) %>%
+  rename(all_of(dict_names))
+
+jari_data <- tibble(
+  researcher = "Jari",
+  locality = "Finland", 
+  roof_treatment = NA,
+  abundance = list(tibble(jari_fa)),
+  list = list(tibble(jari_list)),
+  traits=list(tibble(jari_traits)),
+  measures=list(tibble(jari_measures)),
+  obs = "Dados confusos. Precisamos tirar duvidas")
+
+save(jari_data,
+     file = here("dados_microcosmos",
+                 "Jari_Finland",
+                 "jari_finland.RData"))
+
+#----
+#--- Juen_Belém_BR
+#----
+# os dados dos diferentes tratamentos estao todos juntos
+# precisamos separar em linhas distintas e limpar as abas correspondentes
+# por ex, no tratamento com telhado, alguns taxons nao estao presentes, assim
+# como nos outros experimentos. Pela estrutura dos dados, tem 3 experimentos 
+# aqui, sendo um deles a comparacao entre UFPA vs. Utinga
+juen_belem <- here("dados_microcosmos",
+                     "Juen_Belém_BR")
+
+juen_fa <- read_xlsx(
+  here(
+    juen_belem,
+    "Juen_Belem_Amazon.xlsx"),
+  "fauna_abundance")
+
+juen_list <- read_xlsx(
+  here(
+    juen_belem,
+    "Juen_Belem_Amazon.xlsx"),
+  "Fauna_morphospecies_list")
+
+juen_traits <- read_xlsx(
+  here(
+    juen_belem,
+    "Juen_Belem_Amazon.xlsx"),
+  "Fauna_traits")
+
+juen_measures <- read_xlsx(
+  here(
+    juen_belem,
+    "Juen_Belem_Amazon.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+juen_roof_fa <- juen_fa %>%
+  filter(Roof == "com roof") %>% # 20 amostras
+  select(-"Morphospecies.1", -"Morphospecies.2", -"Morphospecies.6",
+         -"Morphospecies.8", -"Morphospecies.10", -"Morphospecies.11",
+         -"Morphospecies.16", -"Morphospecies.18", -"Morphospecies.20") 
+#dim(juen_roof_fa)
+#colSums(juen_roof_fa[,5:16])
+
+juen_nonroof_fa <- juen_fa %>%
+  filter(Roof == "Sem roof") %>% # 40 amostras
+  filter(Local != "Utinga" & Local !="UFPA" ) %>% # agora 20 amostras
+  select(-"Morphospecies.1", -"Morphospecies.2", -"Morphospecies.6",
+         -"Morphospecies.9", -"Morphospecies.10", -"Morphospecies.13",
+         -"Morphospecies.21")
+#dim(juen_nonroof_fa)
+#colSums(juen_nonroof_fa[,5:18])
+
+juen_na_fa <- juen_fa %>%
+  filter(Local == "Utinga" | Local == "UFPA") %>%
+  select(-"Morphospecies.13", -"Morphospecies.14", -"Morphospecies.15",
+         -"Morphospecies.16", -"Morphospecies.17", -"Morphospecies.18",
+         -"Morphospecies.19", -"Morphospecies.20", -"Morphospecies.21")
+#dim(juen_na_fa)
+#colSums(juen_na_fa[,5:16])
+
+# list
+juen_roof_list <- juen_list %>%
+  filter(Morfospecies_name != "Morphospecies.1" & 
+         Morfospecies_name != "Morphospecies.2" &
+         Morfospecies_name != "Morphospecies.6" &
+         Morfospecies_name != "Morphospecies.8" &
+         Morfospecies_name != "Morphospecies.10" &
+         Morfospecies_name != "Morphospecies.11" &
+         Morfospecies_name != "Morphospecies.16" &
+         Morfospecies_name != "Morphospecies.18" &
+         Morfospecies_name != "Morphospecies.20")
+
+juen_nonroof_list <- juen_list %>%
+  filter(Morfospecies_name != "Morphospecies.1" & 
+           Morfospecies_name != "Morphospecies.2" &
+           Morfospecies_name != "Morphospecies.6" &
+           Morfospecies_name != "Morphospecies.9" &
+           Morfospecies_name != "Morphospecies.10" &
+           Morfospecies_name != "Morphospecies.13" &
+           Morfospecies_name != "Morphospecies.21")
+
+juen_na_list <- juen_list %>%
+  filter(Morfospecies_name != "Morphospecies.13" & 
+           Morfospecies_name != "Morphospecies.14" &
+           Morfospecies_name != "Morphospecies.15" &
+           Morfospecies_name != "Morphospecies.16" &
+           Morfospecies_name != "Morphospecies.17" &
+           Morfospecies_name != "Morphospecies.18" &
+           Morfospecies_name != "Morphospecies.19" &
+           Morfospecies_name != "Morphospecies.20" &
+           Morfospecies_name != "Morphospecies.21")
+
+# traits
+juen_roof_traits <- juen_traits %>%
+  filter(Morfospecies_name != "Morphospecies.1" & 
+           Morfospecies_name != "Morphospecies.2" &
+           Morfospecies_name != "Morphospecies.6" &
+           Morfospecies_name != "Morphospecies.8" &
+           Morfospecies_name != "Morphospecies.10" &
+           Morfospecies_name != "Morphospecies.11" &
+           Morfospecies_name != "Morphospecies.16" &
+           Morfospecies_name != "Morphospecies.18" &
+           Morfospecies_name != "Morphospecies.20")
+
+juen_nonroof_traits <- juen_traits %>%
+  filter(Morfospecies_name != "Morphospecies.1" & 
+           Morfospecies_name != "Morphospecies.2" &
+           Morfospecies_name != "Morphospecies.6" &
+           Morfospecies_name != "Morphospecies.9" &
+           Morfospecies_name != "Morphospecies.10" &
+           Morfospecies_name != "Morphospecies.13" &
+           Morfospecies_name != "Morphospecies.21")
+
+juen_na_traits <- juen_traits %>%
+  filter(Morfospecies_name != "Morphospecies.13" & 
+           Morfospecies_name != "Morphospecies.14" &
+           Morfospecies_name != "Morphospecies.15" &
+           Morfospecies_name != "Morphospecies.16" &
+           Morfospecies_name != "Morphospecies.17" &
+           Morfospecies_name != "Morphospecies.18" &
+           Morfospecies_name != "Morphospecies.19" &
+           Morfospecies_name != "Morphospecies.20" &
+           Morfospecies_name != "Morphospecies.21")
+
+# measures
+juen_roof_measures <- juen_measures %>%
+  filter(Roof == "com roof") %>%
+  rename("dissolved_O2" = "dissolved_O2 (%)") %>%
+  rename(all_of(dict_names))
+
+juen_nonroof_measures <- juen_measures %>%
+  filter(Roof == "Sem roof") %>%
+  filter(Local != "Utinga" & Local !="UFPA") %>%
+  rename("dissolved_O2" = "dissolved_O2 (%)") %>%
+  rename(all_of(dict_names))
+
+juen_na_measures <- juen_measures %>%
+  filter(Roof == "Sem roof") %>%
+  filter(Local == "Utinga" | Local == "UFPA") %>%
+  rename("dissolved_O2" = "dissolved_O2 (%)") %>%
+  rename(all_of(dict_names))
+
+# data
+juen_roof_data <- tibble(
+  researcher = "Juen",
+  locality = "Belem_Brazil", 
+  roof_treatment = 1,
+  abundance = list(tibble(juen_roof_fa)),
+  list = list(tibble(juen_roof_list)),
+  traits=list(tibble(juen_roof_traits)),
+  measures=list(tibble(juen_roof_measures)),
+  obs = "Sem dados dos algodoes")
+
+juen_nonroof_data <- tibble(
+  researcher = "Juen",
+  locality = "Belem_Brazil", 
+  roof_treatment = 0,
+  abundance = list(tibble(juen_nonroof_fa)),
+  list = list(tibble(juen_nonroof_list)),
+  traits=list(tibble(juen_nonroof_traits)),
+  measures=list(tibble(juen_nonroof_measures)),
+  obs = "Sem dados dos algodoes")
+
+juen_na_data <- tibble(
+  researcher = "Juen",
+  locality = "Belem_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(juen_na_fa)),
+  list = list(tibble(juen_na_list)),
+  traits=list(tibble(juen_na_traits)),
+  measures=list(tibble(juen_na_measures)),
+  obs = "Sem dados dos algodoes")
+
+save(juen_na_data,
+     juen_nonroof_data,
+     juen_roof_data,
+     file = here("dados_microcosmos",
+                 "Juen_Belém_BR",
+                 "juen_belem_br.RData"))
 
 #----
 # TODO
@@ -1070,16 +1360,23 @@ nested_df <- bind_rows(boukal_czech_roof,
                        celine_general_frenchguyana_data,
                        gonzales_data,
                        horvath_data,
-                       izzo_data) 
+                       izzo_data,
+                       romero_japi_data,
+                       jari_data,
+                       juen_roof_data,
+                       juen_nonroof_data,
+                       juen_na_data)
+
+save(nested_df,
+     file = here("dados_microcosmos",
+                 "nested_df.RData"))
+
+load("dados_microcosmos/nested_df.RData")
 View(nested_df)
 
-#---Jari Finland
-# tirar dúvidas
-
-#--- Juen_Belém_BR
-# dados ok após correção
-
+#----
 #--- Knapp_Czech
+#----
 # tirar dúvidas
 
 #---Luciano_argentina
@@ -1126,3 +1423,13 @@ chapeco_list2  <- mutate_all(chapeco_list2, ~(replace(., .=="*", NA)))
 chapeco_list3 <- read_xlsx("Renan_Chapecó/Vertical_Chapeco_BR.xlsx",
                           "Fauna_morphospecies_list")
 chapeco_list3  <- mutate_all(chapeco_list3, ~(replace(., .=="*", NA)))
+
+# Rodrigo_Argentina
+
+# Sedney_Francis_Filipinas
+
+# Srivastava_Canada
+
+# Sweet_UK
+
+# Thomas_Alemanha
