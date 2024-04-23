@@ -6,7 +6,7 @@ library(here) # set directory
 library(renv) # versioning R and packages
 
 #---
-# Data dictiorary 
+# Data dictiorary ----
 dict_data <- read_xlsx(
   here("dados_microcosmos",
        "data_dictionary.xlsx"),
@@ -27,8 +27,8 @@ dict_names <- dict_data %>%
 # 0 = ausent
 # NA = non treatment apply
 
-#--- Boukal_Czech (with roof)
-#----
+#--- Boukal_Czech ----
+# (with roof) 
 boukal_roofs_fa <- read_xlsx(
   here(
   "dados_microcosmos",
@@ -225,10 +225,7 @@ load(here("dados_microcosmos",
           "Boukal_Czech",
           "Boukal_Czech.RData"))
 
-
-#----
-#--- Caliman_Natal_BR
-#----
+#--- Caliman_Natal_BR ----
 caliman_fa <- read_xlsx(
   here(
     "dados_microcosmos",
@@ -1342,6 +1339,231 @@ save(juen_na_data,
                  "juen_belem_br.RData"))
 
 #----
+#--- Knapp_Czech ----
+# tirar dúvidas
+knapp_czech <- here("dados_microcosmos",
+                   "Knapp_Czech")
+
+knapp_fa <- read_xlsx(
+  here(
+    knapp_czech,
+    "Knapp_Michal_Krivoklatsko.xlsx"),
+  "fauna_abundance")[1,1]
+
+knapp_list <- read_xlsx(
+  here(
+    knapp_czech,
+    "Knapp_Michal_Krivoklatsko.xlsx"),
+  "Fauna_morphospecies_list")[1,1]
+
+knapp_traits <- read_xlsx(
+  here(
+    knapp_czech,
+    "Knapp_Michal_Krivoklatsko.xlsx"),
+  "Fauna_traits")[1,1]
+
+knapp_measures <- read_xlsx(
+  here(
+    knapp_czech,
+    "Knapp_Michal_Krivoklatsko.xlsx"),
+  "measures_decomposition_geograph")[1:40, ]
+
+# measures
+knapp_roof_measures <- knapp_measures %>%
+  filter(Experiment == "roof") %>%
+  rename(all_of(dict_names)) %>%
+  select(-Experiment)
+
+knapp_nonroof_measures <- knapp_measures %>%
+  filter(Experiment == "standard") %>%
+  rename(all_of(dict_names)) %>%
+  select(-Experiment)
+
+knapp_roof_data <- tibble(
+  researcher = "Knapp",
+  locality = "Křivoklátsko_Czech",
+  roof_treatment = 1,
+  abundance = NA, #list(tibble(knapp_fa)),
+  list = NA, #list(tibble(knapp_list)),
+  traits= NA, #list(tibble(knapp_traits)),
+  measures=list(tibble(knapp_roof_measures)),
+  obs = "Sem invertebrados presentes na coleta")
+
+knapp_nonroof_data <- tibble(
+  researcher = "Knapp",
+  locality = "Křivoklátsko_Czech", 
+  roof_treatment = 0,
+  abundance = NA, #list(tibble(knapp_fa)),
+  list = NA, #list(tibble(knapp_list)),
+  traits= NA , #list(tibble(knapp_traits)),
+  measures=list(tibble(knapp_nonroof_measures)),
+  obs = "Sem invertebrados presentes na coleta")
+
+# hory 
+knapp_hory_fa <- read_xlsx(
+  here(
+    knapp_czech,
+    "Knapp Michal_Krusne_hory.xlsx"),
+  "fauna_abundance")
+
+knapp_hory_list <- read_xlsx(
+  here(
+    knapp_czech,
+    "Knapp Michal_Krusne_hory.xlsx"),
+  "Fauna_morphospecies_list")
+
+knapp_hory_traits <- read_xlsx(
+  here(
+    knapp_czech,
+    "Knapp Michal_Krusne_hory.xlsx"),
+  "Fauna_traits")
+
+knapp_hory_measures <- read_xlsx(
+  here(
+    knapp_czech,
+    "Knapp Michal_Krusne_hory.xlsx"),
+  "measures_decomposition_geograph")[1:20, ]
+
+# measures
+knapp_hory_fa
+knapp_hory_list
+knapp_hory_traits
+knapp_hory_measures
+
+# abundance
+knapp_hory_fa[is.na(knapp_hory_fa)] <- 0
+
+# list
+knapp_hory_list
+
+# traits
+knapp_hory_traits
+
+# measures
+knapp_hory_measures <- knapp_hory_measures %>%
+  rename(all_of(dict_names)) %>%
+  select(-Experiment)
+
+knapp_data <- tibble(
+  researcher = "Knapp",
+  locality = "OreMountains_Czech",
+  roof_treatment = NA,
+  abundance = list(tibble(knapp_hory_fa)),
+  list = list(tibble(knapp_hory_list)),
+  traits= list(tibble(knapp_hory_traits)),
+  measures=list(tibble(knapp_hory_measures)),
+  obs = "")
+
+save(knapp_roof_data,
+     knapp_nonroof_data,
+     knapp_data,
+     file = here("dados_microcosmos",
+                 "Knapp_Czech",
+                 "knapp_czech.RData"))
+
+#--- Luciano_argentina ----
+luciano_argentina <- here("dados_microcosmos",
+                    "Luciano_Argentina")
+
+luciano_fa <- read_xlsx(
+  here(
+    luciano_argentina,
+    "Microcosm_data_Cordoba.xlsx"),
+  "Fauna_abundance")
+
+luciano_list <- read_xlsx(
+  here(
+    luciano_argentina,
+    "Microcosm_data_Cordoba.xlsx"),
+  "Fauna_morphospecies_list")
+
+luciano_traits <- read_xlsx(
+  here(
+    luciano_argentina,
+    "Microcosm_data_Cordoba.xlsx"),
+  "Fauna_traits")
+
+luciano_measures <- read_xlsx(
+  here(
+    luciano_argentina,
+    "Microcosm_data_Cordoba.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+luciano_fa
+
+# list
+luciano_list
+
+# traits
+luciano_traits
+
+# measures
+luciano_measures <- luciano_measures %>%
+  rename(all_of(dict_names)) 
+
+luciano_data <- tibble(
+  researcher = "Luciano",
+  locality = "Cordoba_Argentina",
+  roof_treatment = NA,
+  abundance = list(tibble(luciano_fa)),
+  list = list(tibble(luciano_list)),
+  traits= list(tibble(luciano_traits)),
+  measures=list(tibble(luciano_measures)),
+  obs = "")
+
+save(luciano_data,
+     file = here("dados_microcosmos",
+                 "Luciano_Argentina",
+                 "luciano_argentina.RData"))
+
+
+#--- Martins_Hamada_Amazon
+martins_hamada <- here("dados_microcosmos",
+                      "Martins_Hamada_Amazon")
+
+martins_fa <- read_xlsx(
+  here(
+    martins_hamada,
+    "Martins&Hamada_Manaus_01_12_23.xlsx"),
+  "fauna_abundance")
+
+martins_list <- read_xlsx(
+  here(
+    martins_hamada,
+    "Martins&Hamada_Manaus_01_12_23.xlsx"),
+  "Fauna_morphospecies_list")
+
+martins_traits <- read_xlsx(
+  here(
+    martins_hamada,
+    "Martins&Hamada_Manaus_01_12_23.xlsx"),
+  "Fauna_traits")
+
+martins_measures <- read_xlsx(
+  here(
+    martins_hamada,
+    "Martins&Hamada_Manaus_01_12_23.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+martins_roof_fa <- martins_fa %>%
+  filter(Treatment == "Managed forest - roof" |
+         Treatment == "Natural forest - roof")
+
+martins_nonroof_fa <- martins_fa %>%
+  filter(Treatment == "Managed forest - standard experiment" |
+         Treatment == "Natural forest - standard experiment")
+
+martins_na_fa <- martins_fa %>%
+  filter(Treatment == "Managed forest - 15m" |
+         Treatment == "Natural forest - 15m")
+
+martins_roof_fa[is.na(martins_roof_fa)] <- 0
+martins_nonroof_fa[is.na(martins_nonroof_fa)] <- 0
+martins_na_fa[is.na(martins_na_fa)] <- 0
+
+#----
 # TODO
 #----
 # nested dataframes 
@@ -1365,34 +1587,20 @@ nested_df <- bind_rows(boukal_czech_roof,
                        jari_data,
                        juen_roof_data,
                        juen_nonroof_data,
-                       juen_na_data)
+                       juen_na_data,
+                       knapp_roof_data,
+                       knapp_nonroof_data,
+                       knapp_data,
+                       luciano_data)
 
+View(nested_df)
 save(nested_df,
      file = here("dados_microcosmos",
                  "nested_df.RData"))
 
 load("dados_microcosmos/nested_df.RData")
-View(nested_df)
 
 #----
-#--- Knapp_Czech
-#----
-# tirar dúvidas
-
-#---Luciano_argentina
-# parecem ok
-
-#--- Martins_Hamada_Amazon
-martins_fa <- read_xlsx("Martins_Hamada_Amazon/Martins&Hamada_Manaus_01_12_23.xlsx",
-                          "fauna_abundance")
-
-martins_traits <- read_xlsx("Martins_Hamada_Amazon/Martins&Hamada_Manaus_01_12_23.xlsx",
-                        "Fauna_traits")
-
-martins_fa[is.na(martins_fa)] <- 0
-
-saveRDS(martins_fa, martins_traits, file = "martins3.rds")
-
 #--- Mexico_Wesley
 # retirei o undefined e deixei vazio para ler como NA.
 
