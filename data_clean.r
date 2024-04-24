@@ -5,7 +5,6 @@ library(readxl) # read .xlsx
 library(here) # set directory 
 library(renv) # versioning R and packages
 
-#---
 # Data dictiorary ----
 dict_data <- read_xlsx(
   here("dados_microcosmos",
@@ -225,6 +224,7 @@ load(here("dados_microcosmos",
           "Boukal_Czech",
           "Boukal_Czech.RData"))
 
+
 #--- Caliman_Natal_BR ----
 caliman_fa <- read_xlsx(
   here(
@@ -292,15 +292,13 @@ save(caliman_natal_br,
      file = here("dados_microcosmos",
                  "Caliman_Natal_BR",
                  "Caliman_Natal_BR.RData")) 
-#----
-#--- Campos_do_Jordao_e_Sta_Virginia
-#----
+
+#--- Campos_do_Jordao_e_Sta_Virginia ----
 # dados indisponiveis ainda
 # TODO: precisa separar em duas pastas
 
-#----
-#--- Cardinale_USA
-#----
+
+#--- Cardinale_USA ----
 cardinale_usa <- here("dados_microcosmos",
                       "Cardinale_USA")
 
@@ -359,14 +357,12 @@ save(cardinale_usa_data,
      file = here(cardinale_usa,
                  "Cardinale_USA.RData")) 
 
-#----
-#--- Cardoso_Romero
-#----
+
+#--- Cardoso_Romero ----
 # TODO: Dados incompletos, mas as coordenadas foram convertidas direto no xlsx.
 
-#----
-#--- Collyer_Japan
-#----
+
+#--- Collyer_Japan ----
 collyer_japan <- here("dados_microcosmos",
                       "Collyer_Japan")
 
@@ -424,9 +420,8 @@ save(collyer_japan_data,
      file = here(collyer_japan,
                  "Collyer_Japan.RData")) 
 
-#----
-#---- Cornelissen_BR
-#----
+
+#---- Cornelissen_BR ----
 cornelissen_br <- here("dados_microcosmos",
                       "Cornelissen_BR",
                       "dados_definitivos")
@@ -565,9 +560,8 @@ save(cornelissen_roof_BR_data,
 #load(here("dados_microcosmos",
 #          "Cornelissen_BR",
 #          "Cornelissen_BR.RData"))
-#----
-#--- Cotriguacu_Romero
-#----
+
+#--- Cotriguacu_Romero ----
 cotriguacu_br <- here("dados_microcosmos",
                        "Cotriguacu_Romero")
 
@@ -622,9 +616,8 @@ cotriguacu_romero_data <- tibble(
   measures=list(tibble(cotriguacu_measures)),
   obs= "experimento com diferentes alturas")
 
-#----
-#--- Fabiola_Colombia
-#----
+
+#--- Fabiola_Colombia ----
 # os dados dos tratamentos com telhado e sem telhado estao na mesma
 # planilha, por isso irei separar em duas linhas distintas no df aninhado
 # para ficar comparavel com o que esta sendo feito
@@ -768,9 +761,8 @@ save(fabiola_roof_colombia_data,
      file = here("dados_microcosmos",
                  "Fabiola_Colombia",
                  "Fabiola_Colombia.RData"))
-#----
-#--- French_Guyana_Celine
-#----
+
+#--- French_Guyana_Celine ----
 # linhas 11-15 precisam ser deletadas, deletei direto no .xlsx
 # Canopy data
 celine_guyana <- here("dados_microcosmos",
@@ -870,14 +862,13 @@ save(celine_canopy_frenchguyana_data,
      file = here("dados_microcosmos",
                  "French_Guyana_Celine",
                  "Celine_FrenchGuyana.RData"))
-#----
-#--- Gonzalez_USA
-#----
+
+#--- Gonzalez_USA ----
 # aguardando retorno do email
 # aparentemente temos tratamentos com e sem telhado.
 gonzales_usa <- here("dados_microcosmos",
   "Gonzalez_USA",
-  "González.NJ_Site_Microcosm_Updated.xlsx")
+  "González.NJ_Site_Microcosm_Updated_2.xlsx")
 
 gonzales_fa <- read_xlsx(
   here(
@@ -900,40 +891,123 @@ gonzales_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-head(gonzales_fa)
+gonzales_site1_fa <- gonzales_fa %>% 
+  filter(Site == "Site 1") %>%
+  select(-Morphospecies.4, -Morphospecies.5, -Morphospecies.7,
+         -Morphospecies.8, -Morphospecies.9, -Morphospecies.10)
+
+gonzales_site2_fa <- gonzales_fa %>% 
+  filter(Site == "Site 2") %>%
+  select(-Morphospecies.4, -Morphospecies.6, -Morphospecies.9)
+
+gonzales_site3_fa <- gonzales_fa %>% 
+  filter(Site == "Site 3") %>%
+  select(-Morphospecies.5, -Morphospecies.6, -Morphospecies.7, 
+         -Morphospecies.8)
+
+#colSums(gonzales_site1_fa[,-c(1:3)]) 
+#colSums(gonzales_site2_fa[,-c(1:3)])  
+#colSums(gonzales_site3_fa[,-c(1:3)])  
 
 # list
 gonzales_list <- mutate_all(
   gonzales_list, ~(replace(., .=="?", NA)))
 
+gonzales_site1_list <- gonzales_list %>%
+  filter(Morfospecies_name != "Morphospecies.4" &
+         Morfospecies_name != "Morphospecies.5" &
+         Morfospecies_name != "Morphospecies.7" &
+         Morfospecies_name != "Morphospecies.8" & 
+         Morfospecies_name != "Morphospecies.9" & 
+         Morfospecies_name != "Morphospecies.10")
+
+gonzales_site2_list <- gonzales_list %>%
+  filter(Morfospecies_name != "Morphospecies.4" &
+           Morfospecies_name != "Morphospecies.6" &
+           Morfospecies_name != "Morphospecies.9") 
+           
+gonzales_site3_list <- gonzales_list %>%
+  filter(Morfospecies_name != "Morphospecies.5" &
+           Morfospecies_name != "Morphospecies.6" &
+           Morfospecies_name != "Morphospecies.7" &
+           Morfospecies_name != "Morphospecies.8") 
+
 # traits
 gonzales_traits <- mutate_all(
   gonzales_traits, ~(replace(., .=="?", NA)))
 
+gonzales_site1_traits <- gonzales_traits %>%
+  filter(Morfospecies_name != "Morphospecies.4" &
+           Morfospecies_name != "Morphospecies.5" &
+           Morfospecies_name != "Morphospecies.7" &
+           Morfospecies_name != "Morphospecies.8" & 
+           Morfospecies_name != "Morphospecies.9" & 
+           Morfospecies_name != "Morphospecies.10")
+
+gonzales_site2_traits <- gonzales_traits %>%
+  filter(Morfospecies_name != "Morphospecies.4" &
+           Morfospecies_name != "Morphospecies.6" &
+           Morfospecies_name != "Morphospecies.9") 
+
+gonzales_site3_traits <- gonzales_traits %>%
+  filter(Morfospecies_name != "Morphospecies.5" &
+           Morfospecies_name != "Morphospecies.6" &
+           Morfospecies_name != "Morphospecies.7" &
+           Morfospecies_name != "Morphospecies.8")
+
 # measures
-gonzales_measures <- gonzales_measures %>%
+gonzales_site1_measures <- gonzales_measures %>% 
+  filter(Site == "Site 1") %>%
+  rename(all_of(dict_names))
+
+gonzales_site2_measures <- gonzales_measures %>% 
+  filter(Site == "Site 2") %>%
+  rename(all_of(dict_names))
+
+gonzales_site3_measures <- gonzales_measures %>% 
+  filter(Site == "Site 3") %>%
   rename(all_of(dict_names))
 
 # data 
-gonzales_data <- tibble(
+gonzales_site1_data <- tibble(
   researcher = "Gonzales",
   locality = "Philadelphia_USA", 
   roof_treatment = NA,
-  abundance = list(tibble(gonzales_fa)),
-  list = list(tibble(gonzales_list)),
-  traits=list(tibble(gonzales_traits)),
-  measures=list(tibble(gonzales_measures)),
-  obs = "aguardando email, aparentemente tem mais tratamentos
-  juntos na mesma planilha")
+  abundance = list(tibble(gonzales_site1_fa)),
+  list = list(tibble(gonzales_site1_list)),
+  traits=list(tibble(gonzales_site1_traits)),
+  measures=list(tibble(gonzales_site1_measures)),
+  obs = "20 por tratamento. Site 1")
 
-save(gonzales_data,
+gonzales_site2_data <- tibble(
+  researcher = "Gonzales",
+  locality = "Philadelphia_USA", 
+  roof_treatment = NA,
+  abundance = list(tibble(gonzales_site2_fa)),
+  list = list(tibble(gonzales_site2_list)),
+  traits=list(tibble(gonzales_site2_traits)),
+  measures=list(tibble(gonzales_site2_measures)),
+  obs = "20 por tratamento. Site 2")
+
+gonzales_site3_data <- tibble(
+  researcher = "Gonzales",
+  locality = "Philadelphia_USA", 
+  roof_treatment = NA,
+  abundance = list(tibble(gonzales_site3_fa)),
+  list = list(tibble(gonzales_site3_list)),
+  traits=list(tibble(gonzales_site3_traits)),
+  measures=list(tibble(gonzales_site3_measures)),
+  obs = "20 por tratamento. Site 3")
+
+save(gonzales_site1_data,
+     gonzales_site2_data,
+     gonzales_site3_data,
      file = here("dados_microcosmos",
                  "Gonzalez_USA",
                  "Gonzalez_USA.RData"))
 
-#----
-#--- Horvath_HU
-#----
+
+#--- Horvath_HU ----
 # dados do logger estão na mesma planilha
 horvath_hungria <- here("dados_microcosmos",
                      "Horvath_HU",
@@ -989,9 +1063,9 @@ save(horvath_data,
                  "Horvath_HU",
                  "horvath_hungria.RData"))
 
-#----
-#--- Izzo_Chapada_BR
-#----
+
+
+#--- Izzo_Chapada_BR ----
 # Fauna_morphospecies_list: substituído '-' por 'NA' (fiz direto na planilha a remoção do hífen)
 izzo_br <- here("dados_microcosmos",
                         "Izzo_Chapada_BR",
@@ -1045,9 +1119,8 @@ save(izzo_data,
      file = here("dados_microcosmos",
                  "Izzo_Chapada_BR",
                  "izzo_brazil.RData"))
-#----
-#--- GRomero_Japi
-#----
+
+#--- GRomero_Japi ----
 # coordenadas convertidas direto no xlsx
 romero_japi <- here("dados_microcosmos",
                 "Japi_romero",
@@ -1100,9 +1173,8 @@ save(romero_japi_data,
      file = here("dados_microcosmos",
                  "Japi_romero",
                  "romero_japi_brazil.RData"))
-#----
-#---Jari Finland
-#----
+
+#---Jari Finland ----
 # tirar dúvidas
 jari_finland <- here("dados_microcosmos",
                     "Jari_Finland",
@@ -1157,9 +1229,8 @@ save(jari_data,
                  "Jari_Finland",
                  "jari_finland.RData"))
 
-#----
-#--- Juen_Belém_BR
-#----
+
+#--- Juen_Belém_BR ----
 # os dados dos diferentes tratamentos estao todos juntos
 # precisamos separar em linhas distintas e limpar as abas correspondentes
 # por ex, no tratamento com telhado, alguns taxons nao estao presentes, assim
@@ -1338,7 +1409,8 @@ save(juen_na_data,
                  "Juen_Belém_BR",
                  "juen_belem_br.RData"))
 
-#----
+
+
 #--- Knapp_Czech ----
 # tirar dúvidas
 knapp_czech <- here("dados_microcosmos",
@@ -1461,6 +1533,7 @@ save(knapp_roof_data,
                  "Knapp_Czech",
                  "knapp_czech.RData"))
 
+
 #--- Luciano_argentina ----
 luciano_argentina <- here("dados_microcosmos",
                     "Luciano_Argentina")
@@ -1518,8 +1591,12 @@ save(luciano_data,
                  "luciano_argentina.RData"))
 
 
-#--- Martins_Hamada_Amazon
-martins_hamada <- here("dados_microcosmos",
+#--- Martins_Hamada_Amazon ----
+# aqui existem alguns tratamentos juntos, com telhado, sem telhado
+# e a diferenca de estratificacao com os microcosmos colocados a 15m de altura
+# depois precisamos remover de cada experimento as faunas que nao estiveram
+# presentes no respectivo tratamento (validado com Gustavo Romero)
+martins_amazon <- here("dados_microcosmos",
                       "Martins_Hamada_Amazon")
 
 martins_fa <- read_xlsx(
@@ -1547,25 +1624,162 @@ martins_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
+# selecionando cada tratamento e
+# removendo a abundancia 0 em cada tratamento
 martins_roof_fa <- martins_fa %>%
   filter(Treatment == "Managed forest - roof" |
-         Treatment == "Natural forest - roof")
+         Treatment == "Natural forest - roof") %>%
+  select(-Dytiscidae.sp2, -Curculionidae,
+         -Megapodagrionidae.Heteropodagrion,
+         -Formicidae.morpho2, -Cicadidae,
+         -Colembola, -Pompilidae, -Chilopoda)
 
 martins_nonroof_fa <- martins_fa %>%
   filter(Treatment == "Managed forest - standard experiment" |
-         Treatment == "Natural forest - standard experiment")
+         Treatment == "Natural forest - standard experiment") %>%
+  select(-Culicidae.Haemagogus, -Psychodidae, -Dytiscidae.sp2,
+         -Curculionidae, -Termitidae, -Blaberidae, -Formicidae.morpho2,
+         -Cicadidae, -Colembola, -"Anuro(girino)")
+  
 
 martins_na_fa <- martins_fa %>%
   filter(Treatment == "Managed forest - 15m" |
-         Treatment == "Natural forest - 15m")
-
+         Treatment == "Natural forest - 15m") %>%
+  select(-Culicidae.Toxorhynchites, -Ceratopogonidae, -Psychodidae,
+         -Scirtidae, -Stratiomidae, -Megapodagrionidae.Heteropodagrion,
+         -Termitidae, -Blaberidae, -Pompilidae, -Chilopoda, -"Anuro(girino)")
+  
 martins_roof_fa[is.na(martins_roof_fa)] <- 0
 martins_nonroof_fa[is.na(martins_nonroof_fa)] <- 0
 martins_na_fa[is.na(martins_na_fa)] <- 0
 
-#----
-# TODO
-#----
+# list
+martins_roof_list <- martins_list %>% 
+  filter(Morfospecies_name != "Dytiscidae.sp2" &
+           Morfospecies_name != "Curculionidae" &
+           Morfospecies_name != "Megapodagrionidae.Heteropodagrion" &
+           Morfospecies_name != "Formicidae.morpho2" &
+           Morfospecies_name != "Cicadidae" &
+           Morfospecies_name != "Colembola" &
+           Morfospecies_name != "Pompilidae" &
+           Morfospecies_name != "Chilopoda")
+
+martins_nonroof_list <- martins_list %>% 
+  filter(Morfospecies_name != "Culicidae.Haemagogus" &
+          Morfospecies_name != "Psychodidae" &
+          Morfospecies_name != "Dytiscidae.sp2" &
+          Morfospecies_name != "Curculionidae" &
+          Morfospecies_name != "Termitidae" &
+          Morfospecies_name != "Blaberidae" &
+          Morfospecies_name != "Formicidae.morpho2" &
+          Morfospecies_name != "Cicadidae" &
+          Morfospecies_name != "Colembola" &
+          Morfospecies_name != "Anuro(girino)")
+
+martins_na_list <- martins_list %>% 
+  filter(Morfospecies_name != "Culicidae.Toxorhynchites" &
+           Morfospecies_name != "Ceratopogonidae" &
+           Morfospecies_name != "Psychodidae" &
+           Morfospecies_name != "Scirtidae" &
+           Morfospecies_name != "Stratiomidae" &
+           Morfospecies_name != "Megapodagrionidae.Heteropodagrion" &
+           Morfospecies_name != "Termitidae" &
+           Morfospecies_name != "Blaberidae" &
+           Morfospecies_name != "Pompilidae" &
+           Morfospecies_name != "Chilopoda" &
+           Morfospecies_name != "Anuro(girino)")
+
+# traits
+martins_roof_traits <- martins_traits %>%
+  filter(Morfospecies_name != "Dytiscidae.sp2" &
+           Morfospecies_name != "Curculionidae" &
+           Morfospecies_name != "Megapodagrionidae.Heteropodagrion" &
+           Morfospecies_name != "Formicidae.morpho2" &
+           Morfospecies_name != "Cicadidae" &
+           Morfospecies_name != "Colembola" &
+           Morfospecies_name != "Pompilidae" &
+           Morfospecies_name != "Chilopoda")
+  
+martins_nonroof_traits <- martins_traits %>%
+  filter(Morfospecies_name != "Culicidae.Haemagogus" &
+           Morfospecies_name != "Psychodidae" &
+           Morfospecies_name != "Dytiscidae.sp2" &
+           Morfospecies_name != "Curculionidae" &
+           Morfospecies_name != "Termitidae" &
+           Morfospecies_name != "Blaberidae" &
+           Morfospecies_name != "Formicidae.morpho2" &
+           Morfospecies_name != "Cicadidae" &
+           Morfospecies_name != "Colembola" &
+           Morfospecies_name != "Anuro(girino)")
+
+martins_na_traits <- martins_traits %>%
+  filter(Morfospecies_name != "Culicidae.Toxorhynchites" &
+           Morfospecies_name != "Ceratopogonidae" &
+           Morfospecies_name != "Psychodidae" &
+           Morfospecies_name != "Scirtidae" &
+           Morfospecies_name != "Stratiomidae" &
+           Morfospecies_name != "Megapodagrionidae.Heteropodagrion" &
+           Morfospecies_name != "Termitidae" &
+           Morfospecies_name != "Blaberidae" &
+           Morfospecies_name != "Pompilidae" &
+           Morfospecies_name != "Chilopoda" &
+           Morfospecies_name != "Anuro(girino)")
+
+# measures
+martins_roof_measures <- martins_measures %>%
+  filter(Treatment == "Managed forest - roof" |
+         Treatment == "Natural forest - roof") %>%
+  rename(all_of(dict_names))
+
+martins_nonroof_measures <- martins_measures %>%
+  filter(Treatment == "Managed forest - standard experiment" |
+         Treatment == "Natural forest - standard experiment") %>%
+  rename(all_of(dict_names))
+
+martins_na_measures <- martins_measures %>%
+  filter(Treatment == "Managed forest - 15m" |
+        Treatment == "Natural forest - 15m") %>%
+  rename(all_of(dict_names))
+
+# data
+martins_roof_data <- tibble(
+  researcher = "Martins",
+  locality = "Amazon_Brazil", 
+  roof_treatment = 1,
+  abundance = list(tibble(martins_roof_fa)),
+  list = list(tibble(martins_roof_list)),
+  traits=list(tibble(martins_roof_traits)),
+  measures=list(tibble(martins_roof_measures)),
+  obs = "Tem invertebrado terrestre, revisar")
+
+martins_nonroof_data <- tibble(
+  researcher = "Martins",
+  locality = "Amazon_Brazil", 
+  roof_treatment = 0,
+  abundance = list(tibble(martins_nonroof_fa)),
+  list = list(tibble(martins_nonroof_list)),
+  traits=list(tibble(martins_nonroof_traits)),
+  measures=list(tibble(martins_nonroof_measures)),
+  obs = "Tem invertebrado terrestre, revisar")
+
+martins_na_data <- tibble(
+  researcher = "Martins",
+  locality = "Amazon_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(martins_na_fa)),
+  list = list(tibble(martins_na_list)),
+  traits=list(tibble(martins_na_traits)),
+  measures=list(tibble(martins_na_measures)),
+  obs = "Exp. estratificado 15m - Tem invertebrado terrestre, revisar")
+
+save(martins_roof_data,
+     martins_nonroof_data,
+     martins_na_data,
+     file = here("dados_microcosmos",
+                 "Martins_Hamada_Amazon",
+                 "martins_amazon_br.RData"))
+
+# To do ----
 # nested dataframes 
 nested_df <- bind_rows(boukal_czech_roof,
                        boukal_czech_nonroof,
@@ -1591,7 +1805,10 @@ nested_df <- bind_rows(boukal_czech_roof,
                        knapp_roof_data,
                        knapp_nonroof_data,
                        knapp_data,
-                       luciano_data)
+                       luciano_data,
+                       martins_roof_data,
+                       martins_nonroof_data,
+                       martins_na_data)
 
 View(nested_df)
 save(nested_df,
