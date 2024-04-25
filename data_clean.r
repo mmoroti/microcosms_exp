@@ -2127,6 +2127,231 @@ save(pavel_site1_data,
                  "pavel_uk.RData"))
 
 
+#--- Petterman_Austria ----
+petermann_austria <- here("dados_microcosmos",
+                        "Petermann_Austria",
+                 "Petermann.Austria Wienerwald_Global experiment_v2.xlsx")
+
+pettermann_fa <- read_xlsx(
+  here(
+    petermann_austria),
+  "fauna_abundance")
+
+pettermann_list <- read_xlsx(
+  here(
+    petermann_austria),
+  "Fauna_morphospecies_list")
+
+pettermann_traits <- read_xlsx(
+  here(
+    petermann_austria),
+  "Fauna_traits")
+
+pettermann_measures <- read_xlsx(
+  here(
+    petermann_austria),
+  "measures_decomposition")
+
+# abundance
+glimpse(pettermann_fa)
+
+# list
+glimpse(pettermann_list)
+
+# traits
+glimpse(pettermann_traits)
+
+# measures
+glimpse(pettermann_measures)
+
+pettermann_measures <- pettermann_measures %>%
+  rename(all_of(dict_names))
+
+pettermann_data <- tibble(
+  researcher = "Petermann",
+  locality = "Austria",
+  roof_treatment = NA,
+  abundance = list(tibble(pettermann_fa)),
+  list = list(tibble(pettermann_list)),
+  traits= list(tibble(pettermann_traits)),
+  measures=list(tibble(pettermann_measures)),
+  obs = "Confirmar dados no data_log.txt")
+
+save(pettermann_data,
+     file = here("dados_microcosmos",
+                 "Petermann_Austria",
+                 "petermann_austria.RData"))
+
+
+#--- Renan_Chapecó ----
+renan_br <- here("dados_microcosmos",
+                "Renan_Chapecó")
+
+renan_alloch_fa <- read_xlsx(
+  here(
+    renan_br,
+    "Allochthonous_Chapeco_BR.xlsx"),
+  "fauna_abundance_allochthonous")
+
+renan_alloch_list <- read_xlsx(
+  here(
+    renan_br,
+    "Allochthonous_Chapeco_BR.xlsx"),
+  "Fauna_morphospecies_list")
+
+renan_alloch_traits <- read_xlsx(
+  here(
+    renan_br,
+    "Allochthonous_Chapeco_BR.xlsx"),
+  "Fauna_traits")
+
+renan_alloch_measures <- read_xlsx(
+  here(
+    renan_br,
+    "Allochthonous_Chapeco_BR.xlsx"),
+  "measures_decomposition_allochth")
+
+#abundance
+renan_alloch_fa
+
+#list
+renan_alloch_list <- mutate_all(renan_alloch_list, ~(replace(., .=="*", NA)))
+
+#traits
+renan_alloch_traits
+
+#measures
+renan_alloch_measures <- renan_alloch_measures %>% 
+  mutate("dissolved_CO2" = NA) %>%
+  rename("dissolved_O2" = "dissolved_O2 mg/L",
+         "turbidity" = "turbidity NTU",
+         "Tree dbh" = "Tree dbh (cm)",
+         "canopy openness" = "canopy openness %") %>%
+  rename(all_of(dict_names))
+
+#vertical_chapeco
+renan_vertical_fa <- read_xlsx(
+  here(
+    renan_br,
+    "Vertical_Chapeco_BR.xlsx"),
+  "fauna_abundance_vertical")
+
+renan_vertical_list <- read_xlsx(
+  here(
+    renan_br,
+    "vertical_Chapeco_BR.xlsx"),
+  "Fauna_morphospecies_list")
+
+renan_vertical_traits <- read_xlsx(
+  here(
+    renan_br,
+    "vertical_Chapeco_BR.xlsx"),
+  "Fauna_traits")
+
+renan_vertical_measures <- read_xlsx(
+  here(
+    renan_br,
+    "vertical_Chapeco_BR.xlsx"),
+  "measures_decomposition_vertical")
+
+#abundance
+colSums(renan_vertical_fa[,-c(1:2)])
+
+#list
+renan_vertical_list <- mutate_all(
+  renan_vertical_list, ~(replace(., .=="*", NA)))
+
+#traits
+renan_vertical_traits
+
+#measures
+renan_vertical_measures <- renan_vertical_measures %>% 
+  mutate("dissolved_CO2" = NA) %>%
+  rename("Tree dbh" = "Tree dbh (cm)",
+        "canopy openness" = "canopy openness %") %>%
+  rename(all_of(dict_names))
+
+#names(renan_vertical_measures)
+
+#basic_chapeco
+renan_basic_fa <- read_xlsx(
+  here(
+    renan_br,
+    "Basic_Chapeco_BR.xlsx"),
+  "fauna_abundance_basic")
+
+renan_basic_list <- read_xlsx(
+  here(
+    renan_br,
+    "Basic_Chapeco_BR.xlsx"),
+  "Fauna_morphospecies_list")
+
+renan_basic_traits <- read_xlsx(
+  here(
+    renan_br,
+    "Basic_Chapeco_BR.xlsx"),
+  "Fauna_traits")
+
+renan_basic_measures <- read_xlsx(
+  here(
+    renan_br,
+    "Basic_Chapeco_BR.xlsx"),
+  "measures_decomposition_basic")
+
+#abundance
+colSums(renan_basic_fa[,-c(1:2)])
+
+#list
+renan_basic_list <- mutate_all(renan_basic_list, ~(replace(., .=="*", NA)))
+
+#traits
+renan_basic_traits
+
+#measures
+renan_basic_measures <- renan_basic_measures %>% 
+  mutate("dissolved_CO2" = NA) %>%
+  rename("Tree dbh" = "Tree dbh (cm)",
+         "canopy openness" = "canopy openness %") %>%
+  rename(all_of(dict_names))
+
+#data save
+renan_alloch_data <- tibble(
+  researcher = "Renan_BR",
+  locality = "Chapeco_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(renan_alloch_fa)),
+  list = list(tibble(renan_alloch_list)),
+  traits=list(tibble(renan_alloch_traits)),
+  measures=list(tibble(renan_alloch_measures)),
+  obs = "Exp. Allochthonous. Confirmar!")
+
+renan_vertical_data <- tibble(
+  researcher = "Renan_BR",
+  locality = "Chapeco_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(renan_vertical_fa)),
+  list = list(tibble(renan_vertical_list)),
+  traits=list(tibble(renan_vertical_traits)),
+  measures=list(tibble(renan_vertical_measures)),
+  obs = "Exp. vertical. Confirmar!")
+
+renan_basic_data <- tibble(
+  researcher = "Renan_BR",
+  locality = "Chapeco_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(renan_basic_fa)),
+  list = list(tibble(renan_basic_list)),
+  traits=list(tibble(renan_basic_traits)),
+  measures=list(tibble(renan_basic_measures)),
+  obs = "Exp. padrao (basic). Confirmar!")
+
+save(renan_alloch_data,
+     renan_vertical_data,
+     renan_basic_data,
+     file = here("dados_microcosmos",
+                 "Renan_Chapecó",
+                 "renan_br.RData"))
+
 # To do ----
 # nested dataframes 
 nested_df <- bind_rows(boukal_czech_roof,
@@ -2164,7 +2389,11 @@ nested_df <- bind_rows(boukal_czech_roof,
                        moretti_site2_data,
                        nock_data,
                        pavel_site1_data,
-                       pavel_site2_data) 
+                       pavel_site2_data,
+                       pettermann_data,
+                       renan_alloch_data,
+                       renan_vertical_data,
+                       renan_basic_data) 
 
 data <- column_id(nested_df, "MD")
 View(data)
@@ -2173,21 +2402,6 @@ save(data,
      file = here("dados_microcosmos",
                  "nested_df.RData"))
 load("dados_microcosmos/nested_df.RData")
-
-#--- Petterman_Austria ----
-#--- Renan_Chapecó ----
-chapeco_list1 <- read_xlsx("Renan_Chapecó/Allochthonous_Chapeco_BR.xlsx",
-                          "Fauna_morphospecies_list")
-chapeco_list1  <- mutate_all(chapeco_list1, ~(replace(., .=="*", NA)))
-
-
-chapeco_list2 <- read_xlsx("Renan_Chapecó/Basic_Chapeco_BR.xlsx",
-                          "Fauna_morphospecies_list")
-chapeco_list2  <- mutate_all(chapeco_list2, ~(replace(., .=="*", NA)))
-
-chapeco_list3 <- read_xlsx("Renan_Chapecó/Vertical_Chapeco_BR.xlsx",
-                          "Fauna_morphospecies_list")
-chapeco_list3  <- mutate_all(chapeco_list3, ~(replace(., .=="*", NA)))
 
 #--- Rodrigo_Argentina ----
 
