@@ -4,6 +4,23 @@ library(tidyverse) # data science handling
 library(readxl) # read .xlsx
 library(here) # set directory 
 library(renv) # versioning R and packages
+library(glue) # to create acronyms
+
+# function
+# create a key column to join between datasets
+column_id <- function(data, acronym){
+
+  for (i in 1:nrow(data)) {
+    # cria o acronimo desejado  
+    
+    data$ID[i] <- glue({acronym}, i)
+  }
+  # coloca como primeira coluna
+  data <- data %>%
+    relocate(ID, .before = 1)
+  
+  return(data)
+}
 
 # Data dictiorary ----
 dict_data <- read_xlsx(
@@ -292,12 +309,11 @@ save(caliman_natal_br,
      file = here("dados_microcosmos",
                  "Caliman_Natal_BR",
                  "Caliman_Natal_BR.RData")) 
-
 #--- Campos_do_Jordao_e_Sta_Virginia ----
 # dados indisponiveis ainda
 # TODO: precisa separar em duas pastas
 
-
+# TODO: falta receber os dados
 #--- Cardinale_USA ----
 cardinale_usa <- here("dados_microcosmos",
                       "Cardinale_USA")
@@ -357,11 +373,10 @@ save(cardinale_usa_data,
      file = here(cardinale_usa,
                  "Cardinale_USA.RData")) 
 
-
 #--- Cardoso_Romero ----
 # TODO: Dados incompletos, mas as coordenadas foram convertidas direto no xlsx.
 
-
+# TODO: falta receber os dados
 #--- Collyer_Japan ----
 collyer_japan <- here("dados_microcosmos",
                       "Collyer_Japan")
@@ -419,7 +434,6 @@ save(collyer_japan_data,
      #boukal_czech_nonroof,
      file = here(collyer_japan,
                  "Collyer_Japan.RData")) 
-
 
 #---- Cornelissen_BR ----
 cornelissen_br <- here("dados_microcosmos",
@@ -616,7 +630,6 @@ cotriguacu_romero_data <- tibble(
   measures=list(tibble(cotriguacu_measures)),
   obs= "experimento com diferentes alturas")
 
-
 #--- Fabiola_Colombia ----
 # os dados dos tratamentos com telhado e sem telhado estao na mesma
 # planilha, por isso irei separar em duas linhas distintas no df aninhado
@@ -761,7 +774,6 @@ save(fabiola_roof_colombia_data,
      file = here("dados_microcosmos",
                  "Fabiola_Colombia",
                  "Fabiola_Colombia.RData"))
-
 #--- French_Guyana_Celine ----
 # linhas 11-15 precisam ser deletadas, deletei direto no .xlsx
 # Canopy data
@@ -862,7 +874,6 @@ save(celine_canopy_frenchguyana_data,
      file = here("dados_microcosmos",
                  "French_Guyana_Celine",
                  "Celine_FrenchGuyana.RData"))
-
 #--- Gonzalez_USA ----
 # aguardando retorno do email
 # aparentemente temos tratamentos com e sem telhado.
@@ -1007,6 +1018,7 @@ save(gonzales_site1_data,
                  "Gonzalez_USA.RData"))
 
 
+
 #--- Horvath_HU ----
 # dados do logger estão na mesma planilha
 horvath_hungria <- here("dados_microcosmos",
@@ -1119,7 +1131,6 @@ save(izzo_data,
      file = here("dados_microcosmos",
                  "Izzo_Chapada_BR",
                  "izzo_brazil.RData"))
-
 #--- GRomero_Japi ----
 # coordenadas convertidas direto no xlsx
 romero_japi <- here("dados_microcosmos",
@@ -1173,7 +1184,7 @@ save(romero_japi_data,
      file = here("dados_microcosmos",
                  "Japi_romero",
                  "romero_japi_brazil.RData"))
-
+# TODO: ainda falta receber os dados 
 #---Jari Finland ----
 # tirar dúvidas
 jari_finland <- here("dados_microcosmos",
@@ -1228,7 +1239,6 @@ save(jari_data,
      file = here("dados_microcosmos",
                  "Jari_Finland",
                  "jari_finland.RData"))
-
 
 #--- Juen_Belém_BR ----
 # os dados dos diferentes tratamentos estao todos juntos
@@ -1408,7 +1418,6 @@ save(juen_na_data,
      file = here("dados_microcosmos",
                  "Juen_Belém_BR",
                  "juen_belem_br.RData"))
-
 
 
 #--- Knapp_Czech ----
@@ -1779,6 +1788,345 @@ save(martins_roof_data,
                  "Martins_Hamada_Amazon",
                  "martins_amazon_br.RData"))
 
+#--- Mexico_Wesley ----
+# retirei o undefined e deixei vazio para ler como NA.
+wesley_mexico <- here("dados_microcosmos",
+                       "Mexico_Wesley")
+
+wesley_fa <- read_xlsx(
+  here(
+    wesley_mexico,
+    "PI.WesleyDattilo_Mexico_FINAL.xlsx"),
+  "fauna_abundance")
+
+wesley_list <- read_xlsx(
+  here(
+    wesley_mexico,
+    "PI.WesleyDattilo_Mexico_FINAL.xlsx"),
+  "Fauna_morphospecies_list")
+
+wesley_traits <- read_xlsx(
+  here(
+    wesley_mexico,
+    "PI.WesleyDattilo_Mexico_FINAL.xlsx"),
+  "Fauna_traits")
+
+wesley_measures <- read_xlsx(
+  here(
+    wesley_mexico,
+    "PI.WesleyDattilo_Mexico_FINAL.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(wesley_fa)
+
+# list
+head(wesley_list)
+
+# traits
+head(wesley_traits)
+
+# measures
+head(wesley_measures)
+
+wesley_measures <- wesley_measures %>%
+  rename(all_of(dict_names))
+
+wesley_data <- tibble(
+  researcher = "WesleyDattilo",
+  locality = "Mexico", 
+  roof_treatment = NA,
+  abundance = list(tibble(wesley_fa)),
+  list = list(tibble(wesley_list)),
+  traits=list(tibble(wesley_traits)),
+  measures=list(tibble(wesley_measures)),
+  obs = "")
+
+save(wesley_data,
+     file = here("dados_microcosmos",
+                 "Mexico_Wesley",
+                 "wesley_mexico.RData"))
+
+
+#--- MMoretti Lab_BR ----
+moretti_br <- here("dados_microcosmos",
+                      "MMoretti Lab_BR")
+
+moretti_site1_fa <- read_xlsx(
+  here(
+    moretti_br,
+    "PI.Marcelo.Moretti.Site.1.xlsx"),
+  "Fauna_abundance")
+
+moretti_site1_list <- read_xlsx(
+  here(
+    moretti_br,
+    "PI.Marcelo.Moretti.Site.1.xlsx"),
+  "Fauna_morphospecies_list")
+
+moretti_site1_traits <- read_xlsx(
+  here(
+    moretti_br,
+    "PI.Marcelo.Moretti.Site.1.xlsx"),
+  "Fauna_traits")
+
+moretti_site1_measures <- read_xlsx(
+  here(
+    moretti_br,
+    "PI.Marcelo.Moretti.Site.1.xlsx"),
+  "Measures_decomposition_geograph")
+
+# abundance
+head(moretti_site1_fa)
+moretti_site1_fa[is.na(moretti_site1_fa)] <- 0
+
+# list
+moretti_site1_list
+
+# traits
+moretti_site1_traits
+
+# measures
+moretti_site1_measures <- moretti_site1_measures %>%
+  rename("dissolved_O2" = "dissolved_O2 (mg/L)",
+         "turbidity" = "turbidity (NTU)",
+         "detritus dry mass (fine)" = "detritus dry mass (fine) (mg)",
+         "detritus dry mass (coarse)" = "detritus dry mass (coarse) (g)",
+         "Tree dbh" = "Tree dbh (cm)") %>%
+  rename(all_of(dict_names))
+
+# site 2
+moretti_site2_fa <- read_xlsx(
+  here(
+    moretti_br,
+    "PI.Marcelo.Moretti.Site.2.xlsx"),
+  "Fauna_abundance")
+
+moretti_site2_list <- read_xlsx(
+  here(
+    moretti_br,
+    "PI.Marcelo.Moretti.Site.2.xlsx"),
+  "Fauna_morphospecies_list")
+
+moretti_site2_traits <- read_xlsx(
+  here(
+    moretti_br,
+    "PI.Marcelo.Moretti.Site.2.xlsx"),
+  "Fauna_traits")
+
+moretti_site2_measures <- read_xlsx(
+  here(
+    moretti_br,
+    "PI.Marcelo.Moretti.Site.2.xlsx"),
+  "Measures_decomposition_geograph")
+
+# abundance
+head(moretti_site2_fa)
+moretti_site2_fa[is.na(moretti_site2_fa)] <- 0
+
+# list
+moretti_site2_list
+
+# traits
+moretti_site2_traits
+
+# measures
+moretti_site2_measures <- moretti_site2_measures %>%
+  rename("dissolved_O2" = "dissolved_O2 (mg/L)",
+         "turbidity" = "turbidity (NTU)",
+         "detritus dry mass (fine)" = "detritus dry mass (fine) (mg)",
+         "detritus dry mass (coarse)" = "detritus dry mass (coarse) (g)",
+         "Tree dbh" = "Tree dbh (cm)") %>%
+  rename(all_of(dict_names))
+
+#names(moretti_site2_measures)
+
+moretti_site1_data <- tibble(
+  researcher = "Moretti",
+  locality = "SantaTereza_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(moretti_site1_fa)),
+  list = list(tibble(moretti_site1_list)),
+  traits=list(tibble(moretti_site1_traits)),
+  measures=list(tibble(moretti_site1_measures)),
+  obs = "")
+
+moretti_site2_data <- tibble(
+  researcher = "Moretti",
+  locality = "MarechalFloriano_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(moretti_site2_fa)),
+  list = list(tibble(moretti_site2_list)),
+  traits=list(tibble(moretti_site2_traits)),
+  measures=list(tibble(moretti_site2_measures)),
+  obs = "")
+
+save(moretti_site1_data,
+     moretti_site2_data,
+     file = here("dados_microcosmos",
+                 "MMoretti Lab_BR",
+                 "moretti_br.RData"))
+
+
+#--- Musa_SouthAfrica ----
+# TODO: ainda falta receber os dados formatados
+#--- Nock ----
+nock_canada <- here("dados_microcosmos",
+                    "Nock")
+
+#nock_fa <- read_xlsx(
+#  here(
+#    nock_canada,
+#    "CA_NOCK_EMEND.2.xlsx"),
+#  "fauna_abundance")
+#
+#nock_list <- read_xlsx(
+#  here(
+#    nock_canada,
+#    "CA_NOCK_EMEND.2.xlsx"),
+#  "Fauna_morphospecies_list")
+#
+#nock_traits <- read_xlsx(
+#  here(
+#    nock_canada,
+#    "CA_NOCK_EMEND.2.xlsx"),
+#  "Fauna_traits")
+
+nock_measures <- read_xlsx(
+  here(
+    nock_canada,
+    "CA_NOCK_EMEND.2.xlsx"),
+  "measures_decomposition_geograph")
+
+# measures
+nock_measures <- nock_measures %>%
+#  filter(Experiment == "roof") %>%
+  rename(all_of(dict_names)) 
+
+nock_data <- tibble(
+  researcher = "Nock",
+  locality = "Alberta_Canada",
+  roof_treatment = NA,
+  abundance = NA, #list(tibble(knapp_fa)),
+  list = NA, #list(tibble(knapp_list)),
+  traits= NA, #list(tibble(knapp_traits)),
+  measures=list(tibble(nock_measures)),
+  obs = "Sem invertebrados presentes na coleta? confirmar")
+
+save(nock_data,
+     file = here("dados_microcosmos",
+                 "Nock",
+                 "nock_canada.RData"))
+
+#--- Pavel Kratina_UK ----
+pavel_uk <- here("dados_microcosmos",
+                   "Pavel Kratina_UK")
+
+pavel_site1_fa <- read_xlsx(
+  here(
+    pavel_uk,
+    "Microcosm_UK_Kratina.xlsx"),
+  "fauna_abundance")
+
+pavel_site1_list <- read_xlsx(
+  here(
+    pavel_uk,
+    "Microcosm_UK_Kratina.xlsx"),
+  "Fauna_morphospecies_list")
+
+pavel_site1_traits <- read_xlsx(
+  here(
+    pavel_uk,
+    "Microcosm_UK_Kratina.xlsx"),
+  "Fauna_traits")
+
+pavel_site1_measures <- read_xlsx(
+  here(
+    pavel_uk,
+    "Microcosm_UK_Kratina.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+pavel_site1_fa
+
+# list
+pavel_site1_list
+
+# traits
+pavel_site1_traits
+
+# measures
+pavel_site1_measures <- pavel_site1_measures %>%
+  mutate("Natural tree hole.1" = NA,
+         "Natural tree hole.2" = NA) %>%
+  rename(all_of(dict_names))
+
+# site 2
+pavel_site2_fa <- read_xlsx(
+  here(
+    pavel_uk,
+    "PavelKratina_Site_UK.xlsx"),
+  "fauna_abundance")
+
+pavel_site2_list <- read_xlsx(
+  here(
+    pavel_uk,
+    "PavelKratina_Site_UK.xlsx"),
+  "Fauna_morphospecies_list")
+
+pavel_site2_traits <- read_xlsx(
+  here(
+    pavel_uk,
+    "PavelKratina_Site_UK.xlsx"),
+  "Fauna_traits")
+
+pavel_site2_measures <- read_xlsx(
+  here(
+    pavel_uk,
+    "PavelKratina_Site_UK.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+table(pavel_site2_fa$Treatment) # managed forest aparece 20x e natural forest 15
+
+# list
+pavel_site2_list
+
+# traits
+pavel_site2_traits
+
+# measures
+pavel_site2_measures <- pavel_site2_measures %>%
+  rename(all_of(dict_names))
+
+pavel_site1_data <- tibble(
+  researcher = "PavelKratina",
+  locality = "UnitedKingdom",
+  roof_treatment = NA,
+  abundance = list(tibble(pavel_site1_fa)),
+  list = list(tibble(pavel_site1_list)),
+  traits= list(tibble(pavel_site1_traits)),
+  measures=list(tibble(pavel_site1_measures)),
+  obs = "Experiment 1. Precisamos checar os dados")
+
+pavel_site2_data <- tibble(
+  researcher = "PavelKratina",
+  locality = "UnitedKingdom",
+  roof_treatment = NA,
+  abundance = list(tibble(pavel_site2_fa)),
+  list = list(tibble(pavel_site2_list)),
+  traits= list(tibble(pavel_site2_traits)),
+  measures=list(tibble(pavel_site2_measures)),
+  obs = "Experiment 2. Precisamos checar os dados")
+
+#View(pavel_site2_data)
+save(pavel_site1_data,
+     pavel_site2_data,
+     file = here("dados_microcosmos",
+                 "Pavel Kratina_UK",
+                 "pavel_uk.RData"))
+
+
 # To do ----
 # nested dataframes 
 nested_df <- bind_rows(boukal_czech_roof,
@@ -1794,7 +2142,9 @@ nested_df <- bind_rows(boukal_czech_roof,
                        fabiola_nonroof_colombia_data,
                        celine_canopy_frenchguyana_data,
                        celine_general_frenchguyana_data,
-                       gonzales_data,
+                       gonzales_site1_data,
+                       gonzales_site2_data,
+                       gonzales_site3_data,
                        horvath_data,
                        izzo_data,
                        romero_japi_data,
@@ -1808,34 +2158,24 @@ nested_df <- bind_rows(boukal_czech_roof,
                        luciano_data,
                        martins_roof_data,
                        martins_nonroof_data,
-                       martins_na_data)
+                       martins_na_data,
+                       wesley_data, 
+                       moretti_site1_data,
+                       moretti_site2_data,
+                       nock_data,
+                       pavel_site1_data,
+                       pavel_site2_data) 
 
-View(nested_df)
-save(nested_df,
+data <- column_id(nested_df, "MD")
+View(data)
+
+save(data,
      file = here("dados_microcosmos",
                  "nested_df.RData"))
-
 load("dados_microcosmos/nested_df.RData")
 
-#----
-#--- Mexico_Wesley
-# retirei o undefined e deixei vazio para ler como NA.
-
-#--- MMoretti Lab_BR
-moretti_fa1 <- read_xlsx("MMoretti Lab_BR/PI.Marcelo.Moretti.Site.1.xlsx",
-                          "Fauna_abundance")
-moretti_fa1[is.na(moretti_fa1)] <- 0
-
-moretti_fa2 <- read_xlsx("MMoretti Lab_BR/PI.Marcelo.Moretti.Site.2.xlsx",
-                          "Fauna_abundance")
-
-moretti_fa2[is.na(moretti_fa2)] <- 0
-
-#--- Musa_SouthAfrica
-#--- Nock
-#--- Pavel Kratina_UK
-#--- Petterman_Austria
-#--- Renan_Chapecó
+#--- Petterman_Austria ----
+#--- Renan_Chapecó ----
 chapeco_list1 <- read_xlsx("Renan_Chapecó/Allochthonous_Chapeco_BR.xlsx",
                           "Fauna_morphospecies_list")
 chapeco_list1  <- mutate_all(chapeco_list1, ~(replace(., .=="*", NA)))
@@ -1849,12 +2189,12 @@ chapeco_list3 <- read_xlsx("Renan_Chapecó/Vertical_Chapeco_BR.xlsx",
                           "Fauna_morphospecies_list")
 chapeco_list3  <- mutate_all(chapeco_list3, ~(replace(., .=="*", NA)))
 
-# Rodrigo_Argentina
+#--- Rodrigo_Argentina ----
 
-# Sedney_Francis_Filipinas
+#--- Sedney_Francis_Filipinas ----
 
-# Srivastava_Canada
+#--- Srivastava_Canada ----
 
-# Sweet_UK
+#--- Sweet_UK ----
 
-# Thomas_Alemanha
+#--- Thomas_Alemanha ----
