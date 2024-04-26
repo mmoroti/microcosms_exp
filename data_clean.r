@@ -1238,14 +1238,14 @@ save(jari_data,
                  "Jari_Finland",
                  "jari_finland.RData"))
 
-#--- Juen_Belém_BR ----
+#--- Juen_Belem_BR ----
 # os dados dos diferentes tratamentos estao todos juntos
 # precisamos separar em linhas distintas e limpar as abas correspondentes
 # por ex, no tratamento com telhado, alguns taxons nao estao presentes, assim
 # como nos outros experimentos. Pela estrutura dos dados, tem 3 experimentos 
 # aqui, sendo um deles a comparacao entre UFPA vs. Utinga
 juen_belem <- here("dados_microcosmos",
-                     "Juen_Belém_BR")
+                     "Juen_Belem_BR")
 
 juen_fa <- read_xlsx(
   here(
@@ -2181,9 +2181,9 @@ save(pettermann_data,
                  "petermann_austria.RData"))
 
 
-#--- Renan_Chapecó ----
+#--- Renan_Chapeco ----
 renan_br <- here("dados_microcosmos",
-                "Renan_Chapecó")
+                "Renan_Chapeco")
 
 renan_alloch_fa <- read_xlsx(
   here(
