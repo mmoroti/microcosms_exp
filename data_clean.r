@@ -6,7 +6,7 @@ library(here) # set directory
 library(renv) # versioning R and packages
 library(glue) # to create acronyms
 
-# function
+# functions
 # create a key column to join between datasets
 column_id <- function(data, acronym){
 
@@ -310,9 +310,7 @@ save(caliman_natal_br,
                  "Caliman_Natal_BR",
                  "Caliman_Natal_BR.RData")) 
 #--- Campos_do_Jordao_e_Sta_Virginia ----
-# dados indisponiveis ainda
 # TODO: precisa separar em duas pastas
-
 # TODO: falta receber os dados
 #--- Cardinale_USA ----
 cardinale_usa <- here("dados_microcosmos",
@@ -1185,7 +1183,7 @@ save(romero_japi_data,
                  "Japi_romero",
                  "romero_japi_brazil.RData"))
 # TODO: ainda falta receber os dados 
-#---Jari Finland ----
+#--- Jari Finland ----
 # tirar dúvidas
 jari_finland <- here("dados_microcosmos",
                     "Jari_Finland",
@@ -2352,8 +2350,335 @@ save(renan_alloch_data,
                  "Renan_Chapecó",
                  "renan_br.RData"))
 
-# To do ----
-# nested dataframes 
+#--- Rodrigo_Argentina ----
+rodrigo_argentina <- here("dados_microcosmos",
+                 "Rodrigo_Argentina")
+
+rodrigo_fa <- read_xlsx(
+  here(
+    rodrigo_argentina,
+    "FreireRodrigo_Site.1.xlsx"),
+  "fauna_abundance")
+
+rodrigo_list <- read_xlsx(
+  here(
+    rodrigo_argentina,
+    "FreireRodrigo_Site.1.xlsx"),
+  "Fauna_morphospecies_list")
+
+rodrigo_traits <- read_xlsx(
+  here(
+    rodrigo_argentina,
+    "FreireRodrigo_Site.1.xlsx"),
+  "Fauna_traits")
+
+rodrigo_measures <- read_xlsx(
+  here(
+    rodrigo_argentina,
+    "FreireRodrigo_Site.1.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(rodrigo_fa)
+
+# list
+head(rodrigo_list)
+
+# traits
+head(rodrigo_traits)
+
+# measures
+#View(rodrigo_measures)
+rodrigo_measures <- rodrigo_measures %>%
+  rename(all_of(dict_names))
+
+rodrigo_data <- tibble(
+  researcher = "RodrigoFreire",
+  locality = "ParanaDelta_Argentina",
+  roof_treatment = NA,
+  abundance = list(tibble(rodrigo_fa)),
+  list = list(tibble(rodrigo_list)),
+  traits= list(tibble(rodrigo_traits)),
+  measures=list(tibble(rodrigo_measures)),
+  obs = "Confirmar dados no data_log.txt")
+
+save(rodrigo_data,
+     file = here(rodrigo_argentina,
+                 "rodrigo_data.RData"))
+
+#--- Sedney_Francis_Filipinas ----
+sedney_filipinas <- here("dados_microcosmos",
+                          "Sedney_Francis_Filipinas")
+
+sedney_fa <- read_xlsx(
+  here(
+    sedney_filipinas,
+    "Magbanua_Philippines_MICROcosms revised data.xlsx"),
+  "fauna_abundance")
+
+sedney_list <- read_xlsx(
+  here(
+    sedney_filipinas,
+    "Magbanua_Philippines_MICROcosms revised data.xlsx"),
+  "Fauna_morphospecies_list")
+
+sedney_traits <- read_xlsx(
+  here(
+    sedney_filipinas,
+    "Magbanua_Philippines_MICROcosms revised data.xlsx"),
+  "Fauna_traits")
+
+sedney_measures <- read_xlsx(
+  here(
+    sedney_filipinas,
+    "Magbanua_Philippines_MICROcosms revised data.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(sedney_fa)
+
+# list
+head(sedney_list)
+
+# traits
+head(sedney_traits)
+
+# measures
+sedney_measures <- sedney_measures %>% 
+  mutate_all(~(replace(., .=="ND", NA))) %>%
+  rename(all_of(dict_names))
+
+sedney_data <- tibble(
+  researcher = "Sedney",
+  locality = "Mt.MakilingForest_Filipinas",
+  roof_treatment = NA,
+  abundance = list(tibble(sedney_fa)),
+  list = list(tibble(sedney_list)),
+  traits= list(tibble(sedney_traits)),
+  measures=list(tibble(sedney_measures)),
+  obs = "Confirmar dados no data_log.txt")
+
+save(sedney_data,
+     file = here(sedney_filipinas,
+                 "sedney_filipinas.RData"))
+
+#--- Srivastava_Canada ----
+srivastava_canada <- here("dados_microcosmos",
+                         "Srivastava_Canada")
+
+srivastava_site1_fa <- read_xlsx(
+  here(
+    srivastava_canada,
+    "Srivastava_site1.xlsx"),
+  "fauna_abundance")
+
+srivastava_site1_list <- read_xlsx(
+  here(
+    srivastava_canada,
+    "Srivastava_site1.xlsx"),
+  "Fauna_morphospecies_list")
+
+srivastava_site1_traits <- read_xlsx(
+  here(
+    srivastava_canada,
+    "Srivastava_site1.xlsx"),
+  "Fauna_traits")
+
+srivastava_site1_measures <- read_xlsx(
+  here(
+    srivastava_canada,
+    "Srivastava_site1.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(srivastava_site1_fa)
+
+# list
+head(srivastava_site1_list)
+
+# traits
+head(srivastava_site1_traits)
+
+# measures
+srivastava_site1_measures <- srivastava_site1_measures %>% 
+  rename(all_of(dict_names))
+
+# site 2
+srivastava_site2_fa <- read_xlsx(
+  here(
+    srivastava_canada,
+    "Srivastava_site2.xlsx"),
+  "fauna_abundance")
+
+srivastava_site2_list <- read_xlsx(
+  here(
+    srivastava_canada,
+    "Srivastava_site2.xlsx"),
+  "Fauna_morphospecies_list")
+
+srivastava_site2_traits <- read_xlsx(
+  here(
+    srivastava_canada,
+    "Srivastava_site2.xlsx"),
+  "Fauna_traits")
+
+srivastava_site2_measures <- read_xlsx(
+  here(
+    srivastava_canada,
+    "Srivastava_site2.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(srivastava_site2_fa)
+
+# list
+head(srivastava_site2_list)
+
+# traits
+head(srivastava_site2_traits)
+
+# measures
+srivastava_site2_measures <- srivastava_site2_measures %>% 
+  rename(all_of(dict_names))
+
+srivastava_site1_data <- tibble(
+  researcher = "Srivastava",
+  locality = "Vancouver_Canada",
+  roof_treatment = NA,
+  abundance = list(tibble(srivastava_site1_fa)),
+  list = list(tibble(srivastava_site1_list)),
+  traits= list(tibble(srivastava_site1_traits)),
+  measures=list(tibble(srivastava_site1_measures)),
+  obs = "Site 1. Confirmar dados no data_log.txt")
+
+srivastava_site2_data <- tibble(
+  researcher = "Srivastava",
+  locality = "Vancouver_Canada",
+  roof_treatment = NA,
+  abundance = list(tibble(srivastava_site2_fa)),
+  list = list(tibble(srivastava_site2_list)),
+  traits= list(tibble(srivastava_site2_traits)),
+  measures=list(tibble(srivastava_site2_measures)),
+  obs = "Site 2. Confirmar dados no data_log.txt")
+
+save(srivastava_site1_data,
+     srivastava_site2_data,
+     file = here(srivastava_canada,
+                 "srivastava_canada.RData"))
+
+#--- Sweet_UK ----
+sweet_uk <- here("dados_microcosmos",
+                  "Sweet_UK")
+
+sweet_fa <- read_xlsx(
+  here(
+    sweet_uk,
+    "Sweet Site UK.xlsx"),
+  "fauna_abundance")
+
+sweet_list <- read_xlsx(
+  here(
+    sweet_uk,
+    "Sweet Site UK.xlsx"),
+  "Fauna_morphospecies_list")
+
+sweet_traits <- read_xlsx(
+  here(
+    sweet_uk,
+    "Sweet Site UK.xlsx"),
+  "Fauna_traits")
+
+sweet_measures <- read_xlsx(
+  here(
+    sweet_uk,
+    "Sweet Site UK.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(sweet_fa)
+
+# list
+head(sweet_list)
+
+# traits
+head(sweet_traits)
+
+# measures
+sweet_measures <- sweet_measures %>% 
+  rename(all_of(dict_names))
+
+sweet_data <- tibble(
+  researcher = "Sweet",
+  locality = "Midlands_UnitedKingdom",
+  roof_treatment = NA,
+  abundance = list(tibble(sweet_fa)),
+  list = list(tibble(sweet_list)),
+  traits= list(tibble(sweet_traits)),
+  measures=list(tibble(sweet_measures)),
+  obs = "Precisa confirmar as coordenadas")
+
+save(sweet_data,
+     file = here(sweet_uk,
+                 "sweet_uk.RData"))
+
+#--- Thomas_Alemanha ----
+thomas_alemanha <- here("dados_microcosmos",
+                        "Thomas_Alemanha")
+
+thomas_fa <- read_xlsx(
+  here(
+    thomas_alemanha,
+    "Scheuerl_Site.2.xlsx"),
+  "fauna_abundance")
+
+thomas_list <- read_xlsx(
+  here(
+    thomas_alemanha,
+    "Scheuerl_Site.2.xlsx"),
+  "Fauna_morphospecies_list")
+
+thomas_traits <- read_xlsx(
+  here(
+    thomas_alemanha,
+    "Scheuerl_Site.2.xlsx"),
+  "Fauna_traits_Scheuerl")
+
+thomas_measures <- read_xlsx(
+  here(
+    thomas_alemanha,
+    "Scheuerl_Site.2.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(thomas_fa)
+
+# list
+head(thomas_list)
+
+# traits
+head(thomas_traits)
+
+# measures
+thomas_measures %>% 
+  mutate("Natural tree hole.1" = NA,
+         "Natural tree hole.2" = NA) %>%
+  rename(all_of(dict_names))
+
+thomas_data <- tibble(
+  researcher = "Sweet",
+  locality = "Bavaria_Alemanha",
+  roof_treatment = NA,
+  abundance = list(tibble(thomas_fa)),
+  list = list(tibble(thomas_list)),
+  traits= list(tibble(thomas_traits)),
+  measures=list(tibble(thomas_measures)),
+  obs = "Confirmar dados no data_log.txt")
+
+save(thomas_data,
+     file = here(thomas_alemanha,
+                 "thomas_alemanha.RData"))
+
+#--- Nested dataframe ----
 nested_df <- bind_rows(boukal_czech_roof,
                        boukal_czech_nonroof,
                        boukal_czech_plesnelake,
@@ -2393,7 +2718,13 @@ nested_df <- bind_rows(boukal_czech_roof,
                        pettermann_data,
                        renan_alloch_data,
                        renan_vertical_data,
-                       renan_basic_data) 
+                       renan_basic_data, 
+                       rodrigo_data, 
+                       sedney_data,
+                       srivastava_site1_data,
+                       srivastava_site2_data,
+                       sweet_data,
+                       thomas_data)
 
 data <- column_id(nested_df, "MD")
 View(data)
@@ -2402,13 +2733,3 @@ save(data,
      file = here("dados_microcosmos",
                  "nested_df.RData"))
 load("dados_microcosmos/nested_df.RData")
-
-#--- Rodrigo_Argentina ----
-
-#--- Sedney_Francis_Filipinas ----
-
-#--- Srivastava_Canada ----
-
-#--- Sweet_UK ----
-
-#--- Thomas_Alemanha ----
