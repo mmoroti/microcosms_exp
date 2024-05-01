@@ -541,7 +541,8 @@ cornelissen_nonroof_list <- cornelissen_nonroof_list %>%
 cornelissen_nonroof_traits <- cornelissen_nonroof_traits %>% 
   mutate_all(~ifelse(.=="Undetermined", NA, .)) %>%
   select(-"...7", -"...8", -"...9", 
-         -"...10", -"...11", -"...12")
+         -"...10", -"...11", -"...12") %>%
+  rename("total_length" = "average_length")
 
 # measures
 # substituir o undetermined por NA
@@ -849,7 +850,8 @@ head(celine_general_fa)
 head(celine_general_list)
 
 # traits
-head(celine_general_traits)
+celine_general_traits <- celine_general_traits %>%
+  rename("total_length" = "total_length (mm)")
 
 # measures
 celine_general_measures <- celine_general_measures %>%
@@ -1220,6 +1222,9 @@ jari_list <- jari_list %>%
 # traits
 jari_traits <- jari_traits[-c(39:46),] # retirando as linhas a mais
 
+jari_traits <- jari_traits %>% 
+  rename("total_length" = "total_length (mm)")
+
 # measures
 jari_measures <- jari_measures %>%
   mutate("detritus dry mass (fine)" = NA) %>%
@@ -1518,7 +1523,11 @@ knapp_hory_fa[is.na(knapp_hory_fa)] <- 0
 knapp_hory_list
 
 # traits
-knapp_hory_traits
+knapp_hory_traits <- knapp_hory_traits %>%
+  mutate(total_length = case_when(
+    total_length == "5 mm" ~ 5,
+    TRUE ~ as.double(total_length)
+  ))
 
 # measures
 knapp_hory_measures <- knapp_hory_measures %>%
@@ -1541,7 +1550,6 @@ save(knapp_roof_data,
      file = here("dados_microcosmos",
                  "Knapp_Czech",
                  "knapp_czech.RData"))
-
 
 #--- Luciano_argentina ----
 luciano_argentina <- here("dados_microcosmos",
@@ -1824,7 +1832,8 @@ head(wesley_fa)
 head(wesley_list)
 
 # traits
-head(wesley_traits)
+wesley_traits <- wesley_traits %>%
+  rename("total_length" = "total_length(mm)")
 
 # measures
 head(wesley_measures)
@@ -1893,7 +1902,8 @@ moretti_site1_traits <- moretti_site1_traits %>%
     Morfospecies_name == "Wyeomyia sp2" ~ "Wyeomyia.sp2",
     Morfospecies_name == "Pupa.Psychodidae" ~ "Psychodidae.pupa",
     TRUE ~ Morfospecies_name  # caso padrao, mantem o valor
-  ))
+  )) %>%
+  rename("total_length" = "total_length (mm)")
 
 # measures
 moretti_site1_measures <- moretti_site1_measures %>%
@@ -2528,7 +2538,12 @@ head(srivastava_site1_fa)
 head(srivastava_site1_list)
 
 # traits
-head(srivastava_site1_traits)
+srivastava_site1_traits <- srivastava_site1_traits %>%
+  mutate(total_length = case_when(
+    total_length == "3 - 3.5 mm" ~ 3.25,
+    total_length == "3,5 mm" ~ 3.5,
+    TRUE ~ as.double(total_length)
+  ))
 
 # measures
 srivastava_site1_measures <- srivastava_site1_measures %>% 
@@ -2566,7 +2581,12 @@ head(srivastava_site2_fa)
 head(srivastava_site2_list)
 
 # traits
-head(srivastava_site2_traits)
+srivastava_site2_traits <- srivastava_site2_traits %>%
+  mutate(total_length = case_when(
+    total_length == "3 mm" ~ 3,
+    total_length == "4 mm" ~ 4,
+    TRUE ~ as.double(total_length)
+  ))
 
 # measures
 srivastava_site2_measures <- srivastava_site2_measures %>% 
@@ -2633,7 +2653,8 @@ names(sweet_list)
 
 # traits
 sweet_traits <- sweet_traits %>%
-  rename("Morfospecies_name" = "Morphospecies_name")
+  rename("Morfospecies_name" = "Morphospecies_name") %>%
+  rename("total_length" = "total_length (mm)")
 
 # measures
 sweet_measures <- sweet_measures %>% 
