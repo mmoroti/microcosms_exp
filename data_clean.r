@@ -102,7 +102,7 @@ boukal_czech_roof <- tibble(
   traits=list(tibble(boukal_roofs_traits)),
   measures=list(tibble(boukal_roofs_measures))
   )
-
+View(boukal_czech_roof)
 #View(boukal_czech_roof)
 
 #--- Boukal_Czech (without roof)
@@ -205,16 +205,15 @@ boukal_plesnelake_list <- boukal_plesnelake_list[1:2,]
 
 # TODO needs revision by Gustavo Romero
 # TODO needs encoding
-glimpse(boukal_plesnelake_traits)
+boukal_plesnelake_traits <- boukal_plesnelake_traits %>%
+  filter(Morfospecies_name != "Morphospecies.3" &
+         Morfospecies_name != "Morphospecies.4")
 
 # rename variables with data dictionary
 # gambiarra para renomear as colunas
 boukal_plesnelake_measures <- 
   boukal_plesnelake_measures %>%
-  rename("dissolved_O2" = "dissolved_O2 (%)")
-
-boukal_plesnelake_measures <- 
-  boukal_plesnelake_measures %>%
+  rename("dissolved_O2" = "dissolved_O2 (%)") %>%
   rename(all_of(dict_names))
 
 glimpse(boukal_plesnelake_measures)
@@ -951,18 +950,21 @@ gonzales_site1_traits <- gonzales_traits %>%
            Morfospecies_name != "Morphospecies.7" &
            Morfospecies_name != "Morphospecies.8" & 
            Morfospecies_name != "Morphospecies.9" & 
-           Morfospecies_name != "Morphospecies.10")
+           Morfospecies_name != "Morphospecies.10" &
+           Morfospecies_name != "Morphospecies.11")
 
 gonzales_site2_traits <- gonzales_traits %>%
   filter(Morfospecies_name != "Morphospecies.4" &
            Morfospecies_name != "Morphospecies.6" &
-           Morfospecies_name != "Morphospecies.9") 
+           Morfospecies_name != "Morphospecies.9"&
+           Morfospecies_name != "Morphospecies.11") 
 
 gonzales_site3_traits <- gonzales_traits %>%
   filter(Morfospecies_name != "Morphospecies.5" &
            Morfospecies_name != "Morphospecies.6" &
            Morfospecies_name != "Morphospecies.7" &
-           Morfospecies_name != "Morphospecies.8")
+           Morfospecies_name != "Morphospecies.8" &
+           Morfospecies_name != "Morphospecies.11")
 
 # measures
 gonzales_site1_measures <- gonzales_measures %>% 
@@ -1014,8 +1016,6 @@ save(gonzales_site1_data,
      file = here("dados_microcosmos",
                  "Gonzalez_USA",
                  "Gonzalez_USA.RData"))
-
-
 
 #--- Horvath_HU ----
 # dados do logger estão na mesma planilha
@@ -1210,13 +1210,15 @@ jari_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-head(jari_fa)
+View(jari_fa)
 
 # list
-head(jari_list)
+jari_list <- jari_list %>%
+       bind_rows(tibble(Morfospecies_name = "Morphospecies.38")) # present in
+# traits, but ausent in list
 
 # traits
-head(jari_traits)
+jari_traits <- jari_traits[-c(39:46),] # retirando as linhas a mais
 
 # measures
 jari_measures <- jari_measures %>%
@@ -1882,7 +1884,16 @@ moretti_site1_fa[is.na(moretti_site1_fa)] <- 0
 moretti_site1_list
 
 # traits
-moretti_site1_traits
+# change names to join with list 
+moretti_site1_traits <- moretti_site1_traits %>% 
+  bind_rows(tibble(Morfospecies_name = "Culicidae.pupa")) %>% # ausente nos traits
+  mutate(Morfospecies_name = case_when(
+    Morfospecies_name == "Forcipomyia sp" ~ "Forcipomyia.sp",
+    Morfospecies_name == "Wyeomyia sp1" ~ "Wyeomyia.sp1",
+    Morfospecies_name == "Wyeomyia sp2" ~ "Wyeomyia.sp2",
+    Morfospecies_name == "Pupa.Psychodidae" ~ "Psychodidae.pupa",
+    TRUE ~ Morfospecies_name  # caso padrao, mantem o valor
+  ))
 
 # measures
 moretti_site1_measures <- moretti_site1_measures %>%
@@ -1964,7 +1975,6 @@ save(moretti_site1_data,
      file = here("dados_microcosmos",
                  "MMoretti Lab_BR",
                  "moretti_br.RData"))
-
 
 #--- Musa_SouthAfrica ----
 # TODO: ainda falta receber os dados formatados
@@ -2213,7 +2223,12 @@ renan_alloch_measures <- read_xlsx(
 renan_alloch_fa
 
 #list
-renan_alloch_list <- mutate_all(renan_alloch_list, ~(replace(., .=="*", NA)))
+# na lista esta ChirAnomidae e precisa ser ChirOnomidae
+renan_alloch_list <- mutate_all(renan_alloch_list, ~(replace(., .=="*", NA))) %>%
+  mutate(Morfospecies_name = case_when(
+    Morfospecies_name == "Chiranomidae_1" ~ "Chironomidae_1",
+    TRUE ~ Morfospecies_name  # Caso padrão, mantém o valor original
+  ))
 
 #traits
 renan_alloch_traits
@@ -2257,7 +2272,11 @@ colSums(renan_vertical_fa[,-c(1:2)])
 
 #list
 renan_vertical_list <- mutate_all(
-  renan_vertical_list, ~(replace(., .=="*", NA)))
+  renan_vertical_list, ~(replace(., .=="*", NA))) %>%
+  mutate(Morfospecies_name = case_when(
+    Morfospecies_name == "Chiranomidae_1" ~ "Chironomidae_1",
+    TRUE ~ Morfospecies_name  # Caso padrão, mantém o valor original
+  ))
 
 #traits
 renan_vertical_traits
@@ -2300,10 +2319,22 @@ renan_basic_measures <- read_xlsx(
 colSums(renan_basic_fa[,-c(1:2)])
 
 #list
-renan_basic_list <- mutate_all(renan_basic_list, ~(replace(., .=="*", NA)))
+renan_basic_list <- mutate_all(renan_basic_list, ~(replace(., .=="*", NA))) %>%
+  bind_rows(tibble(Morfospecies_name = "Ceratopogonidae_3")) %>%
+  bind_rows(tibble(Morfospecies_name = "Psychoda_2")) %>%
+  mutate(Morfospecies_name = case_when(
+    Morfospecies_name == "Chiranomidae_1" ~ "Chironomidae_1",
+    Morfospecies_name == "Planorbiidae_1" ~ "Planorbidae_1",
+    TRUE ~ Morfospecies_name  
+  )) %>%
+  filter(Morfospecies_name != "Collembola_3")
 
 #traits
-renan_basic_traits
+renan_basic_traits <- renan_basic_traits %>%
+  mutate(Morfospecies_name = case_when(
+    Morfospecies_name == "Corculionidae_adulto_1" ~ "Curculionidae_adulto_1",
+    TRUE ~ Morfospecies_name  
+  ))
 
 #measures
 renan_basic_measures <- renan_basic_measures %>% 
@@ -2347,7 +2378,7 @@ save(renan_alloch_data,
      renan_vertical_data,
      renan_basic_data,
      file = here("dados_microcosmos",
-                 "Renan_Chapecó",
+                 "Renan_Chapeco",
                  "renan_br.RData"))
 
 #--- Rodrigo_Argentina ----
@@ -2598,10 +2629,11 @@ sweet_measures <- read_xlsx(
 head(sweet_fa)
 
 # list
-head(sweet_list)
+names(sweet_list)
 
 # traits
-head(sweet_traits)
+sweet_traits <- sweet_traits %>%
+  rename("Morfospecies_name" = "Morphospecies_name")
 
 # measures
 sweet_measures <- sweet_measures %>% 
@@ -2659,13 +2691,13 @@ head(thomas_list)
 head(thomas_traits)
 
 # measures
-thomas_measures %>% 
+thomas_measures <- thomas_measures %>% 
   mutate("Natural tree hole.1" = NA,
          "Natural tree hole.2" = NA) %>%
   rename(all_of(dict_names))
 
 thomas_data <- tibble(
-  researcher = "Sweet",
+  researcher = "Thomas",
   locality = "Bavaria_Alemanha",
   roof_treatment = NA,
   abundance = list(tibble(thomas_fa)),
@@ -2727,8 +2759,7 @@ nested_df <- bind_rows(boukal_czech_roof,
                        thomas_data)
 
 data <- column_id(nested_df, "MD")
-View(data)
-
+#View(data)
 save(data,
      file = here("dados_microcosmos",
                  "nested_df.RData"))
