@@ -398,9 +398,13 @@ romero_campos_measures <- read_xlsx(
 
 head(romero_campos_fa)
 
-head(romero_campos_list)
+romero_campos_list <- romero_campos_list %>%
+  filter(Morfospecies_name != "Diptera_sp4" &
+        Morfospecies_name != "Diptera_sp13" &
+        Morfospecies_name != "Chironomidae_sp5")
+nrow(romero_campos_list)
 
-head(romero_campos_traits)
+nrow(romero_campos_traits)
 
 # rename variables with data dictionary
 romero_campos_measures <- 
@@ -410,10 +414,11 @@ romero_campos_measures <-
 
 names(romero_campos_measures)
 
-View(left_join(romero_campos_list,
-          romero_campos_traits,
-          by = "Morfospecies_name")
-)
+# works!
+#View(left_join(romero_campos_list,
+#          romero_campos_traits,
+#          by = "Morfospecies_name")
+#)
 
 romero_campos_data <- tibble(
   researcher = "Romero",
@@ -423,6 +428,11 @@ romero_campos_data <- tibble(
   list = list(tibble(romero_campos_list)),
   traits=list(tibble(romero_campos_traits)),
   measures=list(tibble(romero_campos_measures)))
+
+# save .RData from romero
+save(romero_campos_data,
+     file = here(romero_br,
+                 "romero_camposdojordao.RData"))
 
 #--- Cardinale_USA ----
 cardinale_usa <- here("dados_microcosmos",
