@@ -309,8 +309,121 @@ save(caliman_natal_br,
                  "Caliman_Natal_BR",
                  "Caliman_Natal_BR.RData")) 
 #--- Campos_do_Jordao_e_Sta_Virginia ----
-# TODO: precisa separar em duas pastas
-# TODO: falta receber os dados
+# Sta virginia
+romero_br <- here("dados_microcosmos",
+                   "Campos_do_Jordao_e_Sta_Virginia")
+
+romero_stavirginia_fa <- read_xlsx(
+  here(
+    romero_br,
+    "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia.xlsx"),
+  "fauna_abundance")
+
+romero_stavirginia_list <- read_xlsx(
+  here(
+    romero_br,
+    "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia.xlsx"),
+  "Fauna_morphospecies_list")
+
+romero_stavirginia_traits <- read_xlsx(
+  here(
+    romero_br,
+    "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia.xlsx"),
+  "Fauna_traits")
+
+romero_stavirginia_measures <- read_xlsx(
+  here(
+    romero_br,
+    "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia.xlsx"),
+  "measures_decomposition_geograph")
+
+head(romero_stavirginia_fa)
+
+head(romero_stavirginia_list)
+
+head(romero_stavirginia_traits)
+
+romero_stavirginia_measures <- 
+  romero_stavirginia_measures %>%
+  rename(all_of(dict_names))
+names(romero_stavirginia_measures)
+
+#View(left_join(romero_stavirginia_list,
+#          romero_stavirginia_traits,
+#          by = "Morfospecies_name")
+#)
+# rename variables with data dictionary
+
+romero_stavirginia_data <- tibble(
+  researcher = "Romero",
+  locality = "StaVirginia_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(romero_stavirginia_fa)),
+  list = list(tibble(romero_stavirginia_list)),
+  traits=list(tibble(romero_stavirginia_traits)),
+  measures=list(tibble(romero_stavirginia_measures)))
+
+# save .RData from romero
+save(romero_stavirginia_data,
+     file = here(romero_br,
+                 "romero_stavirginia.RData")) 
+
+# Campos do Jordao
+romero_br <- here("dados_microcosmos",
+                  "Campos_do_Jordao_e_Sta_Virginia")
+
+romero_campos_fa <- read_xlsx(
+  here(
+    romero_br,
+    "Felipe_Rezende_Daiane_Montoia - Campos_do_Jordao_community_dataset.xlsx"),
+  "fauna_abundance")
+
+romero_campos_list <- read_xlsx(
+  here(
+    romero_br,
+    "Felipe_Rezende_Daiane_Montoia - Campos_do_Jordao_community_dataset.xlsx"),
+  "Fauna_morphospecies_list")
+
+romero_campos_traits <- read_xlsx(
+  here(
+    romero_br,
+    "Felipe_Rezende_Daiane_Montoia - Campos_do_Jordao_community_dataset.xlsx"),
+  "Fauna_traits")
+
+romero_campos_measures <- read_xlsx(
+  here(
+    romero_br,
+    "Felipe_Rezende_Daiane_Montoia - Campos_do_Jordao_community_dataset.xlsx"),
+  "measures_decomposition_geograph")
+
+head(romero_campos_fa)
+
+head(romero_campos_list)
+
+head(romero_campos_traits)
+
+# rename variables with data dictionary
+romero_campos_measures <- 
+  romero_campos_measures %>%
+  rename("canopy openness" = "Canopy openness") %>%
+  rename(all_of(dict_names))
+
+names(romero_campos_measures)
+
+View(left_join(romero_campos_list,
+          romero_campos_traits,
+          by = "Morfospecies_name")
+)
+
+romero_campos_data <- tibble(
+  researcher = "Romero",
+  locality = "CamposDoJordao_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(romero_campos_fa)),
+  list = list(tibble(romero_campos_list)),
+  traits=list(tibble(romero_campos_traits)),
+  measures=list(tibble(romero_campos_measures)))
+
 #--- Cardinale_USA ----
 cardinale_usa <- here("dados_microcosmos",
                       "Cardinale_USA")
@@ -371,9 +484,60 @@ save(cardinale_usa_data,
                  "Cardinale_USA.RData")) 
 
 #--- Cardoso_Romero ----
-# TODO: Dados incompletos, mas as coordenadas foram convertidas direto no xlsx.
+romero_cardoso <- here("dados_microcosmos",
+                  "Cardoso_Romero")
 
-# TODO: falta receber os dados
+romero_cardoso_fa <- read_xlsx(
+  here(
+    romero_cardoso,
+    "Daiane_Montoia_Felipe_Rezende_Cardoso_Island-Cananeia_community_dataset.xlsx"),
+  "fauna_abundance")
+
+romero_cardoso_list <- read_xlsx(
+  here(
+    romero_cardoso,
+    "Daiane_Montoia_Felipe_Rezende_Cardoso_Island-Cananeia_community_dataset.xlsx"),
+  "Fauna_morphospecies_list")
+
+romero_cardoso_traits <- read_xlsx(
+  here(
+    romero_cardoso,
+    "Daiane_Montoia_Felipe_Rezende_Cardoso_Island-Cananeia_community_dataset.xlsx"),
+  "Fauna_traits")[1:11,] # retirando a leitura de um ponto aleatorio na planilha
+
+romero_cardoso_measures <- read_xlsx(
+  here(
+    romero_cardoso,
+    "Daiane_Montoia_Felipe_Rezende_Cardoso_Island-Cananeia_community_dataset.xlsx"),
+  "measures_decomposition_geograph")
+
+head(romero_cardoso_fa)
+
+View(romero_cardoso_list)
+
+View(romero_cardoso_traits)
+
+# rename variables with data dictionary
+romero_cardoso_measures <- 
+  romero_cardoso_measures %>%
+  rename("canopy openness" = "canopy openness_Daiane") %>%
+  rename("microcosm position (N, S, E, W)" = "microcosm position (N. S. E. W)") %>%
+  rename(all_of(dict_names))
+
+View(left_join(romero_cardoso_list,
+               romero_cardoso_traits,
+               by = "Morfospecies_name")
+)
+
+romero_cardoso_data <- tibble(
+  researcher = "Romero",
+  locality = "IlhaDoCardoso_Brazil", 
+  roof_treatment = NA,
+  abundance = list(tibble(romero_cardoso_fa)),
+  list = list(tibble(romero_cardoso_list)),
+  traits=list(tibble(romero_cardoso_traits)),
+  measures=list(tibble(romero_cardoso_measures)))
+
 #--- Collyer_Japan ----
 collyer_japan <- here("dados_microcosmos",
                       "Collyer_Japan")
@@ -1225,6 +1389,8 @@ jari_traits <- jari_traits[-c(39:46),] # retirando as linhas a mais
 jari_traits <- jari_traits %>% 
   rename("total_length" = "total_length (mm)")
 
+jari_traits$total_length <- as.double(jari_traits$total_length)
+
 # measures
 jari_measures <- jari_measures %>%
   mutate("detritus dry mass (fine)" = NA) %>%
@@ -1947,7 +2113,7 @@ moretti_site2_fa[is.na(moretti_site2_fa)] <- 0
 moretti_site2_list
 
 # traits
-moretti_site2_traits
+glimpse(moretti_site1_traits)
 
 # measures
 moretti_site2_measures <- moretti_site2_measures %>%
@@ -1988,6 +2154,130 @@ save(moretti_site1_data,
 
 #--- Musa_SouthAfrica ----
 # TODO: ainda falta receber os dados formatados
+
+#--- Nakamura_China ---- 
+nakamura <- here("dados_microcosmos",
+                  "Nakamura_China")
+
+nakamura_site1_fa <- read_xlsx(
+  here(
+    nakamura,
+    "Nakamura_AilaoMountainYunnanChina.xlsx"),
+  "fauna_abundance")
+
+nakamura_site1_list <- read_xlsx(
+  here(
+    nakamura,
+    "Nakamura_AilaoMountainYunnanChina.xlsx"),
+  "Fauna_morphospecies_list")
+
+nakamura_site1_traits <- read_xlsx(
+  here(
+    nakamura,
+    "Nakamura_AilaoMountainYunnanChina.xlsx"),
+  "Fauna_traits")[1:11,] # retirando linhas de anotacao
+
+nakamura_site1_measures <- read_xlsx(
+  here(
+    nakamura,
+    "Nakamura_AilaoMountainYunnanChina.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+nakamura_site1_fa[is.na(nakamura_site1_fa)] <- 0
+
+# list
+head(nakamura_site1_list)
+
+# traits
+head(nakamura_site1_traits)
+
+# measures
+# rename variables with data dictionary
+nakamura_site1_measures <- 
+  nakamura_site1_measures %>%
+  rename(all_of(dict_names))
+
+# join works!
+#View(left_join(nakamura_site1_list,
+#               nakamura_site1_traits,
+#          by = "Morfospecies_name"))
+
+nakamura_site1_data <- tibble(
+  researcher = "Nakamura",
+  locality = "AilaoMountain_China", 
+  roof_treatment = NA,
+  abundance = list(tibble(nakamura_site1_fa)),
+  list = list(tibble(nakamura_site1_list)),
+  traits=list(tibble(nakamura_site1_traits)),
+  measures=list(tibble(nakamura_site1_measures)),
+  obs = "Experimento com 24 potes divididos em 3 tratamentos de altura de pote")
+
+# site 2
+nakamura_site2_fa <- read_xlsx(
+  here(
+    nakamura,
+    "Nakamura_BubengYunnanChina_MICROcosm.xlsx"),
+  "fauna_abundance")
+
+nakamura_site2_list <- read_xlsx(
+  here(
+    nakamura,
+    "Nakamura_BubengYunnanChina_MICROcosm.xlsx"),
+  "Fauna_morphospecies_list")
+
+nakamura_site2_traits <- read_xlsx(
+  here(
+    nakamura,
+    "Nakamura_BubengYunnanChina_MICROcosm.xlsx"),
+  "Fauna_traits")
+
+nakamura_site2_measures <- read_xlsx(
+  here(
+    nakamura,
+    "Nakamura_BubengYunnanChina_MICROcosm.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+nakamura_site2_fa[is.na(nakamura_site2_fa)] <- 0
+
+# list
+head(nakamura_site2_list)
+
+# traits
+head(nakamura_site2_traits)
+
+# measures
+# rename variables with data dictionary
+nakamura_site2_measures <- 
+  nakamura_site2_measures %>%
+  mutate("biomass_cotton_stripes_outside_bag_after (mg)" = NA,
+         "biomass_cotton_stripes_outside_bag_before (mg)" = NA,
+         "Natural tree hole.1" = NA,
+         "Natural tree hole.2" = NA) %>%
+  rename(all_of(dict_names))
+
+# join works!
+View(left_join(nakamura_site2_list,
+               nakamura_site2_traits,
+          by = "Morfospecies_name"))
+
+nakamura_site2_data <- tibble(
+  researcher = "Nakamura",
+  locality = "Bubeng_China", 
+  roof_treatment = NA,
+  abundance = list(tibble(nakamura_site2_fa)),
+  list = list(tibble(nakamura_site2_list)),
+  traits=list(tibble(nakamura_site2_traits)),
+  measures=list(tibble(nakamura_site2_measures)),
+  obs = "Experimento com 3 tratamentos de altura e floresta manejada")
+
+# save .RData from romero
+save(nakamura_site1_data,
+     nakamura_site2_data,
+     file = here(nakamura,
+                 "nakamura_china.RData"))
+
 #--- Nock ----
 nock_canada <- here("dados_microcosmos",
                     "Nock")
@@ -2111,7 +2401,7 @@ table(pavel_site2_fa$Treatment) # managed forest aparece 20x e natural forest 15
 pavel_site2_list
 
 # traits
-pavel_site2_traits
+pavel_site2_traits$total_length <- as.double(pavel_site2_traits$total_length)
 
 # measures
 pavel_site2_measures <- pavel_site2_measures %>%
@@ -2177,7 +2467,7 @@ glimpse(pettermann_fa)
 glimpse(pettermann_list)
 
 # traits
-glimpse(pettermann_traits)
+pettermann_traits$total_length <-as.double(pettermann_traits$total_length)
 
 # measures
 glimpse(pettermann_measures)
@@ -2426,7 +2716,11 @@ head(rodrigo_fa)
 head(rodrigo_list)
 
 # traits
-head(rodrigo_traits)
+rodrigo_traits <- rodrigo_traits %>%
+  mutate(total_length = case_when(
+    total_length == "3,755/8,975" ~ 8.975,
+    TRUE ~ as.double(total_length)
+  ))
 
 # measures
 #View(rodrigo_measures)
@@ -2709,7 +3003,7 @@ head(thomas_fa)
 head(thomas_list)
 
 # traits
-head(thomas_traits)
+thomas_traits$total_length <- as.double(thomas_traits$total_length)
 
 # measures
 thomas_measures <- thomas_measures %>% 
@@ -2777,7 +3071,12 @@ nested_df <- bind_rows(boukal_czech_roof,
                        srivastava_site1_data,
                        srivastava_site2_data,
                        sweet_data,
-                       thomas_data)
+                       thomas_data,
+                       romero_stavirginia_data,
+                       nakamura_site1_data,
+                       nakamura_site2_data,
+                       romero_campos_data,
+                       romero_cardoso_data)
 
 data <- column_id(nested_df, "MD")
 #View(data)
