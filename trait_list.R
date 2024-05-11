@@ -1,14 +1,16 @@
 # Mon Apr 29 09:56:19 2024 ------------------------------
 library(tidyverse)
+library(visdat)
+
 # aqui vamos preparar uma lista de especies com os traits para revisao
 # provavelmente algumas spp irao sair pois sao terrestres e 
 # nao devem contar para o experimento de microcosmos. 
 load("dados_microcosmos/nested_df.RData")
-View(data)
 #View(data)
 # para facilitar a manipulacao dos dados, retiramos as colunas 
 # desnecessarias e tambem os experimentos que nao tinha invertebrados
-# md19 removido pois ainda nao foram adicionados os dados
+# md24, md25, md34 nao tem invertebrados, por isso foram removidos
+# md19 removido pois ainda nao foram adicionados os dados do japi
 list_traits <- data %>% 
   select(-"roof_treatment", -"abundance", -"measures", -"obs") %>%
   filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & ID != "MD19")
@@ -26,15 +28,14 @@ for (i in 1:nrow(list_traits)) {
   list_traits$nrow_trait_list[[i]] <- nrow(list_traits$trait_list[[i]])
   }
 
-View(list_traits %>% 
-       select("ID","researcher","locality","trait_list") %>%
-       unnest(cols="trait_list"))
-names(list_traits)
-
-for (i in 1:nrow(list_traits)) {
-  print(list_traits$ID[[i]])
-  glimpse(list_traits$traits[[i]])
-}
+# code created to make adjustments and confer type of variables
+# this procedure is necessary to create list_traits_unnest
+# since the syntax to create unnest dataframe is necessary to
+# change the type of columns from the same (numeric). 
+#for (i in 1:nrow(list_traits)) {
+#  print(list_traits$ID[[i]])
+#  glimpse(list_traits$traits[[i]])
+#}
 # needs adjusments traits
 # MD8 rename average_length to total_length
 # MD13 rename total_length(mm) to total_length
@@ -47,3 +48,198 @@ for (i in 1:nrow(list_traits)) {
 # MD43 change type of variable and remove mm
 # MD44 change type of variable and remove mm
 # MD45 rename  `total_length(mm)` to total_length
+
+# unnested dataframe
+list_traits_unnest <- list_traits %>% 
+       select("ID","researcher","locality","trait_list") %>%
+       unnest(cols="trait_list")
+
+# Fri May 10 14:34:49 2024 ------------------------------
+# unificando algumas colunas de anotacoes de diferentes autores em menos
+# colunas, apenas para facilitar e diminuir colunas desnecessarias e NAs
+names(list_traits_unnest)
+glimpse(list_traits_unnest)
+vis_miss(list_traits_unnest)
+
+#View(list_traits_unnest)
+
+# tratamento para mudar o que nao esta como na, e na vdd eh na
+# por exemplo, undefined = na
+#unique(list_traits_unnest$Family)
+
+list_traits_unnest <- list_traits_unnest %>%
+  mutate_all(~ifelse(. == "NA", NA, .)) %>%
+  mutate_all(~ifelse(. == "unidentified", NA, .))
+
+# Combinar as colunas com dados ausentes
+list_traits_unnest$notes_combined <- coalesce(
+  list_traits_unnest$...1,
+  as.character(list_traits_unnest$...1.x)) 
+
+list_traits_unnest$notes_combined <- coalesce(
+  list_traits_unnest$notes_combined,
+  list_traits_unnest$"Liam Notes")
+
+list_traits_unnest$notes_combined <- coalesce(
+  list_traits_unnest$notes_combined,
+  list_traits_unnest$"remarks")
+
+list_traits_unnest$notes_combined <- coalesce(
+  list_traits_unnest$notes_combined,
+  list_traits_unnest$"OBS.x")
+
+list_traits_unnest$notes_combined <- coalesce(
+  list_traits_unnest$notes_combined,
+  list_traits_unnest$"...1.y")
+
+# coalesce life_stage and development stage
+list_traits_unnest$life_stage <- coalesce(
+  list_traits_unnest$life_stage,
+  list_traits_unnest$"Development stage")
+
+# column "Information" has the same information as the "life_stage"
+# for this reason, we use the coalesce function
+list_traits_unnest$life_stage <- coalesce(
+  list_traits_unnest$life_stage,
+  list_traits_unnest$Information)
+
+list_traits_unnest <- list_traits_unnest %>%
+  select(-"...1", -"...1.x", -"...1.y", 
+         -"Liam Notes", -"remarks",
+         -"Information", -"Development stage", -"OBS.x",
+         -"Subfamily")
+
+# coalesce unnecessary columns
+list_traits_unnest$notes <- coalesce(
+  list_traits_unnest$OBS2,
+  list_traits_unnest$notes)
+
+list_traits_unnest <- list_traits_unnest %>%
+  select(-"OBS2")
+
+vis_miss(list_traits_unnest) # 18% missing data "Family"
+View(list_traits_unnest)
+
+# agora precisamos adicionar novas colunas para que seja possivel 
+# preencher fuzzy traits. Os traits escolhidos sao similares aos de
+# Cereghino et al., 2018 - Functional Ecology
+# trait - type
+# mean body size - continuous
+# aquatic stage - ordinal (categories)
+# reproduction - fuzzy
+# resistance form - fuzzy
+# locomotion - fuzzy
+# food - fuzzy
+# feeding group - fuzzy
+# body form - fuzzy
+# cohort production interval - fuzzy
+# morphological defence - fuzzy
+# dispersal mode - binary
+list_traits_review <- list_traits_unnest %>%
+       rename("aquatic_stage" = "life_stage") %>%
+  mutate(uncertain_trait = NA,
+         terrestrial = NA) %>%
+  mutate(ovoviparity = NA,
+         isolated_eggs_free = NA,
+         isolated_eggs_cemented = NA,
+         clutches_cemented = NA,
+         clutches_free = NA,
+         clutches_free = NA,
+         clutches_in_vegetation = NA,
+         clutches_in_terrestrial = NA,
+         clutches_terrestrial = NA,
+         assexual_reproduction = NA) %>%
+  mutate(dispersal_mode = NA) %>%
+  mutate(eggs_statoblasts = NA,
+         cocoons = NA,
+         diapause_or_dormancy = NA,
+         none_resistence = NA) %>%
+  mutate(integument = NA,
+         gill	= NA,
+         plastron	= NA,
+         "Siphon/spiracle" = NA,
+         hydrostatic_vesicle = NA) %>%
+  mutate(flier = NA,
+         surface_swimmer = NA,
+         full_water_swimmer	= NA,
+         crawler = NA,
+         burrower	= NA,
+         interstitial	= NA,
+         tube_builder = NA) %>%
+  mutate(microorganisms = NA,
+         "detritus_(<1 mm)" = NA,
+         "dead_plant_(litter)" = NA,
+         living_microphytes	= NA,
+         living_leaf_tissue	= NA, 
+         "dead_animals_(>1 mm)" =	NA,
+         living_microinvertebrates = NA,
+         living_macroinvertebrates = NA) %>%
+  mutate(deposit_feeder = NA,
+         shredder = NA,
+         scraper = NA,
+         filter_feeder = NA,
+         piercer = NA, 
+         predator = NA) %>%
+  mutate("<21days" = NA, 
+         "21-60days" = NA,
+         ">60days" = NA) %>%
+  mutate(none_defense = NA,
+         elongate_tubercle = NA,
+         hairs = NA,
+         sclerotized_spines	= NA,
+         dorsal_plates = NA,
+         sclerotized_exoskeleton = NA,
+         shell	= NA,
+         case_or_tube = NA) %>%
+  mutate(flat_elongate = NA,
+         flat_ovoid = NA,
+         cylindrical_elongate = NA,
+         cylindrical_ovoid = NA)
+
+ncol(list_traits_review) # 77 colunas
+
+# especificando a ordem desejada das colunas
+ordem_desejada <- c("ID", "researcher", "locality", 
+                    "Class","Order", "Family", 
+                    "Genus","Morfospecies_name", "(morpho)Species", 
+                    "uncertain_trait", "terrestrial",
+                    "total_length","flat_elongate","flat_ovoid",
+                    "cylindrical_elongate","cylindrical_ovoid","aquatic_stage", 
+                    "life_cycle","feeding_guild", "deposit_feeder","shredder",
+                    "scraper","filter_feeder","piercer","predator",
+                    "microorganisms","detritus_(<1 mm)","dead_plant_(litter)",
+                    "living_microphytes","living_leaf_tissue",
+                    "dead_animals_(>1 mm)","living_microinvertebrates",
+                    "living_macroinvertebrates", "defense", "elongate_tubercle",
+                    "hairs","sclerotized_spines","dorsal_plates",
+                    "sclerotized_exoskeleton","shell" ,"case_or_tube", 
+                    "none_defense", "eggs_statoblasts", "cocoons",             
+                    "diapause_or_dormancy","none_resistence","<21days",
+                    "21-60days",">60days", "ovoviparity",
+                    "isolated_eggs_free","isolated_eggs_cemented",
+                    "clutches_cemented", "clutches_free", 
+                    "clutches_in_vegetation", "clutches_in_terrestrial",
+                    "clutches_terrestrial",
+                    "assexual_reproduction", "habitat", "integument",
+                    "gill", "plastron" , "Siphon/spiracle","hydrostatic_vesicle",
+                    "flier","surface_swimmer","full_water_swimmer","crawler",
+                    "burrower","interstitial","tube_builder", "dispersal_mode",
+                    "notes","OBS.y", "notes_combined",
+                    "possible classification","reference")
+
+# garantir que todas as colunas na ordem desejada estejam presentes no dataframe
+# colunas_presentes <- ordem_desejada[ordem_desejada %in% names(list_traits_review)]
+
+# reordenar as colunas de acordo com a ordem desejada
+list_traits_review <- list_traits_review %>%
+  select(ordem_desejada)
+
+ncol(list_traits_review) # 77 colunas
+View(list_traits_review)
+
+# needs confer
+unique(list_traits_review$life_cycle)
+unique(list_traits_review$habitat)
+
+# save list
+write.csv2(list_traits_review, "list_traits_microcosms.csv")
