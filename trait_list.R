@@ -137,8 +137,7 @@ View(list_traits_unnest)
 # dispersal mode - binary
 list_traits_review <- list_traits_unnest %>%
        rename("aquatic_stage" = "life_stage") %>%
-  mutate(uncertain_trait = NA,
-         terrestrial = NA) %>%
+  mutate(uncertain_trait = NA) %>%
   mutate(ovoviparity = NA,
          isolated_eggs_free = NA,
          isolated_eggs_cemented = NA,
@@ -180,6 +179,10 @@ list_traits_review <- list_traits_unnest %>%
          filter_feeder = NA,
          piercer = NA, 
          predator = NA) %>%
+  mutate(terrestrial = NA,
+         pelagic = NA, 
+         benthic = NA,
+         water_surface = NA) %>%
   mutate("<21days" = NA, 
          "21-60days" = NA,
          ">60days" = NA) %>%
@@ -194,18 +197,21 @@ list_traits_review <- list_traits_unnest %>%
   mutate(flat_elongate = NA,
          flat_ovoid = NA,
          cylindrical_elongate = NA,
-         cylindrical_ovoid = NA)
+         cylindrical_ovoid = NA) %>%
+  filter(habitat != "terrestrial" &
+           habitat != "Terrestrial") # ja removendo tudo que esta como terrestre
 
+View(list_traits_review)
 ncol(list_traits_review) # 77 colunas
 
 # especificando a ordem desejada das colunas
 ordem_desejada <- c("ID", "researcher", "locality", 
                     "Class","Order", "Family", 
                     "Genus","Morfospecies_name", "(morpho)Species", 
-                    "uncertain_trait", "terrestrial",
+                    "uncertain_trait", "life_cycle",
                     "total_length","flat_elongate","flat_ovoid",
                     "cylindrical_elongate","cylindrical_ovoid","aquatic_stage", 
-                    "life_cycle","feeding_guild", "deposit_feeder","shredder",
+                    "feeding_guild", "deposit_feeder","shredder",
                     "scraper","filter_feeder","piercer","predator",
                     "microorganisms","detritus_(<1 mm)","dead_plant_(litter)",
                     "living_microphytes","living_leaf_tissue",
@@ -220,7 +226,8 @@ ordem_desejada <- c("ID", "researcher", "locality",
                     "clutches_cemented", "clutches_free", 
                     "clutches_in_vegetation", "clutches_in_terrestrial",
                     "clutches_terrestrial",
-                    "assexual_reproduction", "habitat", "integument",
+                    "assexual_reproduction", "habitat", "terrestrial",
+                    "pelagic", "benthic", "water_surface", "integument",
                     "gill", "plastron" , "Siphon/spiracle","hydrostatic_vesicle",
                     "flier","surface_swimmer","full_water_swimmer","crawler",
                     "burrower","interstitial","tube_builder", "dispersal_mode",
@@ -232,7 +239,7 @@ ordem_desejada <- c("ID", "researcher", "locality",
 
 # reordenar as colunas de acordo com a ordem desejada
 list_traits_review <- list_traits_review %>%
-  select(ordem_desejada)
+  select(all_of(ordem_desejada))
 
 ncol(list_traits_review) # 77 colunas
 View(list_traits_review)
@@ -243,3 +250,6 @@ unique(list_traits_review$habitat)
 
 # save list
 write.csv2(list_traits_review, "list_traits_microcosms.csv")
+
+#write.table(list_traits_review, "list_traits_microcosms.txt", 
+#            sep=",", row.names = FALSE)
