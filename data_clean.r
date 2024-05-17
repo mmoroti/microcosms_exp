@@ -3035,7 +3035,136 @@ save(thomas_data,
      file = here(thomas_alemanha,
                  "thomas_alemanha.RData"))
 
+
+#--- Anikka Germany ----
+anikka_alemanha <- here("dados_microcosmos",
+                        "Annika_Germany")
+
+anikka_fa <- read_xlsx(
+  here(
+    anikka_alemanha,
+    "AnnikaBusse_BavarianForst_Germany.xlsx"),
+  "fauna_abundance")
+
+anikka_list <- read_xlsx(
+  here(
+    anikka_alemanha,
+    "AnnikaBusse_BavarianForst_Germany.xlsx"),
+  "Fauna_morphospecies_list")
+
+anikka_traits <- read_xlsx(
+  here(
+    anikka_alemanha,
+    "AnnikaBusse_BavarianForst_Germany.xlsx"),
+  "Fauna_traits")
+
+anikka_measures <- read_xlsx(
+  here(
+    anikka_alemanha,
+    "AnnikaBusse_BavarianForst_Germany.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+head(anikka_fa)
+
+# list
+head(anikka_list)
+
+# traits
+head(anikka_traits)
+
+# measures
+anikka_measures %>%
+  rename(all_of(dict_names))
+
+names(anikka_measures)
+
+anikka_data <- tibble(
+  researcher = "Anikka",
+  locality = "Glashutte_Alemanha",
+  roof_treatment = NA,
+  abundance = list(tibble(anikka_fa)),
+  list = list(tibble(anikka_list)),
+  traits= list(tibble(anikka_traits)),
+  measures=list(tibble(anikka_measures)),
+  obs = "Nomes das colunas measures nao padronizados, checar data_log")
+#View(anikka_data)
+save(anikka_data,
+     file = here(anikka_alemanha,
+                 "anikka_alemanha.RData"))
+
+
+
+
+#--- Claas_New Zealand ----
+claas_newzealand <- here("dados_microcosmos",
+                        "Claas_NewZealand")
+
+claas_fa <- read_xlsx(
+  here(
+    claas_newzealand,
+    "ClaasDamken_Dunedin_NewZealand.xlsx"),
+  "fauna_abundance")
+
+claas_list <- read_xlsx(
+  here(
+    claas_newzealand,
+    "ClaasDamken_Dunedin_NewZealand.xlsx"),
+  "Fauna_morphospecies_list")
+
+claas_traits <- read_xlsx(
+  here(
+    claas_newzealand,
+    "ClaasDamken_Dunedin_NewZealand.xlsx"),
+  "Fauna_traits")[1:2,]
+
+claas_measures <- read_xlsx(
+  here(
+    claas_newzealand,
+    "ClaasDamken_Dunedin_NewZealand.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+View(claas_fa)
+
+# list
+head(claas_list)
+
+# traits
+head(claas_traits)
+
+# measures
+claas_measures <- claas_measures %>%
+  mutate_all(~ifelse(. == "na", NA, .)) %>%
+  rename("dissolved_O2" = "dissolved_O2_%",
+         "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+         "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  mutate_all(~ifelse(. == "na", NA, .)) %>%
+  rename(all_of(dict_names))
+
+claas_data <- tibble(
+  researcher = "Claas",
+  locality = "Dunedin_NewZealand",
+  roof_treatment = NA,
+  abundance = list(tibble(claas_fa)),
+  list = list(tibble(claas_list)),
+  traits= list(tibble(claas_traits)),
+  measures=list(tibble(claas_measures)),
+  obs = "")
+#View(anikka_data)
+save(claas_data,
+     file = here(claas_newzealand,
+                 "claas_newzealand.RData"))
+
+
 #--- Nested dataframe ----
+### ATENCAO ###
+# FUNDAMENTAL NAO ALTERAR A ORDEM DOS DATAFRAMES
+# POIS ELES RECEBERAM CODIGOS DE ID CONFORME A ORDEM. ESSES CODIGOS
+# FORAM CRIADOS PARA POSTERIOR UNIAO (JOIN) DOS DATAFRAMES ANINHADOS
+# COM AS RESPECTIVAS CHAVES ID APOS A CONFERENCIA DOS ATRIBUTOS FUNCIONAIS
+# QUE FORAM FEITAS MANUALMENTE. QUALQUER DUVIDA, 
+# CONSULTAR MATHEUS MOROTI OU GUSTAVO ROMERO
 nested_df <- bind_rows(boukal_czech_roof,
                        boukal_czech_nonroof,
                        boukal_czech_plesnelake,
@@ -3086,7 +3215,9 @@ nested_df <- bind_rows(boukal_czech_roof,
                        nakamura_site1_data,
                        nakamura_site2_data,
                        romero_campos_data,
-                       romero_cardoso_data)
+                       romero_cardoso_data,
+                       anikka_data,
+                       claas_data)
 
 data <- column_id(nested_df, "MD")
 #View(data)
