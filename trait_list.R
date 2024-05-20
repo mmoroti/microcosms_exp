@@ -10,10 +10,9 @@ load("dados_microcosmos/nested_df.RData")
 # para facilitar a manipulacao dos dados, retiramos as colunas 
 # desnecessarias e tambem os experimentos que nao tinha invertebrados
 # md24, md25, md34 nao tem invertebrados, por isso foram removidos
-# md19 removido pois ainda nao foram adicionados os dados do japi
 list_traits <- data %>% 
   select(-"roof_treatment", -"abundance", -"measures", -"obs") %>%
-  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & ID != "MD19")
+  filter(ID != "MD24" & ID != "MD25" & ID != "MD34")
 
 # Loop for para dar join entre list e traits
 # depois percorrer o dataframe aninhado 
@@ -290,8 +289,39 @@ ncol(list_traits_review) # 86 colunas
 # para mais infos, consultar Matheus Moroti ou Gustavo Romero
 planilha_comparativa <- read_xlsx("list_traits_microcosms_comparative.xlsx")
 teste <- names(planilha_comparativa)
-
+# experimentos que estavam faltando na planilha de traits
 teste2 <- list_traits_review %>%
-  select(all_of(teste[-1]))
+  select(all_of(teste[-1])) %>%
+  filter(ID == "MD19" |
+           ID == "MD54" |
+           ID == "MD52" |
+           ID == "MD53")
 
-write.csv2(teste2, "teste.csv")
+View(teste2)
+
+write.csv2(teste2, "teste.csv", row.names = F, dec = ".")
+write.csv2(dec = ".")
+?write.csv2
+
+# Mon May 20 20:13:47 2024 ------------------------------
+# A planilha anterior "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia_wrong" 
+# foi adicionada a pasta backup foi duas morfoespecies precisaram passar 
+# por novas classificações. Como a planilha de traits desaninhada 
+# já está com o gustavo, vamos apenas substituir as linhas na planilha dele, 
+# e atualizar no fluxo do script essas novas classificações para que a aba
+# "abundance" seja compátivel com a planilha de traits nova que está sendo
+# classificada pelo gustavo, tenha as mesmas espécies.
+# qualquer duvida, consultar MATHEUS MOROTI ou GUSTAVO ROMERO
+
+# Especificamente,
+# 'diptera_19' passou para 'oligochaeta'
+# 'diptera_16' antes era classificado como pelecorhynchidae_sp1 agr tabanidae_sp2
+stavirginia_replace <- list_traits_review %>%
+  select(all_of(teste[-1])) %>%
+  filter(ID == "MD47" &
+           Morfospecies_name == "oligochaeta" |
+           Morfospecies_name == "diptera_sp16") 
+
+View(stavirginia_replace)
+write.csv2(stavirginia_replace, "stavirginia_replace.csv", 
+           row.names = F, dec = ".")

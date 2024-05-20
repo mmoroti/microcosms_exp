@@ -310,31 +310,33 @@ save(caliman_natal_br,
                  "Caliman_Natal_BR.RData")) 
 #--- Campos_do_Jordao_e_Sta_Virginia ----
 # Sta virginia
+# dados de sta virginia passaram por reclassificacao no dia 20/05, 
+# duvidas consultar data_log dos dados ou Matheus Moroti/Gustavo Romero
 romero_br <- here("dados_microcosmos",
                    "Campos_do_Jordao_e_Sta_Virginia")
 
 romero_stavirginia_fa <- read_xlsx(
   here(
     romero_br,
-    "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia.xlsx"),
+    "Izadora_Nardi_Daiane_Montoia - Núcleo_Santa_Virginia.xlsx"),
   "fauna_abundance")
 
 romero_stavirginia_list <- read_xlsx(
   here(
     romero_br,
-    "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia.xlsx"),
+    "Izadora_Nardi_Daiane_Montoia - Núcleo_Santa_Virginia.xlsx"),
   "Fauna_morphospecies_list")
 
 romero_stavirginia_traits <- read_xlsx(
   here(
     romero_br,
-    "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia.xlsx"),
+    "Izadora_Nardi_Daiane_Montoia - Núcleo_Santa_Virginia.xlsx"),
   "Fauna_traits")
 
 romero_stavirginia_measures <- read_xlsx(
   here(
     romero_br,
-    "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia.xlsx"),
+    "Izadora_Nardi_Daiane_Montoia - Núcleo_Santa_Virginia.xlsx"),
   "measures_decomposition_geograph")
 
 head(romero_stavirginia_fa)
@@ -1309,17 +1311,17 @@ save(izzo_data,
 # coordenadas convertidas direto no xlsx
 romero_japi <- here("dados_microcosmos",
                 "Japi_romero",
-                "GRomero_Japi.xlsx")
+                "Romero.Japi_updated_May_2024.xlsx")
 
 romero_japi_fa <- read_xlsx(
   here(
     romero_japi),
-  "fauna_abundance")
+  "Japi-fauna_abundance")
 
 romero_japi_list <- read_xlsx(
   here(
     romero_japi),
-  "Fauna_morphospecies_list")
+  "Japi-Fauna_morphospecies_list")
 
 romero_japi_traits <- read_xlsx(
   here(
@@ -1331,34 +1333,108 @@ romero_japi_measures <- read_xlsx(
     romero_japi),
   "measures_decomposition_geograph")
 
+# Mon May 20 18:09:26 2024 
+# aqui temos 40 potes, sendo que 20 sao com telhado, e 20 sem telhado
+# como os dados ja foram adicionar uma identificacao-chave (Coluna 'ID'), esse
+# experimento foi inicialmente identificado apenas com o ID19. No entanto,
+# esses dados terao que receber duas identificacoes, pois cada tratamento
+# sera uma lista distinta no dataframe aninhado, pois receberao 1 e 0 na coluna
+# roof_treatment, permitindo analisar esses dados de maneira separada
+# por essa razao, ID19 sera o experimento SEM telhado (roof_treatment = 0)
+# e o ID54 COM telhado (roof_treatment = 1). Qualquer duvida, consultar
+# MATHEUS MOROTI ou GUSTAVO ROMERO
+
 # abundance
-head(romero_japi_fa)
+# essa aba nao foi classificada com telhado e sem telhado, por isso vou usar
+# a aba measures para identificar quais potes correspondem aos tratamentos
+japi_treatment <- romero_japi_measures %>% select(Roof_treatment, Replicate)
+
+# como nem todas as sp estao presentes nos tratamentos, precisamos retirar
+# e deixar os dados harmonizados, ou seja, com apenas as especies presentes
+# e que estejam na lista e nos traits
+# roof
+#colSums(romero_roof_japi_fa[,-c(1:2)])
+filter_roof <- c("Morphospecies.12", "Morphospecies.13", "Morphospecies.14",
+                 "Morphospecies.15", "Morphospecies.18", "Morphospecies.19",
+                 "Morphospecies.21", "Morphospecies.24", "Morphospecies.25",
+                 "Morphospecies.26", "Morphospecies.30", "Morphospecies.34",
+                 "Morphospecies.35", "Morphospecies.36", "Morphospecies.37",
+                 "Morphospecies.38", "Morphospecies.39", "Morphospecies.41", 
+                 "Morphospecies.43") 
+# roof
+#colSums(romero_nonroof_japi_fa[,-c(1:2)])
+filter_nonroof <- c("Morphospecies.1", "Morphospecies.2", "Morphospecies.9",
+                    "Morphospecies.10", "Morphospecies.16", "Morphospecies.17",
+                    "Morphospecies.20", "Morphospecies.22", "Morphospecies.28",
+                    "Morphospecies.29", "Morphospecies.31", "Morphospecies.42",
+                    "Morphospecies.44") 
+
+# abundance
+romero_roof_japi_fa <- romero_japi_fa %>%
+  left_join(japi_treatment, by="Replicate") %>%
+  filter(Roof_treatment == "roof") %>%
+  select(-Roof_treatment) %>%
+  select(!(filter_roof))
+
+romero_nonroof_japi_fa <- romero_japi_fa %>%
+  left_join(japi_treatment, by="Replicate") %>%
+  filter(Roof_treatment == "open") %>%
+  select(-Roof_treatment) %>%
+  select(!(filter_nonroof))
 
 # list
-head(romero_japi_list)
+romero_roof_japi_list <- romero_japi_list %>% 
+  filter(!(Morfospecies_name %in% filter_roof)) %>%
+  mutate(across(everything(), ~ na_if(., "-")))
+
+romero_nonroof_japi_list <- romero_japi_list %>% 
+  filter(!(Morfospecies_name %in% filter_nonroof)) %>%
+  mutate(across(everything(), ~ na_if(., "-")))
 
 # traits
-head(romero_japi_traits)
+# mesma coisa nos traits
+romero_roof_japi_traits <- romero_japi_traits %>%
+  filter(!(Morfospecies_name %in% filter_roof))
+
+romero_nonroof_japi_traits <- romero_japi_traits %>%
+  filter(!(Morfospecies_name %in% filter_nonroof))
 
 # measures
-#romero_japi_measures <- romero_japi_measures %>%
-#  rename(all_of(dict_names))
+romero_roof_japi_measures <- romero_japi_measures %>%
+  filter(Roof_treatment == "roof") %>%
+  rename(all_of(dict_names))
 
-romero_japi_data <- tibble(
+romero_nonroof_japi_measures <- romero_japi_measures %>%
+  filter(Roof_treatment == "open") %>%
+  rename(all_of(dict_names))
+
+# save data
+romero_roof_japi_data <- tibble(
   researcher = "Romero",
   locality = "Japi_Brazil", 
-  roof_treatment = NA,
-  abundance = list(tibble(romero_japi_fa)),
-  list = list(tibble(romero_japi_list)),
-  traits=list(tibble(romero_japi_traits)),
-  measures=list(tibble(romero_japi_measures)),
-  obs = "dados incompletos")
+  roof_treatment = 1,
+  abundance = list(tibble(romero_roof_japi_fa)),
+  list = list(tibble(romero_roof_japi_list)),
+  traits=list(tibble(romero_roof_japi_traits)),
+  measures=list(tibble(romero_roof_japi_measures)),
+  obs = "dados foram separados pois estavam na mesma planilha")
 
-save(romero_japi_data,
+romero_nonroof_japi_data <- tibble(
+  researcher = "Romero",
+  locality = "Japi_Brazil", 
+  roof_treatment = 0,
+  abundance = list(tibble(romero_nonroof_japi_fa)),
+  list = list(tibble(romero_nonroof_japi_list)),
+  traits=list(tibble(romero_nonroof_japi_traits)),
+  measures=list(tibble(romero_nonroof_japi_measures)),
+  obs = "dados foram separados pois estavam na mesma planilha")
+
+save(romero_roof_japi_data,
+     romero_nonroof_japi_data,
      file = here("dados_microcosmos",
                  "Japi_romero",
                  "romero_japi_brazil.RData"))
-# TODO: ainda falta receber os dados 
+
 #--- Jari Finland ----
 # tirar dúvidas
 jari_finland <- here("dados_microcosmos",
@@ -3132,6 +3208,7 @@ head(claas_list)
 
 # traits
 head(claas_traits)
+claas_traits$total_length <- as.double(claas_traits$total_length)
 
 # measures
 claas_measures <- claas_measures %>%
@@ -3150,7 +3227,7 @@ claas_data <- tibble(
   list = list(tibble(claas_list)),
   traits= list(tibble(claas_traits)),
   measures=list(tibble(claas_measures)),
-  obs = "")
+  obs = "Checar infos data_log.txt")
 #View(anikka_data)
 save(claas_data,
      file = here(claas_newzealand,
@@ -3183,7 +3260,7 @@ nested_df <- bind_rows(boukal_czech_roof,
                        gonzales_site3_data,
                        horvath_data,
                        izzo_data,
-                       romero_japi_data,
+                       romero_nonroof_japi_data,
                        jari_data,
                        juen_roof_data,
                        juen_nonroof_data,
@@ -3217,7 +3294,8 @@ nested_df <- bind_rows(boukal_czech_roof,
                        romero_campos_data,
                        romero_cardoso_data,
                        anikka_data,
-                       claas_data)
+                       claas_data,
+                       romero_roof_japi_data)
 
 data <- column_id(nested_df, "MD")
 #View(data)
