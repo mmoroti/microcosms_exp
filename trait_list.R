@@ -222,10 +222,11 @@ list_traits_review <- list_traits_unnest %>%
   mutate(siphon_absent = NA,
          siphon_short = NA,
          siphon_long = NA)
-  
-  
-View(list_traits_review)
-ncol(list_traits_review) # 86 colunas
+
+# TODO Needs adjustments
+#View(list_traits_unnest)  
+#View(list_traits_review)
+#ncol(list_traits_review) # 90 colunas
 
 # especificando a ordem desejada das colunas
 #ordem_desejada <- c("ID", "researcher", "locality", 
@@ -287,21 +288,21 @@ ncol(list_traits_review) # 86 colunas
 # da ordem os dados. por isso eh fundamental preservar os ID dos experimentos
 # na ordem descrita no script anterior (nested_df)
 # para mais infos, consultar Matheus Moroti ou Gustavo Romero
-planilha_comparativa <- read_xlsx("list_traits_microcosms_comparative.xlsx")
-teste <- names(planilha_comparativa)
+#planilha_comparativa <- read_xlsx("list_traits_microcosms_comparative.xlsx")
+#teste <- names(planilha_comparativa)
 # experimentos que estavam faltando na planilha de traits
-teste2 <- list_traits_review %>%
-  select(all_of(teste[-1])) %>%
-  filter(ID == "MD19" |
-           ID == "MD54" |
-           ID == "MD52" |
-           ID == "MD53")
+#teste2 <- list_traits_review %>%
+#  select(all_of(teste[-1])) %>%
+#  filter(ID == "MD19" |
+#           ID == "MD54" |
+#           ID == "MD52" |
+#           ID == "MD53")
 
-View(teste2)
+#View(teste2)
 
-write.csv2(teste2, "teste.csv", row.names = F, dec = ".")
-write.csv2(dec = ".")
-?write.csv2
+#write.csv2(teste2, "teste.csv", row.names = F, dec = ".")
+#write.csv2(dec = ".")
+#?write.csv2
 
 # Mon May 20 20:13:47 2024 ------------------------------
 # A planilha anterior "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia_wrong" 
@@ -316,12 +317,85 @@ write.csv2(dec = ".")
 # Especificamente,
 # 'diptera_19' passou para 'oligochaeta'
 # 'diptera_16' antes era classificado como pelecorhynchidae_sp1 agr tabanidae_sp2
-stavirginia_replace <- list_traits_review %>%
-  select(all_of(teste[-1])) %>%
-  filter(ID == "MD47" &
-           Morfospecies_name == "oligochaeta" |
-           Morfospecies_name == "diptera_sp16") 
+#stavirginia_replace <- list_traits_review %>%
+#  select(all_of(teste[-1])) %>%
+#  filter(ID == "MD47" &
+#           Morfospecies_name == "oligochaeta" |
+#           Morfospecies_name == "diptera_sp16") 
 
-View(stavirginia_replace)
-write.csv2(stavirginia_replace, "stavirginia_replace.csv", 
-           row.names = F, dec = ".")
+#View(stavirginia_replace)
+#write.csv2(stavirginia_replace, "stavirginia_replace.csv", 
+#           row.names = F, dec = ".")
+
+
+###----------------------------------------------------------------------------
+# Sat Jul  6 10:36:40 2024 ------------------------------
+# Os traits ja foram classificados e irao retornar para o dataframe aninhado
+load("dados_microcosmos/nested_df.RData")
+
+traits_new <- read_xlsx(
+  here(
+    "dados_microcosmos",
+    "list_traits_microcosms.xlsx"))
+#View(traits_new)
+
+# catch all columns to transform
+transform_columns <- c(names(traits_new[,14:ncol(traits_new)]))
+
+traits_new_nested <- traits_new %>% 
+  mutate_at(vars(transform_columns), as.integer) %>%
+  mutate(total_length = as.double(total_length)) %>%
+  select(
+  -"researcher", -"locality",
+  -"notes", -"OBS.y", -"notes_combined", 
+  -"possible classification", -"reference", -"Column1",
+  -"life_cycle", -"feeding_guild", -"defense", -"habitat") %>%
+  nest(.by = "ID", .key = "traits_revised")
+
+head(traits_new_nested)
+
+# nested dataframe
+nested_traits_join <- left_join(
+  data, 
+  traits_new_nested,
+  by = "ID") %>%
+  relocate(traits_revised, .before = measures)
+
+nested_traits <- nested_traits_join %>%
+  filter(ID != "MD20" & ID != "MD48" & ID != "MD49"
+         & ID != "MD36" & ID != "MD24" & ID != "MD25"
+         & ID != "MD34")
+
+for (i in 1:nrow(nested_traits)) {
+  # inner_join to combine with all names in both dataset
+  nested_traits$nrow_list[[i]] <- nrow(nested_traits$list[[i]])
+  nested_traits$nrow_traits[[i]] <- nrow(nested_traits$traits[[i]])
+  nested_traits$nrow_trait_revised[[i]] <- nrow(nested_traits$traits_revised[[i]])
+  
+}
+
+View(nested_traits_join)
+View(nested_traits %>%
+       relocate(c(nrow_list,nrow_traits,nrow_trait_revised), 
+                .after = ID))
+View(traits_new)
+
+# Sat Jul  6 14:06:17 2024 ------------------------------
+# TODO
+# alguns nao batem os numeros pq passaram por tratamento na elaboracao da lista
+# invertebrados Terrestres foram filtrados na linha 220 e 221, mas nao no dataset
+# original. 
+
+# Precisa checar quais nao fora identificados e quais deveriam ser excluidos
+# por serem terrestres. Experimentos com numeros diferentes
+# MD4  MD15  MD16  MD28  MD29  MD30  MD32  MD33  MD41  MD46  MD47
+
+# Esses experimentos nao foram classificados pois tinham na coluna 'habitat' 
+# NAs, NAs nessa coluna foram filtrados provavelmente na linha 220 e 221.
+# MD20, MD48, MD49 
+# Ja acrescentar dados do Gossner para classificar os traits faltantes e checar
+# pendencias
+
+# checar com Joice e Gustavo
+# Pettermann, Austria tem um valor de tamanho ausente.
+# MD52 tem uma especie sem valor no "uncertain_trait"
