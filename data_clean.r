@@ -87,6 +87,7 @@ glimpse(boukal_roofs_list)
 # TODO needs encoding
 glimpse(boukal_roofs_traits)
 
+
 # rename variables with data dictionary
 boukal_roofs_measures <- boukal_roofs_measures %>%
   rename(all_of(dict_names))
@@ -3170,8 +3171,6 @@ save(anikka_data,
                  "anikka_alemanha.RData"))
 
 
-
-
 #--- Claas_New Zealand ----
 claas_newzealand <- here("dados_microcosmos",
                         "Claas_NewZealand")
@@ -3233,6 +3232,112 @@ save(claas_data,
      file = here(claas_newzealand,
                  "claas_newzealand.RData"))
 
+#--- Martin Gossner ----
+martin_suica <- here("dados_microcosmos",
+                         "MartinGossner_Holsetein")
+
+martin_fa <- read_xlsx(
+  here(
+    martin_suica,
+    "Hölstein_AB_22.11.2023_MartinGossner.xlsx"),
+  "fauna_abundance")
+
+martin_list <- read_xlsx(
+  here(
+    martin_suica,
+    "Hölstein_AB_22.11.2023_MartinGossner.xlsx"),
+  "Fauna_morphospecies_list")
+
+martin_traits <- read_xlsx(
+  here(
+    martin_suica,
+    "Hölstein_AB_22.11.2023_MartinGossner.xlsx"),
+  "Fauna_traits")
+
+martin_measures <- read_xlsx(
+  here(
+    martin_suica,
+    "Hölstein_AB_22.11.2023_MartinGossner.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+martin_fa_2021 <- martin_fa %>% filter(Year == "2021") %>%
+  relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
+  select(-Morphospecies.1, -Morphospecies.4,
+         -Morphospecies.5, -Morphospecies.11)
+
+martin_fa_2022 <- martin_fa %>% filter(Year == "2022") %>%
+  relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
+  select(-Morphospecies.12, -Morphospecies.7)
+
+#colSums(martin_fa_2021[,-c(1:5)]) # Morphospecies.1, Morphospecies.4,
+                                   # Morphospecies.5, Morphospecies.11
+#colSums(martin_fa_2022[,-c(1:5)]) # Morphospecies.7 e Morphospecies.12
+
+# list
+martin_list_2021 <- martin_list %>% filter(
+  Morfospecies_name != "Morphospecies.1" &
+  Morfospecies_name != "Morphospecies.4" &
+  Morfospecies_name != "Morphospecies.5" &
+  Morfospecies_name != "Morphospecies.11"
+  )
+
+martin_list_2022 <- martin_list %>% filter(
+  Morfospecies_name != "Morphospecies.7" &
+    Morfospecies_name != "Morphospecies.12"
+  )
+
+# traits
+martin_traits_2021 <- martin_traits %>% filter(
+  Morfospecies_name != "Morphospecies.1" &
+    Morfospecies_name != "Morphospecies.4" &
+    Morfospecies_name != "Morphospecies.5" &
+    Morfospecies_name != "Morphospecies.11")
+
+martin_traits_2022 <- martin_traits %>% filter(
+  Morfospecies_name != "Morphospecies.7" &
+    Morfospecies_name != "Morphospecies.12"
+)
+
+# measures
+# TODO needs adjustments
+# precisa entender o que eh de cada ano
+#martin_measures <- martin_measures %>%
+#  filter(Year == 2021)
+  #mutate_all(~ifelse(. == "na", NA, .)) %>%
+  #rename("dissolved_O2" = "dissolved_O2_%",
+  #       "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+  #       "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  #mutate_all(~ifelse(. == "na", NA, .)) %>%
+#  rename(all_of(dict_names))
+
+martin_data_2021 <- tibble(
+  #ID = "MD55", 
+  researcher = "MartinGossner",
+  locality = "Holstein_Switzerland",
+  roof_treatment = NA,
+  abundance = list(tibble(martin_fa_2021)),
+  list = list(tibble(martin_list_2021)),
+  traits= list(tibble(martin_traits_2021)),
+  measures=list(tibble(martin_measures)),
+  obs = "Rever 'measures'. Checar data_log")
+
+martin_data_2022 <- tibble(
+  #ID = "MD56", 
+  researcher = "MartinGossner",
+  locality = "Holstein_Switzerland",
+  roof_treatment = NA,
+  abundance = list(tibble(martin_fa_2022)),
+  list = list(tibble(martin_list_2022)),
+  traits= list(tibble(martin_traits_2022)),
+  measures=list(tibble(martin_measures)),
+  obs = "Rever 'measures'. Checar data_log")
+
+#View(anikka_data)
+save(martin_data_2021,
+     martin_data_2022, 
+     file = here(martin_suica,
+                 "martin_suica.RData"))
 
 #--- Nested dataframe ----
 ### ATENCAO ###
@@ -3295,11 +3400,14 @@ nested_df <- bind_rows(boukal_czech_roof,
                        romero_cardoso_data,
                        anikka_data,
                        claas_data,
-                       romero_roof_japi_data)
+                       romero_roof_japi_data,
+                       martin_data_2021,
+                       martin_data_2022)
 
 data <- column_id(nested_df, "MD")
 #View(data)
 save(data,
      file = here("dados_microcosmos",
                  "nested_df.RData"))
-load("dados_microcosmos/nested_df.RData")
+
+load(here("dados_microcosmos/nested_df.RData"))

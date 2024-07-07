@@ -331,7 +331,7 @@ list_traits_review <- list_traits_unnest %>%
 ###----------------------------------------------------------------------------
 # Sat Jul  6 10:36:40 2024 ------------------------------
 # Os traits ja foram classificados e irao retornar para o dataframe aninhado
-load("dados_microcosmos/nested_df.RData")
+load(here("dados_microcosmos/nested_df.RData"))
 
 traits_new <- read_xlsx(
   here(
@@ -367,6 +367,9 @@ nested_traits <- nested_traits_join %>%
          & ID != "MD34")
 
 for (i in 1:nrow(nested_traits)) {
+  nested_traits$anti_join[[i]] <- anti_join(nested_traits$list[[i]],
+                                            nested_traits$traits_revised[[i]],
+                                            by = "Morfospecies_name")
   # inner_join to combine with all names in both dataset
   nested_traits$nrow_list[[i]] <- nrow(nested_traits$list[[i]])
   nested_traits$nrow_traits[[i]] <- nrow(nested_traits$traits[[i]])
@@ -374,11 +377,10 @@ for (i in 1:nrow(nested_traits)) {
   
 }
 
-View(nested_traits_join)
 View(nested_traits %>%
        relocate(c(nrow_list,nrow_traits,nrow_trait_revised), 
                 .after = ID))
-View(traits_new)
+View(nested_traits_join)
 
 # Sat Jul  6 14:06:17 2024 ------------------------------
 # TODO
@@ -386,16 +388,154 @@ View(traits_new)
 # invertebrados Terrestres foram filtrados na linha 220 e 221, mas nao no dataset
 # original. 
 
-# Precisa checar quais nao fora identificados e quais deveriam ser excluidos
-# por serem terrestres. Experimentos com numeros diferentes
-# MD4  MD15  MD16  MD28  MD29  MD30  MD32  MD33  MD41  MD46  MD47
-
+# MD20, MD48, MD49 ----
 # Esses experimentos nao foram classificados pois tinham na coluna 'habitat' 
 # NAs, NAs nessa coluna foram filtrados provavelmente na linha 220 e 221.
-# MD20, MD48, MD49 
 # Ja acrescentar dados do Gossner para classificar os traits faltantes e checar
 # pendencias
+trait_non_classified <- data %>% 
+  filter(ID == "MD20" | ID == "MD48" | ID == "MD49") %>%
+  rbind(martin_data_2021, martin_data_2022)
 
-# checar com Joice e Gustavo
+View(trait_non_classified)
+
+list_trait_non_classified <- trait_non_classified %>% 
+  select(-"roof_treatment", -"abundance", -"measures", -"obs") 
+
+# Loop for para dar join entre list e traits
+# depois percorrer o dataframe aninhado 
+# e contar o numero de linhas em cada dataframe para conferencia
+for (i in 1:nrow(list_trait_non_classified)) {
+  # inner_join to combine with all names in both dataset
+  list_trait_non_classified$trait_list[[i]] <- inner_join(list_trait_non_classified$list[[i]],
+                                                          list_trait_non_classified$traits[[i]],
+                                            by = "Morfospecies_name")
+  list_trait_non_classified$nrow_list[[i]] <- nrow(list_trait_non_classified$list[[i]])
+  list_trait_non_classified$nrow_traits[[i]] <- nrow(list_trait_non_classified$traits[[i]])
+  list_trait_non_classified$nrow_trait_list[[i]] <- nrow(list_trait_non_classified$trait_list[[i]])
+}
+
+unnest_list_trait_non_classified <- list_trait_non_classified %>% 
+  select("ID","researcher","locality","trait_list") %>%
+  unnest(cols="trait_list") %>%
+  select(-'...1.y', -'...1.x') # precisa checar os dados da Jari
+
+unnest_list_trait_non_classified$total_length <- coalesce(
+  unnest_list_trait_non_classified$total_length,
+  unnest_list_trait_non_classified$'total_length (mean_mm)')
+
+unnest_list_trait_non_classified <- unnest_list_trait_non_classified %>% 
+  select(-'total_length (mean_mm)')
+
+unnest_list_trait_non_classified <- unnest_list_trait_non_classified %>%
+  mutate(egg = NA,
+         larva = NA,
+         nymph = NA,
+         adult = NA) %>%
+  mutate(uncertain_trait = NA) %>%
+  mutate(ovoviparity = NA,
+         isolated_eggs_free = NA,
+         isolated_eggs_cemented = NA,
+         clutches_cemented = NA,
+         clutches_free = NA,
+         clutches_in_vegetation = NA,
+         clutches_in_terrestrial = NA,
+         clutches_terrestrial = NA,
+         assexual_reproduction = NA) %>%
+  mutate(disp_passive = NA,
+         disp_active = NA) %>%
+  mutate(eggs_statoblasts = NA,
+         cocoons = NA,
+         diapause_or_dormancy = NA,
+         none_resistence = NA) %>%
+  mutate(integument = NA,
+         gill	= NA,
+         plastron	= NA,
+         "Siphon/spiracle" = NA,
+         hydrostatic_vesicle = NA) %>%
+  mutate(flier = NA,
+         surface_swimmer = NA,
+         full_water_swimmer	= NA,
+         crawler = NA,
+         burrower	= NA,
+         interstitial	= NA,
+         tube_builder = NA) %>%
+  mutate(microorganisms = NA,
+         "detritus_(<1 mm)" = NA,
+         "dead_plant_(litter)" = NA,
+         living_microphytes	= NA,
+         living_leaf_tissue	= NA, 
+         "dead_animals_(>1 mm)" =	NA,
+         living_microinvertebrates = NA,
+         living_macroinvertebrates = NA) %>%
+  mutate(deposit_feeder = NA,
+         shredder = NA,
+         scraper = NA,
+         filter_feeder = NA,
+         piercer = NA, 
+         predator = NA) %>%
+  mutate(terrestrial = NA,
+         pelagic = NA, 
+         benthic = NA,
+         water_surface = NA) %>%
+  mutate("<21days" = NA, 
+         "21-60days" = NA,
+         ">60days" = NA) %>%
+  mutate(none_defense = NA,
+         elongate_tubercle = NA,
+         hairs = NA,
+         sclerotized_spines	= NA,
+         dorsal_plates = NA,
+         sclerotized_exoskeleton = NA,
+         shell	= NA,
+         case_or_tube = NA) %>%
+  mutate(flat_elongate = NA,
+         flat_ovoid = NA,
+         cylindrical_elongate = NA,
+         cylindrical_ovoid = NA) %>%
+  mutate(siphon_absent = NA,
+         siphon_short = NA,
+         siphon_long = NA) %>%
+  mutate(disp_passive = NA,
+         disp_active = NA) %>%
+  mutate(Column1 = NA,
+         OBS.y = NA,
+         notes_combined = NA,
+         'possible classification' = NA,
+         reference = NA)
+
+names_columns <- names(traits_new)
+
+unnest_new_traits <- unnest_list_trait_non_classified %>%
+  select(all_of(names_columns))
+
+View(unnest_new_traits)
+
+# MD4  MD15  MD16  MD28  MD29  MD30  MD32  MD33  MD41  MD46  MD47 ----
+# Precisa checar quais nao foram identificados por erro no codigo
+# e quais deveriam ser excluidos
+# por serem terrestres. Experimentos com numeros diferentes
+# treatment to unnest dataframe
+for (i in seq_along(nested_traits$anti_join)) {
+  nested_traits$anti_join[[i]] <- nested_traits$anti_join[[i]] %>%
+    mutate('(morpho)Species' = as.character('(morpho)Species')) %>%
+    mutate('Genus' = as.character('Genus'))
+}
+
+filtered_data <- nested_traits %>% 
+  select("ID","researcher","locality","anti_join") %>%
+  unnest(cols="anti_join") %>%
+  select("ID", "researcher", "locality", "Morfospecies_name",
+         "Class", "Order", "Family", "Genus")
+
+# unindo os experimentos que sairam e os taxons que nao entraram
+# para conferencia
+unnest_new_traits_all <- unnest_new_traits %>% 
+  bind_rows(filtered_data)
+
+write.csv2(unnest_new_traits_all, here("new_traits_to_fill.csv"), 
+           row.names = F, dec = ".")
+
+# checar com Joice e Gustavo ----
 # Pettermann, Austria tem um valor de tamanho ausente.
 # MD52 tem uma especie sem valor no "uncertain_trait"
