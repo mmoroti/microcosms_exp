@@ -2,7 +2,6 @@
 # packages
 library(tidyverse) # data science handling
 library(readxl) # read .xlsx
-library(here) # set directory 
 library(renv) # versioning R and packages
 library(glue) # to create acronyms
 
@@ -22,9 +21,12 @@ column_id <- function(data, acronym){
   return(data)
 }
 
+# Set directory 
+local_directory <- "G:/Meu Drive/Microcosmos/dados_microcosmos"
+
 # Data dictiorary ----
 dict_data <- read_xlsx(
-  here("dados_microcosmos",
+  file.path(local_directory,
        "data_dictionary.xlsx"),
   "measures_decomposition_geograph")
 
@@ -46,29 +48,29 @@ dict_names <- dict_data %>%
 #--- Boukal_Czech ----
 # (with roof) 
 boukal_roofs_fa <- read_xlsx(
-  here(
-  "dados_microcosmos",
-  "Boukal_Czech",
-  "Boukal_Site.2 Hluboka_roofs.xlsx"),
+  file.path(
+    local_directory,
+    "Boukal_Czech",
+    "Boukal_Site.2 Hluboka_roofs.xlsx"),
   "fauna_abundance")
 
 boukal_roofs_list <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 Hluboka_roofs.xlsx"),
   "Fauna_morphospecies_list")
 
 boukal_roofs_traits <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 Hluboka_roofs.xlsx"),
   "Fauna_traits")
 
 boukal_roofs_measures <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 Hluboka_roofs.xlsx"),
   "measures_decomposition_geograph")
@@ -108,29 +110,29 @@ View(boukal_czech_roof)
 
 #--- Boukal_Czech (without roof)
 boukal_nonroofs_fa <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 Hluboka_without-roofs.xlsx"),
   "fauna_abundance")
 
 boukal_nonroofs_list <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 Hluboka_without-roofs.xlsx"),
   "Fauna_morphospecies_list")
 
 boukal_nonroofs_traits <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 Hluboka_without-roofs.xlsx"),
   "Fauna_traits")
 
 boukal_nonroofs_measures <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 Hluboka_without-roofs.xlsx"),
   "measures_decomposition_geograph")
@@ -166,29 +168,29 @@ boukal_czech_nonroof <- tibble(
 
 ###---- Boukal_Czech (TODO: third treatment?)
 boukal_plesnelake_fa <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 PlesneLake.xlsx"),
   "fauna_abundance")
 
 boukal_plesnelake_list <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 PlesneLake.xlsx"),
   "Fauna_morphospecies_list")
 
 boukal_plesnelake_traits <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 PlesneLake.xlsx"),
   "Fauna_traits")
 
 boukal_plesnelake_measures <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(
+    local_directory,
     "Boukal_Czech",
     "Boukal_Site.2 PlesneLake.xlsx"),
   "measures_decomposition_geograph")
@@ -204,8 +206,6 @@ boukal_plesnelake_fa[is.na(boukal_plesnelake_fa)] <- 0
 # only two species
 boukal_plesnelake_list <- boukal_plesnelake_list[1:2,]
 
-# TODO needs revision by Gustavo Romero
-# TODO needs encoding
 boukal_plesnelake_traits <- boukal_plesnelake_traits %>%
   filter(Morfospecies_name != "Morphospecies.3" &
          Morfospecies_name != "Morphospecies.4")
@@ -233,40 +233,36 @@ boukal_czech_plesnelake <- tibble(
 save(boukal_czech_roof,
         boukal_czech_nonroof,
         boukal_czech_plesnelake,
-        file = here("dados_microcosmos",
+        file =   file.path(local_directory,
                     "Boukal_Czech",
                     "Boukal_Czech.RData")) 
-# it works! 
-load(here("dados_microcosmos",
-          "Boukal_Czech",
-          "Boukal_Czech.RData"))
+
+#load(file.path("dados_microcosmos",
+#          "Boukal_Czech",
+#          "Boukal_Czech.RData"))
 
 
 #--- Caliman_Natal_BR ----
 caliman_fa <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(local_directory,
     "Caliman_Natal_BR",
     "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
   "fauna_abundance")
 
 caliman_list <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(local_directory,
     "Caliman_Natal_BR",
     "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
   "Fauna_morphospecies_list")
 
 caliman_traits <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(local_directory,
     "Caliman_Natal_BR",
     "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
   "Fauna_traits")
 
 caliman_measures <- read_xlsx(
-  here(
-    "dados_microcosmos",
+  file.path(local_directory,
     "Caliman_Natal_BR",
     "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
   "measures_decomposition_geograph")
@@ -306,36 +302,37 @@ caliman_natal_br <- tibble(
 # save .RData from Boukal
 save(caliman_natal_br,
      #boukal_czech_nonroof,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Caliman_Natal_BR",
                  "Caliman_Natal_BR.RData")) 
+
 #--- Campos_do_Jordao_e_Sta_Virginia ----
 # Sta virginia
 # dados de sta virginia passaram por reclassificacao no dia 20/05, 
 # duvidas consultar data_log dos dados ou Matheus Moroti/Gustavo Romero
-romero_br <- here("dados_microcosmos",
+romero_br <- file.path(local_directory,
                    "Campos_do_Jordao_e_Sta_Virginia")
 
 romero_stavirginia_fa <- read_xlsx(
-  here(
+  file.path(
     romero_br,
     "Izadora_Nardi_Daiane_Montoia - Núcleo_Santa_Virginia.xlsx"),
   "fauna_abundance")
 
 romero_stavirginia_list <- read_xlsx(
-  here(
+  file.path(
     romero_br,
     "Izadora_Nardi_Daiane_Montoia - Núcleo_Santa_Virginia.xlsx"),
   "Fauna_morphospecies_list")
 
 romero_stavirginia_traits <- read_xlsx(
-  here(
+  file.path(
     romero_br,
     "Izadora_Nardi_Daiane_Montoia - Núcleo_Santa_Virginia.xlsx"),
   "Fauna_traits")
 
 romero_stavirginia_measures <- read_xlsx(
-  here(
+  file.path(
     romero_br,
     "Izadora_Nardi_Daiane_Montoia - Núcleo_Santa_Virginia.xlsx"),
   "measures_decomposition_geograph")
@@ -368,45 +365,43 @@ romero_stavirginia_data <- tibble(
 
 # save .RData from romero
 save(romero_stavirginia_data,
-     file = here(romero_br,
+     file = file.path(romero_br,
                  "romero_stavirginia.RData")) 
 
 # Campos do Jordao
-romero_br <- here("dados_microcosmos",
-                  "Campos_do_Jordao_e_Sta_Virginia")
-
 romero_campos_fa <- read_xlsx(
-  here(
+  file.path(
     romero_br,
     "Felipe_Rezende_Daiane_Montoia - Campos_do_Jordao_community_dataset.xlsx"),
   "fauna_abundance")
 
 romero_campos_list <- read_xlsx(
-  here(
+  file.path(
     romero_br,
     "Felipe_Rezende_Daiane_Montoia - Campos_do_Jordao_community_dataset.xlsx"),
   "Fauna_morphospecies_list")
 
 romero_campos_traits <- read_xlsx(
-  here(
+  file.path(
     romero_br,
     "Felipe_Rezende_Daiane_Montoia - Campos_do_Jordao_community_dataset.xlsx"),
   "Fauna_traits")
 
 romero_campos_measures <- read_xlsx(
-  here(
+  file.path(
     romero_br,
     "Felipe_Rezende_Daiane_Montoia - Campos_do_Jordao_community_dataset.xlsx"),
   "measures_decomposition_geograph")
 
 head(romero_campos_fa)
 
+# removacao validada com o Felipe e a Izadora
+# erros de classificacao taxonomica
 romero_campos_list <- romero_campos_list %>%
   filter(Morfospecies_name != "Diptera_sp4" &
         Morfospecies_name != "Diptera_sp13" &
         Morfospecies_name != "Chironomidae_sp5")
 nrow(romero_campos_list)
-
 nrow(romero_campos_traits)
 
 # rename variables with data dictionary
@@ -434,33 +429,33 @@ romero_campos_data <- tibble(
 
 # save .RData from romero
 save(romero_campos_data,
-     file = here(romero_br,
+     file = file.path(romero_br,
                  "romero_camposdojordao.RData"))
 
 #--- Cardinale_USA ----
-cardinale_usa <- here("dados_microcosmos",
+cardinale_usa <- file.path(local_directory,
                       "Cardinale_USA")
 
 cardinale_fa <- read_xlsx(
-  here(
+  file.path(
     cardinale_usa,
     "Cardinale_modified_microcosm_data.xlsx"),
   "fauna_abundance")
 
 cardinale_list <- read_xlsx(
-  here(
+  file.path(
     cardinale_usa,
     "Cardinale_modified_microcosm_data.xlsx"),
   "Fauna_morphospecies_list")
 
 cardinale_traits <- read_xlsx(
-  here(
+  file.path(
     cardinale_usa,
     "Cardinale_modified_microcosm_data.xlsx"),
   "Fauna_traits")
 
 cardinale_measures <- read_xlsx(
-  here(
+  file.path(
     cardinale_usa,
     "Cardinale_modified_microcosm_data.xlsx"),
   "measures_decomposition_geograph")
@@ -493,33 +488,33 @@ cardinale_usa_data <- tibble(
 
 # save .RData from Boukal
 save(cardinale_usa_data,
-     file = here(cardinale_usa,
+     file = file.path(cardinale_usa,
                  "Cardinale_USA.RData")) 
 
 #--- Cardoso_Romero ----
-romero_cardoso <- here("dados_microcosmos",
+romero_cardoso <- file.path(local_directory,
                   "Cardoso_Romero")
 
 romero_cardoso_fa <- read_xlsx(
-  here(
+  file.path(
     romero_cardoso,
     "Daiane_Montoia_Felipe_Rezende_Cardoso_Island-Cananeia_community_dataset.xlsx"),
   "fauna_abundance")
 
 romero_cardoso_list <- read_xlsx(
-  here(
+  file.path(
     romero_cardoso,
     "Daiane_Montoia_Felipe_Rezende_Cardoso_Island-Cananeia_community_dataset.xlsx"),
   "Fauna_morphospecies_list")
 
 romero_cardoso_traits <- read_xlsx(
-  here(
+  file.path(
     romero_cardoso,
     "Daiane_Montoia_Felipe_Rezende_Cardoso_Island-Cananeia_community_dataset.xlsx"),
   "Fauna_traits")[1:11,] # retirando a leitura de um ponto aleatorio na planilha
 
 romero_cardoso_measures <- read_xlsx(
-  here(
+  file.path(
     romero_cardoso,
     "Daiane_Montoia_Felipe_Rezende_Cardoso_Island-Cananeia_community_dataset.xlsx"),
   "measures_decomposition_geograph")
@@ -537,10 +532,10 @@ romero_cardoso_measures <-
   rename("microcosm position (N, S, E, W)" = "microcosm position (N. S. E. W)") %>%
   rename(all_of(dict_names))
 
-View(left_join(romero_cardoso_list,
-               romero_cardoso_traits,
-               by = "Morfospecies_name")
-)
+#View(left_join(romero_cardoso_list,
+#               romero_cardoso_traits,
+#               by = "Morfospecies_name")
+#)
 
 romero_cardoso_data <- tibble(
   researcher = "Romero",
@@ -552,29 +547,29 @@ romero_cardoso_data <- tibble(
   measures=list(tibble(romero_cardoso_measures)))
 
 #--- Collyer_Japan ----
-collyer_japan <- here("dados_microcosmos",
+collyer_japan <- file.path(local_directory,
                       "Collyer_Japan")
 
 collyer_fa <- read_xlsx(
-  here(
+  file.path(
     collyer_japan,
     "Giovanna Collyer & Takehito Yoshida_Japan.xlsx"),
   "fauna_abundance")
 
 collyer_list <- read_xlsx(
-  here(
+  file.path(
     collyer_japan,
     "Giovanna Collyer & Takehito Yoshida_Japan.xlsx"),
   "Fauna_morphospecies_list")
 
 collyer_traits <- read_xlsx(
-  here(
+  file.path(
     collyer_japan,
     "Giovanna Collyer & Takehito Yoshida_Japan.xlsx"),
   "Fauna_traits")
 
 collyer_measures <- read_xlsx(
-  here(
+  file.path(
     collyer_japan,
     "Giovanna Collyer & Takehito Yoshida_Japan.xlsx"),
   "measures_decomposition_geograph")
@@ -606,11 +601,11 @@ collyer_japan_data <- tibble(
 
 save(collyer_japan_data,
      #boukal_czech_nonroof,
-     file = here(collyer_japan,
+     file = file.path(collyer_japan,
                  "Collyer_Japan.RData")) 
 
 #---- Cornelissen_BR ----
-cornelissen_br <- here("dados_microcosmos",
+cornelissen_br <- file.path(local_directory,
                       "Cornelissen_BR",
                       "dados_definitivos")
 
@@ -619,25 +614,25 @@ cornelissen_br <- here("dados_microcosmos",
 # a aba "measures_decomposition_geograph" coluna H linha 8 tem
 # um valor ausente que não está preenchido nem com NA. Precisa checar!
 cornelissen_roof_fa <- read_xlsx(
-  here(
+  file.path(
     cornelissen_br,
     "Sao Bartolomeu_Site.2_MICROCOSMS (with_roof).xlsx"),
   "fauna_abundance")
 
 cornelissen_roof_list <- read_xlsx(
-  here(
+  file.path(
     cornelissen_br,
     "Sao Bartolomeu_Site.2_MICROCOSMS (with_roof).xlsx"),
   "Fauna_morphospecies_list")
 
 cornelissen_roof_traits <- read_xlsx(
-  here(
+  file.path(
     cornelissen_br,
     "Sao Bartolomeu_Site.2_MICROCOSMS (with_roof).xlsx"),
   "Fauna_traits")
 
 cornelissen_roof_measures <- read_xlsx(
-  here(
+  file.path(
     cornelissen_br,
     "Sao Bartolomeu_Site.2_MICROCOSMS (with_roof).xlsx"),
   "measures_decomposition_geograph")
@@ -681,25 +676,25 @@ cornelissen_roof_BR_data <- tibble(
 
 #--- Cornelissen_BR without roof
 cornelissen_nonroof_fa <- read_xlsx(
-  here(
+  file.path(
     cornelissen_br,
     "Sao Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx"),
   "fauna_abundance")
 
 cornelissen_nonroof_list <- read_xlsx(
-  here(
+  file.path(
     cornelissen_br,
     "Sao Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx"),
   "Fauna_morphospecies_list")
 
 cornelissen_nonroof_traits <- read_xlsx(
-  here(
+  file.path(
     cornelissen_br,
     "Sao Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx"),
   "Fauna_traits")
 
 cornelissen_nonroof_measures <- read_xlsx(
-  here(
+  file.path(
     cornelissen_br,
     "Sao Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx"),
   "measures_decomposition_geograph")
@@ -742,38 +737,38 @@ cornelissen_nonroof_BR_data <- tibble(
 
 save(cornelissen_roof_BR_data,
      cornelissen_nonroof_BR_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Cornelissen_BR",
                  "Cornelissen_BR.RData"))
 
-#load(here("dados_microcosmos",
+#load(file.path("dados_microcosmos",
 #          "Cornelissen_BR",
 #          "Cornelissen_BR.RData"))
 
 #--- Cotriguacu_Romero ----
-cotriguacu_br <- here("dados_microcosmos",
+cotriguacu_br <- file.path(local_directory,
                        "Cotriguacu_Romero")
 
 cotriguacu_fa <- read_xlsx(
-  here(
+  file.path(
     cotriguacu_br,
     "Romero.Amazon.xlsx"),
   "fauna_abundance")
 
 cotriguacu_list <- read_xlsx(
-  here(
+  file.path(
     cotriguacu_br,
     "Romero.Amazon.xlsx"),
   "Fauna_morphospecies_list")
 
 cotriguacu_traits <- read_xlsx(
-  here(
+  file.path(
     cotriguacu_br,
     "Romero.Amazon.xlsx"),
   "Fauna_traits")
 
 cotriguacu_measures <- read_xlsx(
-  here(
+  file.path(
     cotriguacu_br,
     "Romero.Amazon.xlsx"),
   "measures_decomposition_geograph")
@@ -805,6 +800,10 @@ cotriguacu_romero_data <- tibble(
   measures=list(tibble(cotriguacu_measures)),
   obs= "experimento com diferentes alturas")
 
+save(cotriguacu_romero_data,
+     file = file.path(cotriguacu_br,
+                      "Cotriguacu_romero.RData"))
+
 #--- Fabiola_Colombia ----
 # os dados dos tratamentos com telhado e sem telhado estao na mesma
 # planilha, por isso irei separar em duas linhas distintas no df aninhado
@@ -813,27 +812,27 @@ cotriguacu_romero_data <- tibble(
 # acrônimos usados para indicar os tratamentos sao:
 # BC, BR, PC, and PR were a personal ID that I used. 
 # B=forest; P=plantation; C=without roof; R=roof
-fabiola_colombia <- here("dados_microcosmos",
+fabiola_colombia <- file.path(local_directory,
                       "Fabiola_Colombia",
                       "Fabiola_Site.Colombia.xlsx")
 
 fabiola_fa <- read_xlsx(
-  here(
+  file.path(
     fabiola_colombia),
   "fauna_abundance")
 
 fabiola_list <- read_xlsx(
-  here(
+  file.path(
     fabiola_colombia),
   "Fauna_morphospecies_list")
 
 fabiola_traits <- read_xlsx(
-  here(
+  file.path(
     fabiola_colombia),
   "Fauna_traits")
 
 fabiola_measures <- read_xlsx(
-  here(
+  file.path(
     fabiola_colombia),
   "measures_decomposition_geograph")
 
@@ -946,32 +945,32 @@ fabiola_nonroof_colombia_data <- tibble(
 
 save(fabiola_roof_colombia_data,
      fabiola_nonroof_colombia_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Fabiola_Colombia",
                  "Fabiola_Colombia.RData"))
 #--- French_Guyana_Celine ----
 # linhas 11-15 precisam ser deletadas, deletei direto no .xlsx
 # Canopy data
-celine_guyana <- here("dados_microcosmos",
+celine_guyana <- file.path(local_directory,
                          "French_Guyana_Celine")
 
 celine_canopy_fa <- read_xlsx(
-  here(
+  file.path(
     celine_guyana, "Celine Leroy_French Guiana_canopy.xlsx"),
   "fauna_abundance")
 
 celine_canopy_list <- read_xlsx(
-  here(
+  file.path(
     celine_guyana, "Celine Leroy_French Guiana_canopy.xlsx"),
   "Fauna_morphospecies_list")
 
 celine_canopy_traits <- read_xlsx(
-  here(
+  file.path(
     celine_guyana, "Celine Leroy_French Guiana_canopy.xlsx"),
   "Fauna_traits")
 
 celine_canopy_measures <- read_xlsx(
-  here(
+  file.path(
     celine_guyana, "Celine Leroy_French Guiana_canopy.xlsx"),
   "measures_decomposition_geograph")
 
@@ -1001,22 +1000,22 @@ celine_canopy_frenchguyana_data <- tibble(
 
 # general data
 celine_general_fa <- read_xlsx(
-  here(
+  file.path(
     celine_guyana, "Celine Leroy_French Guiana_general.xlsx"),
   "fauna_abundance")
 
 celine_general_list <- read_xlsx(
-  here(
+  file.path(
     celine_guyana, "Celine Leroy_French Guiana_general.xlsx"),
   "Fauna_morphospecies_list")
 
 celine_general_traits <- read_xlsx(
-  here(
+  file.path(
     celine_guyana, "Celine Leroy_French Guiana_general.xlsx"),
   "Fauna_traits")
 
 celine_general_measures <- read_xlsx(
-  here(
+  file.path(
     celine_guyana, "Celine Leroy_French Guiana_general.xlsx"),
   "measures_decomposition_geograph")
 
@@ -1047,33 +1046,33 @@ celine_general_frenchguyana_data <- tibble(
 
 save(celine_canopy_frenchguyana_data,
      celine_general_frenchguyana_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "French_Guyana_Celine",
                  "Celine_FrenchGuyana.RData"))
 #--- Gonzalez_USA ----
 # aguardando retorno do email
 # aparentemente temos tratamentos com e sem telhado.
-gonzales_usa <- here("dados_microcosmos",
+gonzales_usa <- file.path(local_directory,
   "Gonzalez_USA",
   "González.NJ_Site_Microcosm_Updated_2.xlsx")
 
 gonzales_fa <- read_xlsx(
-  here(
+  file.path(
     gonzales_usa),
   "fauna_abundance")
 
 gonzales_list <- read_xlsx(
-  here(
+  file.path(
     gonzales_usa),
   "Fauna_morphospecies_list")
 
 gonzales_traits <- read_xlsx(
-  here(
+  file.path(
     gonzales_usa),
   "Fauna_traits")
 
 gonzales_measures <- read_xlsx(
-  here(
+  file.path(
     gonzales_usa),
   "measures_decomposition_geograph")
 
@@ -1192,33 +1191,33 @@ gonzales_site3_data <- tibble(
 save(gonzales_site1_data,
      gonzales_site2_data,
      gonzales_site3_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Gonzalez_USA",
                  "Gonzalez_USA.RData"))
 
 #--- Horvath_HU ----
 # dados do logger estão na mesma planilha
-horvath_hungria <- here("dados_microcosmos",
+horvath_hungria <- file.path(local_directory,
                      "Horvath_HU",
                      "Microcosm_HU_Horvath.xlsx")
 
 horvath_fa <- read_xlsx(
-  here(
+  file.path(
     horvath_hungria),
   "fauna_abundance")
 
 horvath_list <- read_xlsx(
-  here(
+  file.path(
     horvath_hungria),
   "Fauna_morphospecies_list")
 
 horvath_traits <- read_xlsx(
-  here(
+  file.path(
     horvath_hungria),
   "Fauna_traits")
 
 horvath_measures <- read_xlsx(
-  here(
+  file.path(
     horvath_hungria),
   "measures_decomposition_geograph")
 
@@ -1248,7 +1247,7 @@ horvath_data <- tibble(
   obs = "dados do logger estão na mesma planilha")
 
 save(horvath_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Horvath_HU",
                  "horvath_hungria.RData"))
 
@@ -1256,27 +1255,27 @@ save(horvath_data,
 
 #--- Izzo_Chapada_BR ----
 # Fauna_morphospecies_list: substituído '-' por 'NA' (fiz direto na planilha a remoção do hífen)
-izzo_br <- here("dados_microcosmos",
+izzo_br <- file.path(local_directory,
                         "Izzo_Chapada_BR",
                         "TJIZZO.Chapada.xlsx")
 
 izzo_fa <- read_xlsx(
-  here(
+  file.path(
     izzo_br),
   "fauna_abundance")
 
 izzo_list <- read_xlsx(
-  here(
+  file.path(
     izzo_br),
   "Fauna_morphospecies_list")
 
 izzo_traits <- read_xlsx(
-  here(
+  file.path(
     izzo_br),
   "Fauna_traits")
 
 izzo_measures <- read_xlsx(
-  here(
+  file.path(
     izzo_br),
   "measures_decomposition_geograph")
 
@@ -1305,32 +1304,32 @@ izzo_data <- tibble(
   e apenas com os parâmetros iniciais coletados")
 
 save(izzo_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Izzo_Chapada_BR",
                  "izzo_brazil.RData"))
 #--- GRomero_Japi ----
 # coordenadas convertidas direto no xlsx
-romero_japi <- here("dados_microcosmos",
+romero_japi <- file.path(local_directory,
                 "Japi_romero",
                 "Romero.Japi_updated_May_2024.xlsx")
 
 romero_japi_fa <- read_xlsx(
-  here(
+  file.path(
     romero_japi),
   "Japi-fauna_abundance")
 
 romero_japi_list <- read_xlsx(
-  here(
+  file.path(
     romero_japi),
   "Japi-Fauna_morphospecies_list")
 
 romero_japi_traits <- read_xlsx(
-  here(
+  file.path(
     romero_japi),
   "Fauna_traits")
 
 romero_japi_measures <- read_xlsx(
-  here(
+  file.path(
     romero_japi),
   "measures_decomposition_geograph")
 
@@ -1432,33 +1431,33 @@ romero_nonroof_japi_data <- tibble(
 
 save(romero_roof_japi_data,
      romero_nonroof_japi_data,
-     file = here("dados_microcosmos",
+     file =file.path(local_directory,
                  "Japi_romero",
                  "romero_japi_brazil.RData"))
 
 #--- Jari Finland ----
 # tirar dúvidas
-jari_finland <- here("dados_microcosmos",
+jari_finland <- file.path(local_directory,
                     "Jari_Finland",
                     "JariKouki-Finland-draft-data.xlsx")
 
 jari_fa <- read_xlsx(
-  here(
+  file.path(
     jari_finland),
   "fauna_abundance")
 
 jari_list <- read_xlsx(
-  here(
+  file.path(
     jari_finland),
   "Fauna_morphospecies_list")
 
 jari_traits <- read_xlsx(
-  here(
+  file.path(
     jari_finland),
   "Fauna_traits")
 
 jari_measures <- read_xlsx(
-  here(
+  file.path(
     jari_finland),
   "measures_decomposition_geograph")
 
@@ -1494,7 +1493,7 @@ jari_data <- tibble(
   obs = "Dados confusos. Precisamos tirar duvidas")
 
 save(jari_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Jari_Finland",
                  "jari_finland.RData"))
 
@@ -1504,29 +1503,29 @@ save(jari_data,
 # por ex, no tratamento com telhado, alguns taxons nao estao presentes, assim
 # como nos outros experimentos. Pela estrutura dos dados, tem 3 experimentos 
 # aqui, sendo um deles a comparacao entre UFPA vs. Utinga
-juen_belem <- here("dados_microcosmos",
+juen_belem <- file.path(local_directory,
                      "Juen_Belem_BR")
 
 juen_fa <- read_xlsx(
-  here(
+  file.path(
     juen_belem,
     "Juen_Belem_Amazon.xlsx"),
   "fauna_abundance")
 
 juen_list <- read_xlsx(
-  here(
+  file.path(
     juen_belem,
     "Juen_Belem_Amazon.xlsx"),
   "Fauna_morphospecies_list")
 
 juen_traits <- read_xlsx(
-  here(
+  file.path(
     juen_belem,
     "Juen_Belem_Amazon.xlsx"),
   "Fauna_traits")
 
 juen_measures <- read_xlsx(
-  here(
+  file.path(
     juen_belem,
     "Juen_Belem_Amazon.xlsx"),
   "measures_decomposition_geograph")
@@ -1673,36 +1672,36 @@ juen_na_data <- tibble(
 save(juen_na_data,
      juen_nonroof_data,
      juen_roof_data,
-     file = here("dados_microcosmos",
-                 "Juen_Belém_BR",
+     file = file.path(local_directory,
+                 "Juen_Belem_BR",
                  "juen_belem_br.RData"))
 
 
 #--- Knapp_Czech ----
 # tirar dúvidas
-knapp_czech <- here("dados_microcosmos",
+knapp_czech <- file.path(local_directory,
                    "Knapp_Czech")
 
 knapp_fa <- read_xlsx(
-  here(
+  file.path(
     knapp_czech,
     "Knapp_Michal_Krivoklatsko.xlsx"),
   "fauna_abundance")[1,1]
 
 knapp_list <- read_xlsx(
-  here(
+  file.path(
     knapp_czech,
     "Knapp_Michal_Krivoklatsko.xlsx"),
   "Fauna_morphospecies_list")[1,1]
 
 knapp_traits <- read_xlsx(
-  here(
+  file.path(
     knapp_czech,
     "Knapp_Michal_Krivoklatsko.xlsx"),
   "Fauna_traits")[1,1]
 
 knapp_measures <- read_xlsx(
-  here(
+  file.path(
     knapp_czech,
     "Knapp_Michal_Krivoklatsko.xlsx"),
   "measures_decomposition_geograph")[1:40, ]
@@ -1740,25 +1739,25 @@ knapp_nonroof_data <- tibble(
 
 # hory 
 knapp_hory_fa <- read_xlsx(
-  here(
+  file.path(
     knapp_czech,
     "Knapp Michal_Krusne_hory.xlsx"),
   "fauna_abundance")
 
 knapp_hory_list <- read_xlsx(
-  here(
+  file.path(
     knapp_czech,
     "Knapp Michal_Krusne_hory.xlsx"),
   "Fauna_morphospecies_list")
 
 knapp_hory_traits <- read_xlsx(
-  here(
+  file.path(
     knapp_czech,
     "Knapp Michal_Krusne_hory.xlsx"),
   "Fauna_traits")
 
 knapp_hory_measures <- read_xlsx(
-  here(
+  file.path(
     knapp_czech,
     "Knapp Michal_Krusne_hory.xlsx"),
   "measures_decomposition_geograph")[1:20, ]
@@ -1800,34 +1799,34 @@ knapp_data <- tibble(
 save(knapp_roof_data,
      knapp_nonroof_data,
      knapp_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Knapp_Czech",
                  "knapp_czech.RData"))
 
 #--- Luciano_argentina ----
-luciano_argentina <- here("dados_microcosmos",
+luciano_argentina <- file.path(local_directory,
                     "Luciano_Argentina")
 
 luciano_fa <- read_xlsx(
-  here(
+  file.path(
     luciano_argentina,
     "Microcosm_data_Cordoba.xlsx"),
   "Fauna_abundance")
 
 luciano_list <- read_xlsx(
-  here(
+  file.path(
     luciano_argentina,
     "Microcosm_data_Cordoba.xlsx"),
   "Fauna_morphospecies_list")
 
 luciano_traits <- read_xlsx(
-  here(
+  file.path(
     luciano_argentina,
     "Microcosm_data_Cordoba.xlsx"),
   "Fauna_traits")
 
 luciano_measures <- read_xlsx(
-  here(
+  file.path(
     luciano_argentina,
     "Microcosm_data_Cordoba.xlsx"),
   "measures_decomposition_geograph")
@@ -1856,7 +1855,7 @@ luciano_data <- tibble(
   obs = "")
 
 save(luciano_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Luciano_Argentina",
                  "luciano_argentina.RData"))
 
@@ -1866,30 +1865,30 @@ save(luciano_data,
 # e a diferenca de estratificacao com os microcosmos colocados a 15m de altura
 # depois precisamos remover de cada experimento as faunas que nao estiveram
 # presentes no respectivo tratamento (validado com Gustavo Romero)
-martins_amazon <- here("dados_microcosmos",
+martins_amazon <- file.path(local_directory,
                       "Martins_Hamada_Amazon")
 
 martins_fa <- read_xlsx(
-  here(
-    martins_hamada,
+  file.path(
+    martins_amazon,
     "Martins&Hamada_Manaus_01_12_23.xlsx"),
   "fauna_abundance")
 
 martins_list <- read_xlsx(
-  here(
-    martins_hamada,
+  file.path(
+    martins_amazon,
     "Martins&Hamada_Manaus_01_12_23.xlsx"),
   "Fauna_morphospecies_list")
 
 martins_traits <- read_xlsx(
-  here(
-    martins_hamada,
+  file.path(
+    martins_amazon,
     "Martins&Hamada_Manaus_01_12_23.xlsx"),
   "Fauna_traits")
 
 martins_measures <- read_xlsx(
-  here(
-    martins_hamada,
+  file.path(
+    martins_amazon,
     "Martins&Hamada_Manaus_01_12_23.xlsx"),
   "measures_decomposition_geograph")
 
@@ -2045,35 +2044,35 @@ martins_na_data <- tibble(
 save(martins_roof_data,
      martins_nonroof_data,
      martins_na_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Martins_Hamada_Amazon",
                  "martins_amazon_br.RData"))
 
 #--- Mexico_Wesley ----
 # retirei o undefined e deixei vazio para ler como NA.
-wesley_mexico <- here("dados_microcosmos",
+wesley_mexico <- file.path(local_directory,
                        "Mexico_Wesley")
 
 wesley_fa <- read_xlsx(
-  here(
+  file.path(
     wesley_mexico,
     "PI.WesleyDattilo_Mexico_FINAL.xlsx"),
   "fauna_abundance")
 
 wesley_list <- read_xlsx(
-  here(
+  file.path(
     wesley_mexico,
     "PI.WesleyDattilo_Mexico_FINAL.xlsx"),
   "Fauna_morphospecies_list")
 
 wesley_traits <- read_xlsx(
-  here(
+  file.path(
     wesley_mexico,
     "PI.WesleyDattilo_Mexico_FINAL.xlsx"),
   "Fauna_traits")
 
 wesley_measures <- read_xlsx(
-  here(
+  file.path(
     wesley_mexico,
     "PI.WesleyDattilo_Mexico_FINAL.xlsx"),
   "measures_decomposition_geograph")
@@ -2105,35 +2104,35 @@ wesley_data <- tibble(
   obs = "")
 
 save(wesley_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "Mexico_Wesley",
                  "wesley_mexico.RData"))
 
 
 #--- MMoretti Lab_BR ----
-moretti_br <- here("dados_microcosmos",
+moretti_br <- file.path(local_directory,
                       "MMoretti Lab_BR")
 
 moretti_site1_fa <- read_xlsx(
-  here(
+  file.path(
     moretti_br,
     "PI.Marcelo.Moretti.Site.1.xlsx"),
   "Fauna_abundance")
 
 moretti_site1_list <- read_xlsx(
-  here(
+  file.path(
     moretti_br,
     "PI.Marcelo.Moretti.Site.1.xlsx"),
   "Fauna_morphospecies_list")
 
 moretti_site1_traits <- read_xlsx(
-  here(
+  file.path(
     moretti_br,
     "PI.Marcelo.Moretti.Site.1.xlsx"),
   "Fauna_traits")
 
 moretti_site1_measures <- read_xlsx(
-  here(
+  file.path(
     moretti_br,
     "PI.Marcelo.Moretti.Site.1.xlsx"),
   "Measures_decomposition_geograph")
@@ -2169,25 +2168,25 @@ moretti_site1_measures <- moretti_site1_measures %>%
 
 # site 2
 moretti_site2_fa <- read_xlsx(
-  here(
+  file.path(
     moretti_br,
     "PI.Marcelo.Moretti.Site.2.xlsx"),
   "Fauna_abundance")
 
 moretti_site2_list <- read_xlsx(
-  here(
+  file.path(
     moretti_br,
     "PI.Marcelo.Moretti.Site.2.xlsx"),
   "Fauna_morphospecies_list")
 
 moretti_site2_traits <- read_xlsx(
-  here(
+  file.path(
     moretti_br,
     "PI.Marcelo.Moretti.Site.2.xlsx"),
   "Fauna_traits")
 
 moretti_site2_measures <- read_xlsx(
-  here(
+  file.path(
     moretti_br,
     "PI.Marcelo.Moretti.Site.2.xlsx"),
   "Measures_decomposition_geograph")
@@ -2235,7 +2234,7 @@ moretti_site2_data <- tibble(
 
 save(moretti_site1_data,
      moretti_site2_data,
-     file = here("dados_microcosmos",
+     file = file.path(local_directory,
                  "MMoretti Lab_BR",
                  "moretti_br.RData"))
 
@@ -2243,29 +2242,29 @@ save(moretti_site1_data,
 # TODO: ainda falta receber os dados formatados
 
 #--- Nakamura_China ---- 
-nakamura <- here("dados_microcosmos",
+nakamura <- file.path(local_directory,
                   "Nakamura_China")
 
 nakamura_site1_fa <- read_xlsx(
-  here(
+  file.path(
     nakamura,
     "Nakamura_AilaoMountainYunnanChina.xlsx"),
   "fauna_abundance")
 
 nakamura_site1_list <- read_xlsx(
-  here(
+  file.path(
     nakamura,
     "Nakamura_AilaoMountainYunnanChina.xlsx"),
   "Fauna_morphospecies_list")
 
 nakamura_site1_traits <- read_xlsx(
-  here(
+  file.path(
     nakamura,
     "Nakamura_AilaoMountainYunnanChina.xlsx"),
   "Fauna_traits")[1:11,] # retirando linhas de anotacao
 
 nakamura_site1_measures <- read_xlsx(
-  here(
+  file.path(
     nakamura,
     "Nakamura_AilaoMountainYunnanChina.xlsx"),
   "measures_decomposition_geograph")
@@ -2302,25 +2301,25 @@ nakamura_site1_data <- tibble(
 
 # site 2
 nakamura_site2_fa <- read_xlsx(
-  here(
+  file.path(
     nakamura,
     "Nakamura_BubengYunnanChina_MICROcosm.xlsx"),
   "fauna_abundance")
 
 nakamura_site2_list <- read_xlsx(
-  here(
+  file.path(
     nakamura,
     "Nakamura_BubengYunnanChina_MICROcosm.xlsx"),
   "Fauna_morphospecies_list")
 
 nakamura_site2_traits <- read_xlsx(
-  here(
+  file.path(
     nakamura,
     "Nakamura_BubengYunnanChina_MICROcosm.xlsx"),
   "Fauna_traits")
 
 nakamura_site2_measures <- read_xlsx(
-  here(
+  file.path(
     nakamura,
     "Nakamura_BubengYunnanChina_MICROcosm.xlsx"),
   "measures_decomposition_geograph")
@@ -2345,9 +2344,9 @@ nakamura_site2_measures <-
   rename(all_of(dict_names))
 
 # join works!
-View(left_join(nakamura_site2_list,
-               nakamura_site2_traits,
-          by = "Morfospecies_name"))
+#View(left_join(nakamura_site2_list,
+#               nakamura_site2_traits,
+#          by = "Morfospecies_name"))
 
 nakamura_site2_data <- tibble(
   researcher = "Nakamura",
@@ -2362,33 +2361,33 @@ nakamura_site2_data <- tibble(
 # save .RData from romero
 save(nakamura_site1_data,
      nakamura_site2_data,
-     file = here(nakamura,
+     file = file.path(nakamura,
                  "nakamura_china.RData"))
 
 #--- Nock ----
-nock_canada <- here("dados_microcosmos",
+nock_canada <- file.path(local_directory,
                     "Nock")
 
 #nock_fa <- read_xlsx(
-#  here(
+#  file.path(
 #    nock_canada,
 #    "CA_NOCK_EMEND.2.xlsx"),
 #  "fauna_abundance")
 #
 #nock_list <- read_xlsx(
-#  here(
+#  file.path(
 #    nock_canada,
 #    "CA_NOCK_EMEND.2.xlsx"),
 #  "Fauna_morphospecies_list")
 #
 #nock_traits <- read_xlsx(
-#  here(
+#  file.path(
 #    nock_canada,
 #    "CA_NOCK_EMEND.2.xlsx"),
 #  "Fauna_traits")
 
 nock_measures <- read_xlsx(
-  here(
+  file.path(
     nock_canada,
     "CA_NOCK_EMEND.2.xlsx"),
   "measures_decomposition_geograph")
@@ -2409,34 +2408,33 @@ nock_data <- tibble(
   obs = "Sem invertebrados presentes na coleta? confirmar")
 
 save(nock_data,
-     file = here("dados_microcosmos",
-                 "Nock",
+     file = file.path(nock_canada,
                  "nock_canada.RData"))
 
 #--- Pavel Kratina_UK ----
-pavel_uk <- here("dados_microcosmos",
+pavel_uk <- file.path(local_directory,
                    "Pavel Kratina_UK")
 
 pavel_site1_fa <- read_xlsx(
-  here(
+  file.path(
     pavel_uk,
     "Microcosm_UK_Kratina.xlsx"),
   "fauna_abundance")
 
 pavel_site1_list <- read_xlsx(
-  here(
+  file.path(
     pavel_uk,
     "Microcosm_UK_Kratina.xlsx"),
   "Fauna_morphospecies_list")
 
 pavel_site1_traits <- read_xlsx(
-  here(
+  file.path(
     pavel_uk,
     "Microcosm_UK_Kratina.xlsx"),
   "Fauna_traits")
 
 pavel_site1_measures <- read_xlsx(
-  here(
+  file.path(
     pavel_uk,
     "Microcosm_UK_Kratina.xlsx"),
   "measures_decomposition_geograph")
@@ -2458,25 +2456,25 @@ pavel_site1_measures <- pavel_site1_measures %>%
 
 # site 2
 pavel_site2_fa <- read_xlsx(
-  here(
+  file.path(
     pavel_uk,
     "PavelKratina_Site_UK.xlsx"),
   "fauna_abundance")
 
 pavel_site2_list <- read_xlsx(
-  here(
+  file.path(
     pavel_uk,
     "PavelKratina_Site_UK.xlsx"),
   "Fauna_morphospecies_list")
 
 pavel_site2_traits <- read_xlsx(
-  here(
+  file.path(
     pavel_uk,
     "PavelKratina_Site_UK.xlsx"),
   "Fauna_traits")
 
 pavel_site2_measures <- read_xlsx(
-  here(
+  file.path(
     pavel_uk,
     "PavelKratina_Site_UK.xlsx"),
   "measures_decomposition_geograph")
@@ -2517,34 +2515,37 @@ pavel_site2_data <- tibble(
 #View(pavel_site2_data)
 save(pavel_site1_data,
      pavel_site2_data,
-     file = here("dados_microcosmos",
-                 "Pavel Kratina_UK",
+     file = file.path(pavel_uk,
                  "pavel_uk.RData"))
 
 
 #--- Petterman_Austria ----
-petermann_austria <- here("dados_microcosmos",
-                        "Petermann_Austria",
-                 "Petermann.Austria Wienerwald_Global experiment_v2.xlsx")
+petermann_austria <- file.path(local_directory,
+                        "Petermann_Austria"
+                 )
 
 pettermann_fa <- read_xlsx(
-  here(
-    petermann_austria),
+  file.path(
+    petermann_austria,
+    "Petermann.Austria Wienerwald_Global experiment_v2.xlsx"),
   "fauna_abundance")
 
 pettermann_list <- read_xlsx(
-  here(
-    petermann_austria),
+  file.path(
+    petermann_austria,
+    "Petermann.Austria Wienerwald_Global experiment_v2.xlsx"),
   "Fauna_morphospecies_list")
 
 pettermann_traits <- read_xlsx(
-  here(
-    petermann_austria),
+  file.path(
+    petermann_austria,
+    "Petermann.Austria Wienerwald_Global experiment_v2.xlsx"),
   "Fauna_traits")
 
 pettermann_measures <- read_xlsx(
-  here(
-    petermann_austria),
+  file.path(
+    petermann_austria,
+    "Petermann.Austria Wienerwald_Global experiment_v2.xlsx"),
   "measures_decomposition")
 
 # abundance
@@ -2573,35 +2574,34 @@ pettermann_data <- tibble(
   obs = "Confirmar dados no data_log.txt")
 
 save(pettermann_data,
-     file = here("dados_microcosmos",
-                 "Petermann_Austria",
+     file = file.path(petermann_austria,
                  "petermann_austria.RData"))
 
 
 #--- Renan_Chapeco ----
-renan_br <- here("dados_microcosmos",
+renan_br <- file.path(local_directory,
                 "Renan_Chapeco")
 
 renan_alloch_fa <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "Allochthonous_Chapeco_BR.xlsx"),
   "fauna_abundance_allochthonous")
 
 renan_alloch_list <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "Allochthonous_Chapeco_BR.xlsx"),
   "Fauna_morphospecies_list")
 
 renan_alloch_traits <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "Allochthonous_Chapeco_BR.xlsx"),
   "Fauna_traits")
 
 renan_alloch_measures <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "Allochthonous_Chapeco_BR.xlsx"),
   "measures_decomposition_allochth")
@@ -2631,25 +2631,25 @@ renan_alloch_measures <- renan_alloch_measures %>%
 
 #vertical_chapeco
 renan_vertical_fa <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "Vertical_Chapeco_BR.xlsx"),
   "fauna_abundance_vertical")
 
 renan_vertical_list <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "vertical_Chapeco_BR.xlsx"),
   "Fauna_morphospecies_list")
 
 renan_vertical_traits <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "vertical_Chapeco_BR.xlsx"),
   "Fauna_traits")
 
 renan_vertical_measures <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "vertical_Chapeco_BR.xlsx"),
   "measures_decomposition_vertical")
@@ -2679,25 +2679,25 @@ renan_vertical_measures <- renan_vertical_measures %>%
 
 #basic_chapeco
 renan_basic_fa <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "Basic_Chapeco_BR.xlsx"),
   "fauna_abundance_basic")
 
 renan_basic_list <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "Basic_Chapeco_BR.xlsx"),
   "Fauna_morphospecies_list")
 
 renan_basic_traits <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "Basic_Chapeco_BR.xlsx"),
   "Fauna_traits")
 
 renan_basic_measures <- read_xlsx(
-  here(
+  file.path(
     renan_br,
     "Basic_Chapeco_BR.xlsx"),
   "measures_decomposition_basic")
@@ -2764,34 +2764,33 @@ renan_basic_data <- tibble(
 save(renan_alloch_data,
      renan_vertical_data,
      renan_basic_data,
-     file = here("dados_microcosmos",
-                 "Renan_Chapeco",
+     file = file.path(renan_br,
                  "renan_br.RData"))
 
 #--- Rodrigo_Argentina ----
-rodrigo_argentina <- here("dados_microcosmos",
+rodrigo_argentina <- file.path(local_directory,
                  "Rodrigo_Argentina")
 
 rodrigo_fa <- read_xlsx(
-  here(
+  file.path(
     rodrigo_argentina,
     "FreireRodrigo_Site.1.xlsx"),
   "fauna_abundance")
 
 rodrigo_list <- read_xlsx(
-  here(
+  file.path(
     rodrigo_argentina,
     "FreireRodrigo_Site.1.xlsx"),
   "Fauna_morphospecies_list")
 
 rodrigo_traits <- read_xlsx(
-  here(
+  file.path(
     rodrigo_argentina,
     "FreireRodrigo_Site.1.xlsx"),
   "Fauna_traits")
 
 rodrigo_measures <- read_xlsx(
-  here(
+  file.path(
     rodrigo_argentina,
     "FreireRodrigo_Site.1.xlsx"),
   "measures_decomposition_geograph")
@@ -2825,33 +2824,33 @@ rodrigo_data <- tibble(
   obs = "Confirmar dados no data_log.txt")
 
 save(rodrigo_data,
-     file = here(rodrigo_argentina,
+     file = file.path(rodrigo_argentina,
                  "rodrigo_data.RData"))
 
 #--- Sedney_Francis_Filipinas ----
-sedney_filipinas <- here("dados_microcosmos",
+sedney_filipinas <- file.path(local_directory,
                           "Sedney_Francis_Filipinas")
 
 sedney_fa <- read_xlsx(
-  here(
+  file.path(
     sedney_filipinas,
     "Magbanua_Philippines_MICROcosms revised data.xlsx"),
   "fauna_abundance")
 
 sedney_list <- read_xlsx(
-  here(
+  file.path(
     sedney_filipinas,
     "Magbanua_Philippines_MICROcosms revised data.xlsx"),
   "Fauna_morphospecies_list")
 
 sedney_traits <- read_xlsx(
-  here(
+  file.path(
     sedney_filipinas,
     "Magbanua_Philippines_MICROcosms revised data.xlsx"),
   "Fauna_traits")
 
 sedney_measures <- read_xlsx(
-  here(
+  file.path(
     sedney_filipinas,
     "Magbanua_Philippines_MICROcosms revised data.xlsx"),
   "measures_decomposition_geograph")
@@ -2881,33 +2880,33 @@ sedney_data <- tibble(
   obs = "Confirmar dados no data_log.txt")
 
 save(sedney_data,
-     file = here(sedney_filipinas,
+     file = file.path(sedney_filipinas,
                  "sedney_filipinas.RData"))
 
 #--- Srivastava_Canada ----
-srivastava_canada <- here("dados_microcosmos",
+srivastava_canada <- file.path(local_directory,
                          "Srivastava_Canada")
 
 srivastava_site1_fa <- read_xlsx(
-  here(
+  file.path(
     srivastava_canada,
     "Srivastava_site1.xlsx"),
   "fauna_abundance")
 
 srivastava_site1_list <- read_xlsx(
-  here(
+  file.path(
     srivastava_canada,
     "Srivastava_site1.xlsx"),
   "Fauna_morphospecies_list")
 
 srivastava_site1_traits <- read_xlsx(
-  here(
+  file.path(
     srivastava_canada,
     "Srivastava_site1.xlsx"),
   "Fauna_traits")
 
 srivastava_site1_measures <- read_xlsx(
-  here(
+  file.path(
     srivastava_canada,
     "Srivastava_site1.xlsx"),
   "measures_decomposition_geograph")
@@ -2932,25 +2931,25 @@ srivastava_site1_measures <- srivastava_site1_measures %>%
 
 # site 2
 srivastava_site2_fa <- read_xlsx(
-  here(
+  file.path(
     srivastava_canada,
     "Srivastava_site2.xlsx"),
   "fauna_abundance")
 
 srivastava_site2_list <- read_xlsx(
-  here(
+  file.path(
     srivastava_canada,
     "Srivastava_site2.xlsx"),
   "Fauna_morphospecies_list")
 
 srivastava_site2_traits <- read_xlsx(
-  here(
+  file.path(
     srivastava_canada,
     "Srivastava_site2.xlsx"),
   "Fauna_traits")
 
 srivastava_site2_measures <- read_xlsx(
-  here(
+  file.path(
     srivastava_canada,
     "Srivastava_site2.xlsx"),
   "measures_decomposition_geograph")
@@ -2995,33 +2994,33 @@ srivastava_site2_data <- tibble(
 
 save(srivastava_site1_data,
      srivastava_site2_data,
-     file = here(srivastava_canada,
+     file = file.path(srivastava_canada,
                  "srivastava_canada.RData"))
 
 #--- Sweet_UK ----
-sweet_uk <- here("dados_microcosmos",
+sweet_uk <- file.path(local_directory,
                   "Sweet_UK")
 
 sweet_fa <- read_xlsx(
-  here(
+  file.path(
     sweet_uk,
     "Sweet Site UK.xlsx"),
   "fauna_abundance")
 
 sweet_list <- read_xlsx(
-  here(
+  file.path(
     sweet_uk,
     "Sweet Site UK.xlsx"),
   "Fauna_morphospecies_list")
 
 sweet_traits <- read_xlsx(
-  here(
+  file.path(
     sweet_uk,
     "Sweet Site UK.xlsx"),
   "Fauna_traits")
 
 sweet_measures <- read_xlsx(
-  here(
+  file.path(
     sweet_uk,
     "Sweet Site UK.xlsx"),
   "measures_decomposition_geograph")
@@ -3052,33 +3051,33 @@ sweet_data <- tibble(
   obs = "Precisa confirmar as coordenadas")
 
 save(sweet_data,
-     file = here(sweet_uk,
+     file = file.path(sweet_uk,
                  "sweet_uk.RData"))
 
 #--- Thomas_Alemanha ----
-thomas_alemanha <- here("dados_microcosmos",
+thomas_alemanha <- file.path(local_directory,
                         "Thomas_Alemanha")
 
 thomas_fa <- read_xlsx(
-  here(
+  file.path(
     thomas_alemanha,
     "Scheuerl_Site.2.xlsx"),
   "fauna_abundance")
 
 thomas_list <- read_xlsx(
-  here(
+  file.path(
     thomas_alemanha,
     "Scheuerl_Site.2.xlsx"),
   "Fauna_morphospecies_list")
 
 thomas_traits <- read_xlsx(
-  here(
+  file.path(
     thomas_alemanha,
     "Scheuerl_Site.2.xlsx"),
   "Fauna_traits_Scheuerl")
 
 thomas_measures <- read_xlsx(
-  here(
+  file.path(
     thomas_alemanha,
     "Scheuerl_Site.2.xlsx"),
   "measures_decomposition_geograph")
@@ -3109,34 +3108,34 @@ thomas_data <- tibble(
   obs = "Confirmar dados no data_log.txt")
 
 save(thomas_data,
-     file = here(thomas_alemanha,
+     file = file.path(thomas_alemanha,
                  "thomas_alemanha.RData"))
 
 
 #--- Anikka Germany ----
-anikka_alemanha <- here("dados_microcosmos",
+anikka_alemanha <- file.path(local_directory,
                         "Annika_Germany")
 
 anikka_fa <- read_xlsx(
-  here(
+  file.path(
     anikka_alemanha,
     "AnnikaBusse_BavarianForst_Germany.xlsx"),
   "fauna_abundance")
 
 anikka_list <- read_xlsx(
-  here(
+  file.path(
     anikka_alemanha,
     "AnnikaBusse_BavarianForst_Germany.xlsx"),
   "Fauna_morphospecies_list")
 
 anikka_traits <- read_xlsx(
-  here(
+  file.path(
     anikka_alemanha,
     "AnnikaBusse_BavarianForst_Germany.xlsx"),
   "Fauna_traits")
 
 anikka_measures <- read_xlsx(
-  here(
+  file.path(
     anikka_alemanha,
     "AnnikaBusse_BavarianForst_Germany.xlsx"),
   "measures_decomposition_geograph")
@@ -3151,8 +3150,9 @@ head(anikka_list)
 head(anikka_traits)
 
 # measures
-anikka_measures %>%
-  rename(all_of(dict_names))
+# TODO renomear colunas, mas pra isso, checar unidades de medida
+#anikka_measures %>%
+#  rename(all_of(dict_names))
 
 names(anikka_measures)
 
@@ -3167,40 +3167,40 @@ anikka_data <- tibble(
   obs = "Nomes das colunas measures nao padronizados, checar data_log")
 #View(anikka_data)
 save(anikka_data,
-     file = here(anikka_alemanha,
+     file = file.path(anikka_alemanha,
                  "anikka_alemanha.RData"))
 
 
 #--- Claas_New Zealand ----
-claas_newzealand <- here("dados_microcosmos",
+claas_newzealand <- file.path(local_directory,
                         "Claas_NewZealand")
 
 claas_fa <- read_xlsx(
-  here(
+  file.path(
     claas_newzealand,
     "ClaasDamken_Dunedin_NewZealand.xlsx"),
   "fauna_abundance")
 
 claas_list <- read_xlsx(
-  here(
+  file.path(
     claas_newzealand,
     "ClaasDamken_Dunedin_NewZealand.xlsx"),
   "Fauna_morphospecies_list")
 
 claas_traits <- read_xlsx(
-  here(
+  file.path(
     claas_newzealand,
     "ClaasDamken_Dunedin_NewZealand.xlsx"),
   "Fauna_traits")[1:2,]
 
 claas_measures <- read_xlsx(
-  here(
+  file.path(
     claas_newzealand,
     "ClaasDamken_Dunedin_NewZealand.xlsx"),
   "measures_decomposition_geograph")
 
 # abundance
-View(claas_fa)
+head(claas_fa)
 
 # list
 head(claas_list)
@@ -3229,33 +3229,33 @@ claas_data <- tibble(
   obs = "Checar infos data_log.txt")
 #View(anikka_data)
 save(claas_data,
-     file = here(claas_newzealand,
+     file = file.path(claas_newzealand,
                  "claas_newzealand.RData"))
 
 #--- Martin Gossner ----
-martin_suica <- here("dados_microcosmos",
+martin_suica <- file.path(local_directory,
                          "MartinGossner_Holsetein")
 
 martin_fa <- read_xlsx(
-  here(
+  file.path(
     martin_suica,
     "Hölstein_AB_22.11.2023_MartinGossner.xlsx"),
   "fauna_abundance")
 
 martin_list <- read_xlsx(
-  here(
+  file.path(
     martin_suica,
     "Hölstein_AB_22.11.2023_MartinGossner.xlsx"),
   "Fauna_morphospecies_list")
 
 martin_traits <- read_xlsx(
-  here(
+  file.path(
     martin_suica,
     "Hölstein_AB_22.11.2023_MartinGossner.xlsx"),
   "Fauna_traits")
 
 martin_measures <- read_xlsx(
-  here(
+  file.path(
     martin_suica,
     "Hölstein_AB_22.11.2023_MartinGossner.xlsx"),
   "measures_decomposition_geograph")
@@ -3336,8 +3336,9 @@ martin_data_2022 <- tibble(
 #View(anikka_data)
 save(martin_data_2021,
      martin_data_2022, 
-     file = here(martin_suica,
+     file = file.path(martin_suica,
                  "martin_suica.RData"))
+
 
 #--- Nested dataframe ----
 ### ATENCAO ###
@@ -3406,8 +3407,11 @@ nested_df <- bind_rows(boukal_czech_roof,
 
 data <- column_id(nested_df, "MD")
 #View(data)
-save(data,
-     file = here("dados_microcosmos",
-                 "nested_df.RData"))
 
-load(here("dados_microcosmos/nested_df.RData"))
+# salva no drive do projeto
+save(data,
+     file = file.path(local_directory,
+                 "nested_df.RData"))
+# salva no github
+save(data,
+     file = here::here("nested_df.RData"))
