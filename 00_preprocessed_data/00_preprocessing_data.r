@@ -3339,6 +3339,252 @@ save(martin_data_2021,
      file = file.path(martin_suica,
                  "martin_suica.RData"))
 
+#--- Sam_Czech ----
+sam_czech <- file.path(local_directory,
+                          "Sam_Czech")
+sam_fa <- read_xlsx(
+  file.path(
+    sam_czech,
+    "Sam.Czechia_Lipi.2.xlsx"),
+  "fauna_abundance")
+
+sam_list <- read_xlsx(
+  file.path(
+    sam_czech,
+    "Sam.Czechia_Lipi.2.xlsx"),
+  "Fauna_morphospecies_list")
+
+sam_traits <- read_xlsx(
+  file.path(
+    sam_czech,
+    "Sam.Czechia_Lipi.2.xlsx"),
+  "Fauna_traits")
+
+sam_measures <- read_xlsx(
+  file.path(
+    sam_czech,
+    "Sam.Czechia_Lipi.2.xlsx"),
+  "measures_decomposition_geograph")
+
+head(sam_fa)
+head(sam_list)
+head(sam_traits)
+
+sam_measures <- sam_measures %>%
+  rename(all_of(dict_names))
+
+sam_data <- tibble(
+  researcher = "Sam",
+  locality = "Czechia",
+  roof_treatment = NA,
+  abundance = list(tibble(sam_fa)),
+  list = list(tibble(sam_list)),
+  traits= list(tibble(sam_traits)),
+  measures=list(tibble(sam_measures)),
+  obs = "")
+
+save(sam_data, 
+     file = file.path(sam_czech,
+                      "sam_czechia.RData"))
+
+# Larrieu_France ----
+larrieu_france <- file.path(local_directory,
+                       "Larrieu_Bouget_Burat_Fontainebleu")
+
+# Burat
+larrieu_burat_fa <- read_xlsx(
+  file.path(
+    larrieu_france,
+    "Burat France_Final.xlsx"),
+  "fauna_abundance")
+
+larrieu_burat_list <- read_xlsx(
+  file.path(
+    larrieu_france,
+    "Burat France_Final.xlsx"),
+  "Fauna_morphospecies_list")
+
+larrieu_burat_traits <- read_xlsx(
+  file.path(
+    larrieu_france,
+    "Burat France_Final.xlsx"),
+  "Fauna_traits")
+
+larrieu_burat_measures <- read_xlsx(
+  file.path(
+    larrieu_france,
+    "Burat France_Final.xlsx"),
+  "measures_decomposition_geograph")
+
+head(larrieu_burat_fa)
+head(larrieu_burat_list)
+head(larrieu_burat_traits)
+
+larrieu_burat_measures <- larrieu_burat_measures %>%
+  rename("Natural tree hole.1" = "Natural tree hole.1 (yes/no)") %>%
+  rename("Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename("canopy openness" = "canopy cover") %>%
+  rename(all_of(dict_names))
+
+# Fontainebleau
+larrieu_france <- file.path(local_directory,
+                            "Larrieu_Bouget_Burat_Fontainebleu")
+larrieu_fontainebleau_fa <- read_xlsx(
+  file.path(
+    larrieu_france,
+    "Fontainebleau France_FINAL.xlsx"),
+  "fauna_abundance")
+
+larrieu_fontainebleau_list <- read_xlsx(
+  file.path(
+    larrieu_france,
+    "Fontainebleau France_FINAL.xlsx"),
+  "Fauna_morphospecies_list")
+
+larrieu_fontainebleau_traits <- read_xlsx(
+  file.path(
+    larrieu_france,
+    "Fontainebleau France_FINAL.xlsx"),
+  "Fauna_traits")
+
+larrieu_fontainebleau_measures <- read_xlsx(
+  file.path(
+    larrieu_france,
+    "Fontainebleau France_FINAL.xlsx"),
+  "measures_decomposition_geograph")
+
+head(larrieu_fontainebleau_fa)
+head(larrieu_fontainebleau_list)
+head(larrieu_fontainebleau_traits)
+
+larrieu_fontainebleau_measures <- larrieu_fontainebleau_measures %>%
+  rename("Tree dbh" = "Tree dbh_cm") %>%
+  rename("canopy openness" = "canopy cover (%)") %>%
+  rename(all_of(dict_names))
+
+larrieu_fontainebleau_data <- tibble(
+  researcher = "Larrieu",
+  locality = "Fontainebleau_France",
+  roof_treatment = NA,
+  abundance = list(tibble(larrieu_fontainebleau_fa)),
+  list = list(tibble(larrieu_fontainebleau_list)),
+  traits= list(tibble(larrieu_fontainebleau_traits)),
+  measures=list(tibble(larrieu_fontainebleau_measures)),
+  obs = "")
+
+larrieu_burat_data <- tibble(
+  researcher = "Larrieu",
+  locality = "Burat_France",
+  roof_treatment = NA,
+  abundance = list(tibble(larrieu_burat_fa)),
+  list = list(tibble(larrieu_burat_list)),
+  traits= list(tibble(larrieu_burat_traits)),
+  measures=list(tibble(larrieu_burat_measures)),
+  obs = "")
+
+#View(anikka_data)
+save(larrieu_burat_data, 
+     larrieu_fontainebleau_data,
+     file = file.path(larrieu_france,
+                      "larrieu_france.RData"))
+
+# Yoshida_Kusaki ----
+yoshida_kusaki <- file.path(local_directory,
+                            "Yoshida_Kusaki")
+yoshida_kusaki_fa <- read_xlsx(
+  file.path(
+    yoshida_kusaki,
+    "Japan_Kusaki_AB_22.12.2023_MG.xlsx"),
+  "fauna_abundance")
+
+yoshida_kusaki_list <- read_xlsx(
+  file.path(
+    yoshida_kusaki,
+    "Japan_Kusaki_AB_22.12.2023_MG.xlsx"),
+  "Fauna_morphospecies_list")
+
+yoshida_kusaki_traits <- read_xlsx(
+  file.path(
+    yoshida_kusaki,
+    "Japan_Kusaki_AB_22.12.2023_MG.xlsx"),
+  "Fauna_traits")
+
+yoshida_kusaki_measures <- read_xlsx(
+  file.path(
+    yoshida_kusaki,
+    "Japan_Kusaki_AB_22.12.2023_MG.xlsx"),
+  "measures_decomposition_geograph")
+
+head(yoshida_kusaki_fa)
+head(yoshida_kusaki_list)
+head(yoshida_kusaki_traits)
+
+yoshida_kusaki_measures <- yoshida_kusaki_measures %>%
+  rename("dissolved_O2" = "dissolved_O2_mg_L") %>%
+  rename(all_of(dict_names))
+
+yoshida_kusaki_data <- tibble(
+  researcher = "Yoshida",
+  locality = "Kusaki_Japan",
+  roof_treatment = NA,
+  abundance = list(tibble(yoshida_kusaki_fa)),
+  list = list(tibble(yoshida_kusaki_list)),
+  traits= list(tibble(yoshida_kusaki_traits)),
+  measures=list(tibble(yoshida_kusaki_measures)),
+  obs = "Conferir data_log")
+
+save(yoshida_kusaki_data, 
+     file = file.path(yoshida_kusaki,
+                      "yoshida_kusaki.RData"))
+
+# Yoshida_Karasawayama ---- 
+yoshida_karasawayama <- file.path(local_directory,
+                                  "Yoshida_Karasawayama")
+yoshida_karasawayama_fa <- read_xlsx(
+  file.path(
+    yoshida_karasawayama,
+    "Japan_Karasawayama_AB_22.12.2023_MG.xlsx"),
+  "fauna_abundance")
+
+yoshida_karasawayama_list <- read_xlsx(
+  file.path(
+    yoshida_karasawayama,
+    "Japan_Karasawayama_AB_22.12.2023_MG.xlsx"),
+  "Fauna_morphospecies_list")
+
+yoshida_karasawayama_traits <- read_xlsx(
+  file.path(
+    yoshida_karasawayama,
+    "Japan_Karasawayama_AB_22.12.2023_MG.xlsx"),
+  "Fauna_traits")
+
+yoshida_karasawayama_measures <- read_xlsx(
+  file.path(
+    yoshida_karasawayama,
+    "Japan_Karasawayama_AB_22.12.2023_MG.xlsx"),
+  "measures_decomposition_geograph")
+
+head(yoshida_karasawayama_fa)
+head(yoshida_karasawayama_list)
+head(yoshida_karasawayama_traits)
+
+yoshida_karasawayama_measures <- yoshida_karasawayama_measures %>%
+  rename("dissolved_O2" = "dissolved_O2_mg_L") %>%
+  rename(all_of(dict_names))
+
+yoshida_karasawayama_data <- tibble(
+  researcher = "Yoshida",
+  locality = "karasawayama_Japan",
+  roof_treatment = NA,
+  abundance = list(tibble(yoshida_karasawayama_fa)),
+  list = list(tibble(yoshida_karasawayama_list)),
+  traits= list(tibble(yoshida_karasawayama_traits)),
+  measures=list(tibble(yoshida_karasawayama_measures)),
+  obs = "Conferir data_log")
+
+save(yoshida_karasawayama_data, 
+     file = file.path(yoshida_karasawayama,
+                      "yoshida_karasawayama.RData"))
 
 #--- Nested dataframe ----
 ### ATENCAO ###
@@ -3403,15 +3649,18 @@ nested_df <- bind_rows(boukal_czech_roof,
                        claas_data,
                        romero_roof_japi_data,
                        martin_data_2021,
-                       martin_data_2022)
+                       martin_data_2022,
+                       sam_data,
+                       larrieu_burat_data, 
+                       larrieu_fontainebleau_data,
+                       yoshida_kusaki_data,
+                       yoshida_karasawayama_data)
 
-data <- column_id(nested_df, "MD")
-#View(data)
+data_number <- column_id(nested_df, "MD")
 
-# salva no drive do projeto
-save(data,
-     file = file.path(local_directory,
-                 "nested_df.RData"))
+# Save in data_preprocessing
+# This data is original traits by the authors
 # salva no github
-save(data,
-     file = here::here("nested_df.RData"))
+save(data_number,
+     file = here::here("00_preprocessed_data",
+                      "nested_df_original.RData"))
