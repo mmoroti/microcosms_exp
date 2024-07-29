@@ -1,11 +1,35 @@
 # Mon Apr 29 09:56:19 2024 ------------------------------
 library(tidyverse)
-library(visdat)
+#library(visdat)
 
+# joins list and traits into a dataframe traits_list for classification
+# of the new traits. It also checks if the three columns have
+# the same number of species. If false, they have different counts.
+combine_and_count <- function(list_trait_non_classified) {
+  for (i in 1:nrow(list_trait_non_classified)) {
+    # inner_join to combine with all names in both dataset
+    list_trait_non_classified$trait_list[[i]] <- inner_join(list_trait_non_classified$list[[i]],
+                                                            list_trait_non_classified$traits[[i]],
+                                                            by = "Morfospecies_name")
+    list_trait_non_classified$nrow_list[[i]] <- nrow(list_trait_non_classified$list[[i]])
+    list_trait_non_classified$nrow_traits[[i]] <- nrow(list_trait_non_classified$traits[[i]])
+    list_trait_non_classified$nrow_trait_list[[i]] <- nrow(list_trait_non_classified$trait_list[[i]])
+    
+    list_trait_non_classified$validation[[i]] <- (
+      list_trait_non_classified$nrow_list[[i]] == list_trait_non_classified$nrow_traits[[i]] && 
+        list_trait_non_classified$nrow_list[[i]] == list_trait_non_classified$nrow_trait_list[[i]])
+  }
+  list_trait_non_classified <- list_trait_non_classified %>% relocate(
+    c(nrow_list,nrow_traits,nrow_trait_list, validation), .after = ID) %>%
+    
+    return(list_trait_non_classified)
+}
+
+# Herein, we generate new nested lists as the database experiment progresses
 # This part is no longer necessary to be executed. 
 # Here, we combined all species from the ‘list’ and ‘traits’ sheets 
 # into a single list to receive new life history trait classifications.
-# Continue from line 337 in the script
+# This process occurred over time, so each case required an alternative solution.
 # Fri Jul 26 18:14:52 2024 ------------------------------
 
 
@@ -230,325 +254,111 @@ list_traits_review <- list_traits_unnest %>%
          siphon_short = NA,
          siphon_long = NA)
 
-# TODO Needs adjustments
-#View(list_traits_unnest)  
-#View(list_traits_review)
-#ncol(list_traits_review) # 90 colunas
 
-# especificando a ordem desejada das colunas
-#ordem_desejada <- c("ID", "researcher", "locality", 
-#                    "Class","Order", "Family", 
-#                    "Genus","Morfospecies_name", "(morpho)Species", 
-#                    "uncertain_trait", "life_cycle",
-#                    "total_length","flat_elongate","flat_ovoid",
-#                    "cylindrical_elongate","cylindrical_ovoid","aquatic_stage", 
-#                    "feeding_guild", "deposit_feeder","shredder",
-#                    "scraper","filter_feeder","piercer","predator",
-#                    "microorganisms","detritus_(<1 mm)","dead_plant_(litter)",
-#                    "living_microphytes","living_leaf_tissue",
-#                    "dead_animals_(>1 mm)","living_microinvertebrates",
-#                    "living_macroinvertebrates", "defense", "elongate_tubercle",
-#                    "hairs","sclerotized_spines","dorsal_plates",
-#                    "sclerotized_exoskeleton","shell" ,"case_or_tube", 
-#                    "none_defense", "eggs_statoblasts", "cocoons",             
-#                    "diapause_or_dormancy","none_resistence","<21days",
-#                    "21-60days",">60days", "ovoviparity",
-#                    "isolated_eggs_free","isolated_eggs_cemented",
-#                    "clutches_cemented", "clutches_free", 
-#                    "clutches_in_vegetation", "clutches_in_terrestrial",
-#                    "clutches_terrestrial",
-#                    "assexual_reproduction", "habitat", "terrestrial",
-#                    "pelagic", "benthic", "water_surface", "integument",
-#                    "gill", "plastron" , "Siphon/spiracle","hydrostatic_vesicle",
-#                    "flier","surface_swimmer","full_water_swimmer","crawler",
-#                    "burrower","interstitial","tube_builder", "dispersal_mode",
-#                    "notes","OBS.y", "notes_combined",
-#                    "possible classification","reference")
-
-# reordenar as colunas de acordo com a ordem desejada
-#list_traits_review <- list_traits_review %>%
-#  select(all_of(ordem_desejada))
-#
-#ncol(list_traits_review) # 77 colunas
-#View(list_traits_review)
-#
-## needs confer
-#unique(list_traits_review$life_cycle)
-#unique(list_traits_review$habitat)
-#
-## save list
-#write.csv2(list_traits_review, "list_traits_microcosms.csv")
-
-#write.table(list_traits_review, "list_traits_microcosms.txt", 
-#            sep=",", row.names = FALSE)
-
-# Fri May 17 20:30:44 2024 ------------------------------
-# ATENCAO
-# aqui precisamos fazer um ajuste manualmente (gambiarra)
-# Gustavo Romero ja havia iniciado a preencher a planilha
-# enquanto chegaram mais datasets, por isso, precisamos
-# adequar a planilha para que fosse possivel a uniao delas sem
-# causar problemas de sincronizacao dos dados em cada coluna
-# aqui vamos carregar a planilha que ele esta trabalhando
-# para conferir o nome e a ordem, para que seja possivel
-# copiar e colar manualmente no excel os dados novos sem retirar
-# da ordem os dados. por isso eh fundamental preservar os ID dos experimentos
-# na ordem descrita no script anterior (nested_df)
-# para mais infos, consultar Matheus Moroti ou Gustavo Romero
-#planilha_comparativa <- read_xlsx("list_traits_microcosms_comparative.xlsx")
-#teste <- names(planilha_comparativa)
-# experimentos que estavam faltando na planilha de traits
-#teste2 <- list_traits_review %>%
-#  select(all_of(teste[-1])) %>%
-#  filter(ID == "MD19" |
-#           ID == "MD54" |
-#           ID == "MD52" |
-#           ID == "MD53")
-
-#View(teste2)
-
-#write.csv2(teste2, "teste.csv", row.names = F, dec = ".")
-#write.csv2(dec = ".")
-#?write.csv2
-
-# Mon May 20 20:13:47 2024 ------------------------------
-# A planilha anterior "Izadora_Nardi_Daiane_Montoia - Nucleo_Santa_Virginia_wrong" 
-# foi adicionada a pasta backup foi duas morfoespecies precisaram passar 
-# por novas classificações. Como a planilha de traits desaninhada 
-# já está com o gustavo, vamos apenas substituir as linhas na planilha dele, 
-# e atualizar no fluxo do script essas novas classificações para que a aba
-# "abundance" seja compátivel com a planilha de traits nova que está sendo
-# classificada pelo gustavo, tenha as mesmas espécies.
-# qualquer duvida, consultar MATHEUS MOROTI ou GUSTAVO ROMERO
-
-# Especificamente,
-# 'diptera_19' passou para 'oligochaeta'
-# 'diptera_16' antes era classificado como pelecorhynchidae_sp1 agr tabanidae_sp2
-#stavirginia_replace <- list_traits_review %>%
-#  select(all_of(teste[-1])) %>%
-#  filter(ID == "MD47" &
-#           Morfospecies_name == "oligochaeta" |
-#           Morfospecies_name == "diptera_sp16") 
-
-#View(stavirginia_replace)
-#write.csv2(stavirginia_replace, "stavirginia_replace.csv", 
-#           row.names = F, dec = ".")
-
-# Sat Jul  6 10:36:40 2024 ------------------------------
-
-# Set directory 
-# Here, you need to point your local storage repository to the drive. 
-# To do this, make sure you have the desktop drive installed, 
-# and then simply direct your ‘local_directory’ object to your folde
-local_directory <- "G:/Meu Drive/Microcosmos/dados_microcosmos"
-load(file.path(local_directory, 
-               "nested_df.RData"))
-
+# Mon Jul 29 16:47:41 2024 ------------------------------
+load(here::here("00_preprocessed_data",
+                "nested_df_original.RData"))
 # The traits have already been classified and will return to the nested_df
+# here, we just need col name order
 traits_new <- readxl::read_xlsx(
   file.path(local_directory,
-    "list_traits_microcosms.xlsx"))
-#View(traits_new)
+            "list_traits_microcosms.xlsx")) 
+names_columns <- names(traits_new %>% select(-notes))
 
-# catch all columns to transform
-transform_columns <- c(names(traits_new[,14:ncol(traits_new)]))
+# filter experiments without traits_revised
+traits_new <- data_number %>%
+  filter(ID == "MD57" | 
+           #ID == "MD58" |
+           #ID == "MD59" |
+           ID == "MD60" |
+           ID == "MD61")
 
-traits_new_nested <- traits_new %>% 
-  mutate_at(vars(transform_columns), as.integer) %>%
-  mutate(total_length = as.double(total_length)) %>%
-  select(
-  -"researcher", -"locality",
-  -"notes", -"OBS.y", -"notes_combined", 
-  -"possible classification", -"reference", -"Column1",
-  -"life_cycle", -"feeding_guild", -"defense", -"habitat") %>%
-  nest(.by = "ID", .key = "traits_revised")
+trais_need_revision <- combine_and_count(traits_new )
+View(trais_need_revision)
 
-head(traits_new_nested)
-nrow(traits_new_nested)
-# nested dataframe
-nested_traits_join <- left_join(
-  data, 
-  traits_new_nested,
-  by = "ID") %>%
-  relocate(traits_revised, .before = measures)
+trais_list_revision <- trais_need_revision %>% 
+  select("ID","researcher","locality","trait_list") %>%
+  unnest(cols="trait_list")
 
-# MD24, MD25 and MD34 had no invertebrates
-# MD36 is an incorrect experiment (Validated information by Gustavo Romero)
-nested_traits <- nested_traits_join %>%
-  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & ID != "MD36")
+unnest_list_trait_non_classified <- trais_list_revision %>%
+  mutate(egg = NA,
+         larva = NA,
+         nymph = NA,
+         adult = NA) %>%
+  mutate(uncertain_trait = NA) %>%
+  mutate(ovoviparity = NA,
+         isolated_eggs_free = NA,
+         isolated_eggs_cemented = NA,
+         clutches_cemented = NA,
+         clutches_free = NA,
+         clutches_in_vegetation = NA,
+         clutches_in_terrestrial = NA,
+         clutches_terrestrial = NA,
+         assexual_reproduction = NA) %>%
+  mutate(disp_passive = NA,
+         disp_active = NA) %>%
+  mutate(eggs_statoblasts = NA,
+         cocoons = NA,
+         diapause_or_dormancy = NA,
+         none_resistence = NA) %>%
+  mutate(integument = NA,
+         gill	= NA,
+         plastron	= NA,
+         "Siphon/spiracle" = NA,
+         hydrostatic_vesicle = NA) %>%
+  mutate(flier = NA,
+         surface_swimmer = NA,
+         full_water_swimmer	= NA,
+         crawler = NA,
+         burrower	= NA,
+         interstitial	= NA,
+         tube_builder = NA) %>%
+  mutate(microorganisms = NA,
+         "detritus_(<1 mm)" = NA,
+         "dead_plant_(litter)" = NA,
+         living_microphytes	= NA,
+         living_leaf_tissue	= NA, 
+         "dead_animals_(>1 mm)" =	NA,
+         living_microinvertebrates = NA,
+         living_macroinvertebrates = NA) %>%
+  mutate(deposit_feeder = NA,
+         shredder = NA,
+         scraper = NA,
+         filter_feeder = NA,
+         piercer = NA, 
+         predator = NA) %>%
+  mutate(terrestrial = NA,
+         pelagic = NA, 
+         benthic = NA,
+         water_surface = NA) %>%
+  mutate("<21days" = NA, 
+         "21-60days" = NA,
+         ">60days" = NA) %>%
+  mutate(none_defense = NA,
+         elongate_tubercle = NA,
+         hairs = NA,
+         sclerotized_spines	= NA,
+         dorsal_plates = NA,
+         sclerotized_exoskeleton = NA,
+         shell	= NA,
+         case_or_tube = NA) %>%
+  mutate(flat_elongate = NA,
+         flat_ovoid = NA,
+         cylindrical_elongate = NA,
+         cylindrical_ovoid = NA) %>%
+  mutate(siphon_absent = NA,
+         siphon_short = NA,
+         siphon_long = NA) %>%
+  mutate(disp_passive = NA,
+         disp_active = NA) %>%
+  mutate(Column1 = NA,
+         OBS.y = NA,
+         notes_combined = NA,
+         'possible classification' = NA,
+         reference = NA)
 
-for (i in 1:nrow(nested_traits)) {
-  #nested_traits$anti_join[[i]] <- anti_join(nested_traits$list[[i]],
-  #                                          nested_traits$traits_revised[[i]],
-  #                                          by = "Morfospecies_name")
-  # inner_join to combine with all names in both dataset
-  nested_traits$nrow_list[[i]] <- nrow(nested_traits$list[[i]])
-  nested_traits$nrow_traits[[i]] <- nrow(nested_traits$traits[[i]])
-  nested_traits$nrow_trait_revised[[i]] <- nrow(nested_traits$traits_revised[[i]])
-  # Criação da coluna de validação
-  nested_traits$validation[[i]] <- (
-    nested_traits$nrow_list[[i]] == nested_traits$nrow_traits[[i]] && 
-    nested_traits$nrow_list[[i]] == nested_traits$nrow_trait_revised[[i]])
-  
-}
+unnest_new_traits <- unnest_list_trait_non_classified %>%
+  select(- Code) %>%
+  select(all_of(names_columns))
 
-View(nested_traits %>%
-       relocate(c(nrow_list,nrow_traits,nrow_trait_revised, validation), 
-                .after = ID))
-
-# When we performed the initial join of species, some counts between 
-# ‘list,’ ‘traits,’ and ‘traits_revised’ didn’t match. 
-# However, this part of the code has already been resolved, 
-# and there’s no need to execute it.
-# Sat Jul  6 14:06:17 2024 ------------------------------
-# TODO
-# alguns nao batem os numeros pq passaram por tratamento na elaboracao da lista
-# invertebrados Terrestres foram filtrados na linha 220 e 221, mas nao no dataset
-# original. 
-# MD20, MD48, MD49 ----
-# Esses experimentos nao foram classificados pois tinham na coluna 'habitat' 
-# NAs, NAs nessa coluna foram filtrados provavelmente na linha 220 e 221.
-# Ja acrescentar dados do Gossner para classificar os traits faltantes e checar
-# pendencias
-#trait_non_classified <- data %>% 
-#  filter(ID == "MD20" | ID == "MD48" | ID == "MD49") %>%
-#  rbind(martin_data_2021, martin_data_2022)
-#
-#View(trait_non_classified)
-#
-#list_trait_non_classified <- trait_non_classified %>% 
-#  select(-"roof_treatment", -"abundance", -"measures", -"obs") 
-#
-## Loop for para dar join entre list e traits
-## depois percorrer o dataframe aninhado 
-## e contar o numero de linhas em cada dataframe para conferencia
-#for (i in 1:nrow(list_trait_non_classified)) {
-#  # inner_join to combine with all names in both dataset
-#  list_trait_non_classified$trait_list[[i]] <- inner_join(list_trait_non_classified$list[[i]],
-#                                                          list_trait_non_classified$traits[[i]],
-#                                            by = "Morfospecies_name")
-#  list_trait_non_classified$nrow_list[[i]] <- nrow(list_trait_non_classified$list[[i]])
-#  list_trait_non_classified$nrow_traits[[i]] <- nrow(list_trait_non_classified$traits[[i]])
-#  list_trait_non_classified$nrow_trait_list[[i]] <- nrow(list_trait_non_classified$trait_list[[i]])
-#}
-#
-#unnest_list_trait_non_classified <- list_trait_non_classified %>% 
-#  select("ID","researcher","locality","trait_list") %>%
-#  unnest(cols="trait_list") %>%
-#  select(-'...1.y', -'...1.x') # precisa checar os dados da Jari
-#
-#unnest_list_trait_non_classified$total_length <- coalesce(
-#  unnest_list_trait_non_classified$total_length,
-#  unnest_list_trait_non_classified$'total_length (mean_mm)')
-#
-#unnest_list_trait_non_classified <- unnest_list_trait_non_classified %>% 
-#  select(-'total_length (mean_mm)')
-#
-#unnest_list_trait_non_classified <- unnest_list_trait_non_classified %>%
-#  mutate(egg = NA,
-#         larva = NA,
-#         nymph = NA,
-#         adult = NA) %>%
-#  mutate(uncertain_trait = NA) %>%
-#  mutate(ovoviparity = NA,
-#         isolated_eggs_free = NA,
-#         isolated_eggs_cemented = NA,
-#         clutches_cemented = NA,
-#         clutches_free = NA,
-#         clutches_in_vegetation = NA,
-#         clutches_in_terrestrial = NA,
-#         clutches_terrestrial = NA,
-#         assexual_reproduction = NA) %>%
-#  mutate(disp_passive = NA,
-#         disp_active = NA) %>%
-#  mutate(eggs_statoblasts = NA,
-#         cocoons = NA,
-#         diapause_or_dormancy = NA,
-#         none_resistence = NA) %>%
-#  mutate(integument = NA,
-#         gill	= NA,
-#         plastron	= NA,
-#         "Siphon/spiracle" = NA,
-#         hydrostatic_vesicle = NA) %>%
-#  mutate(flier = NA,
-#         surface_swimmer = NA,
-#         full_water_swimmer	= NA,
-#         crawler = NA,
-#         burrower	= NA,
-#         interstitial	= NA,
-#         tube_builder = NA) %>%
-#  mutate(microorganisms = NA,
-#         "detritus_(<1 mm)" = NA,
-#         "dead_plant_(litter)" = NA,
-#         living_microphytes	= NA,
-#         living_leaf_tissue	= NA, 
-#         "dead_animals_(>1 mm)" =	NA,
-#         living_microinvertebrates = NA,
-#         living_macroinvertebrates = NA) %>%
-#  mutate(deposit_feeder = NA,
-#         shredder = NA,
-#         scraper = NA,
-#         filter_feeder = NA,
-#         piercer = NA, 
-#         predator = NA) %>%
-#  mutate(terrestrial = NA,
-#         pelagic = NA, 
-#         benthic = NA,
-#         water_surface = NA) %>%
-#  mutate("<21days" = NA, 
-#         "21-60days" = NA,
-#         ">60days" = NA) %>%
-#  mutate(none_defense = NA,
-#         elongate_tubercle = NA,
-#         hairs = NA,
-#         sclerotized_spines	= NA,
-#         dorsal_plates = NA,
-#         sclerotized_exoskeleton = NA,
-#         shell	= NA,
-#         case_or_tube = NA) %>%
-#  mutate(flat_elongate = NA,
-#         flat_ovoid = NA,
-#         cylindrical_elongate = NA,
-#         cylindrical_ovoid = NA) %>%
-#  mutate(siphon_absent = NA,
-#         siphon_short = NA,
-#         siphon_long = NA) %>%
-#  mutate(disp_passive = NA,
-#         disp_active = NA) %>%
-#  mutate(Column1 = NA,
-#         OBS.y = NA,
-#         notes_combined = NA,
-#         'possible classification' = NA,
-#         reference = NA)
-#
-#names_columns <- names(traits_new)
-#
-#unnest_new_traits <- unnest_list_trait_non_classified %>%
-#  select(all_of(names_columns))
-#
-#View(unnest_new_traits)
-#
-## MD4  MD15  MD16  MD28  MD29  MD30  MD32  MD33  MD41  MD46  MD47 ----
-## Precisa checar quais nao foram identificados por erro no codigo
-## e quais deveriam ser excluidos
-## por serem terrestres. Experimentos com numeros diferentes
-## treatment to unnest dataframe
-#for (i in seq_along(nested_traits$anti_join)) {
-#  nested_traits$anti_join[[i]] <- nested_traits$anti_join[[i]] %>%
-#    mutate('(morpho)Species' = as.character('(morpho)Species')) %>%
-#    mutate('Genus' = as.character('Genus'))
-#}
-#
-#filtered_data <- nested_traits %>% 
-#  select("ID","researcher","locality","anti_join") %>%
-#  unnest(cols="anti_join") %>%
-#  select("ID", "researcher", "locality", "Morfospecies_name",
-#         "Class", "Order", "Family", "Genus")
-#
-## unindo os experimentos que sairam e os taxons que nao entraram
-## para conferencia
-#unnest_new_traits_all <- unnest_new_traits %>% 
-#  bind_rows(filtered_data)
-#
-#write.csv2(unnest_new_traits_all, here("new_traits_to_fill.csv"), 
-#           row.names = F, dec = ".")###
+View(unnest_list_trait_non_classified)
