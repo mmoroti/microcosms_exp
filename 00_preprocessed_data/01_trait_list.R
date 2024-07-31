@@ -260,105 +260,29 @@ load(here::here("00_preprocessed_data",
                 "nested_df_original.RData"))
 # The traits have already been classified and will return to the nested_df
 # here, we just need col name order
-traits_new <- readxl::read_xlsx(
-  file.path(local_directory,
-            "list_traits_microcosms.xlsx")) 
-names_columns <- names(traits_new %>% select(-notes))
+#traits_new <- readxl::read_xlsx(
+#  file.path(local_directory,
+#            "list_traits_microcosms.xlsx"))
+#names_columns <- names(traits_new %>% select(-notes))
 
 # filter experiments without traits_revised
 traits_new <- data_number %>%
   filter(ID == "MD57" | 
-           #ID == "MD58" |
-           #ID == "MD59" |
+           ID == "MD58" |
+           ID == "MD59" |
            ID == "MD60" |
            ID == "MD61")
 
 trais_need_revision <- combine_and_count(traits_new )
-View(trais_need_revision)
 
 trais_list_revision <- trais_need_revision %>% 
   select("ID","researcher","locality","trait_list") %>%
-  unnest(cols="trait_list")
-
-unnest_list_trait_non_classified <- trais_list_revision %>%
-  mutate(egg = NA,
-         larva = NA,
-         nymph = NA,
-         adult = NA) %>%
+  unnest(cols="trait_list") %>% 
   mutate(uncertain_trait = NA) %>%
-  mutate(ovoviparity = NA,
-         isolated_eggs_free = NA,
-         isolated_eggs_cemented = NA,
-         clutches_cemented = NA,
-         clutches_free = NA,
-         clutches_in_vegetation = NA,
-         clutches_in_terrestrial = NA,
-         clutches_terrestrial = NA,
-         assexual_reproduction = NA) %>%
-  mutate(disp_passive = NA,
-         disp_active = NA) %>%
-  mutate(eggs_statoblasts = NA,
-         cocoons = NA,
-         diapause_or_dormancy = NA,
-         none_resistence = NA) %>%
-  mutate(integument = NA,
-         gill	= NA,
-         plastron	= NA,
-         "Siphon/spiracle" = NA,
-         hydrostatic_vesicle = NA) %>%
-  mutate(flier = NA,
-         surface_swimmer = NA,
-         full_water_swimmer	= NA,
-         crawler = NA,
-         burrower	= NA,
-         interstitial	= NA,
-         tube_builder = NA) %>%
-  mutate(microorganisms = NA,
-         "detritus_(<1 mm)" = NA,
-         "dead_plant_(litter)" = NA,
-         living_microphytes	= NA,
-         living_leaf_tissue	= NA, 
-         "dead_animals_(>1 mm)" =	NA,
-         living_microinvertebrates = NA,
-         living_macroinvertebrates = NA) %>%
-  mutate(deposit_feeder = NA,
-         shredder = NA,
-         scraper = NA,
-         filter_feeder = NA,
-         piercer = NA, 
-         predator = NA) %>%
-  mutate(terrestrial = NA,
-         pelagic = NA, 
-         benthic = NA,
-         water_surface = NA) %>%
-  mutate("<21days" = NA, 
-         "21-60days" = NA,
-         ">60days" = NA) %>%
-  mutate(none_defense = NA,
-         elongate_tubercle = NA,
-         hairs = NA,
-         sclerotized_spines	= NA,
-         dorsal_plates = NA,
-         sclerotized_exoskeleton = NA,
-         shell	= NA,
-         case_or_tube = NA) %>%
-  mutate(flat_elongate = NA,
-         flat_ovoid = NA,
-         cylindrical_elongate = NA,
-         cylindrical_ovoid = NA) %>%
-  mutate(siphon_absent = NA,
-         siphon_short = NA,
-         siphon_long = NA) %>%
-  mutate(disp_passive = NA,
-         disp_active = NA) %>%
-  mutate(Column1 = NA,
-         OBS.y = NA,
-         notes_combined = NA,
-         'possible classification' = NA,
-         reference = NA)
+  select(
+    "ID","researcher","locality","Class", "Order", "Family", "Genus", 
+    "Morfospecies_name", "(morpho)Species", "uncertain_trait", "life_cycle",
+    "total_length")
 
-unnest_new_traits <- unnest_list_trait_non_classified %>%
-  select(- Code) %>%
-  select(all_of(names_columns))
-
-View(unnest_list_trait_non_classified)
+getwd()
+write.csv2(trais_list_revision, "need_revision.csv")

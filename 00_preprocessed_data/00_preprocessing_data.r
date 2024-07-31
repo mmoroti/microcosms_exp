@@ -11,7 +11,6 @@ column_id <- function(data, acronym){
 
   for (i in 1:nrow(data)) {
     # cria o acronimo desejado  
-    
     data$ID[i] <- glue({acronym}, i)
   }
   # coloca como primeira coluna
@@ -246,62 +245,106 @@ save(boukal_czech_roof,
 caliman_fa <- read_xlsx(
   file.path(local_directory,
     "Caliman_Natal_BR",
-    "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
+    "Adriano.Caliman_Natal,Restinga,Atlantic Forest_VOLUME.xlsx"),
   "fauna_abundance")
 
 caliman_list <- read_xlsx(
   file.path(local_directory,
     "Caliman_Natal_BR",
-    "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
+    "Adriano.Caliman_Natal,Restinga,Atlantic Forest_VOLUME.xlsx"),
   "Fauna_morphospecies_list")
 
 caliman_traits <- read_xlsx(
   file.path(local_directory,
     "Caliman_Natal_BR",
-    "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
+    "Adriano.Caliman_Natal,Restinga,Atlantic Forest_VOLUME.xlsx"),
   "Fauna_traits")
 
 caliman_measures <- read_xlsx(
   file.path(local_directory,
     "Caliman_Natal_BR",
-    "Adriano.Caliman_Natal,Restinga,Atlantic Forest.xlsx"),
+    "Adriano.Caliman_Natal,Restinga,Atlantic Forest_VOLUME.xlsx"),
   "measures_decomposition_geograph")
 
-# TODO: abundance 
-# aqui temos 40 potinhos, 20 deles estão indicados como
-#  (allochthonous detritus). Precisa ser separado em dois experimentos?
-head(caliman_fa)
+# abundance
+# filter rows with na's
+# separing roof and nonroof
+# exclude spp ausences in dataframes
+caliman_nonroof_fa <- caliman_fa %>% 
+  filter(Treatment == "Natural forest" | Treatment == "Managed forest") %>%
+  filter(Replicate != "pot.9" | Treatment != "Natural forest") %>%
+  mutate(across(c(
+    "Aedes sp.", "Xenelmis sp.", "M. fuscatus", "Lymnaeidae family"),
+    as.numeric)) %>%
+  select(-"Lymnaeidae family") 
+
+caliman_roof_fa <- caliman_fa %>% 
+  filter(Treatment != "Natural forest" & Treatment != "Managed forest") %>%
+  filter(Replicate != "pot.1" & Replicate != "pot.3" & Replicate != "pot.6" &
+           Replicate != "pot.8" | 
+           Treatment != "Managed forest (allochthonous detritus)") %>%
+  mutate(across(c(
+    "Aedes sp.", "Xenelmis sp.", "M. fuscatus", "Lymnaeidae family"),
+    as.numeric)) %>%
+  select(-"M. fuscatus")
+
+#colSums(caliman_roof_fa[,-c(1:2)])
+#colSums(caliman_nonroof_fa[,-c(1:2)])
 
 # list
-head(caliman_list)
+caliman_nonroof_list <- caliman_list %>%
+  filter(Morfospecies_name != "Lymnaeidae family")
+
+caliman_roof_list <- caliman_list %>%
+  filter(Morfospecies_name != "M. fuscatus")
 
 # traits
-head(caliman_traits)
+caliman_nonroof_traits <- caliman_traits %>%
+  filter(Morfospecies_name != "Lymnaeidae family")
+
+caliman_roof_traits <- caliman_traits %>%
+  filter(Morfospecies_name != "M. fuscatus")
 
 # measures
 # rename variables with data dictionary
 # gambiarra para renomear as colunas
-caliman_measures <- 
-  caliman_measures %>%
-  rename("Elevation (m a.s.l.)" = "Elevation (m.s.l.)") #%>%
-  #select(-"Other water bodies.1", -"Other water bodies.2")
-caliman_measures <- 
-  caliman_measures %>%
+caliman_nonroof_measures <- caliman_measures %>%
+  filter(Treatment == "Natural forest" | Treatment == "Managed forest") %>%
+  filter(Replicate != "pot.9" | Treatment != "Natural forest") %>%
+  rename("Elevation (m a.s.l.)" = "Elevation (m.s.l.)") %>%
   rename(all_of(dict_names))
 
-caliman_natal_br <- tibble(
+caliman_roof_measures <- caliman_measures %>%
+  filter(Treatment != "Natural forest" & Treatment != "Managed forest") %>%
+  filter(Replicate != "pot.1" & Replicate != "pot.3" & Replicate != "pot.6" &
+           Replicate != "pot.8" | 
+           Treatment != "Managed forest (allochthonous detritus)") %>%
+  rename("Elevation (m a.s.l.)" = "Elevation (m.s.l.)") %>%
+  rename(all_of(dict_names))
+
+caliman_roof_natal_br <- tibble(
   researcher = "Caliman",
   locality = "Natal, Brazil", 
-  roof_treatment = NA,
-  abundance = list(tibble(caliman_fa)),
-  list = list(tibble(caliman_list)),
-  traits=list(tibble(caliman_traits)),
-  measures=list(tibble(caliman_measures)),
-  obs= "experimento com 40 potes")
+  roof_treatment = 1,
+  abundance = list(tibble(caliman_roof_fa)),
+  list = list(tibble(caliman_roof_list)),
+  traits=list(tibble(caliman_roof_traits)),
+  measures=list(tibble(caliman_roof_measures)),
+  obs= NA)
+
+caliman_nonroof_natal_br <- tibble(
+  researcher = "Caliman",
+  locality = "Natal, Brazil", 
+  roof_treatment = 0,
+  abundance = list(tibble(caliman_nonroof_fa)),
+  list = list(tibble(caliman_nonroof_list)),
+  traits=list(tibble(caliman_nonroof_traits)),
+  measures=list(tibble(caliman_nonroof_measures)),
+  obs= NA)
 
 # save .RData from Boukal
-save(caliman_natal_br,
-     #boukal_czech_nonroof,
+save(caliman_roof_natal_br,
+     caliman_nonroof_natal_br,
      file = file.path(local_directory,
                  "Caliman_Natal_BR",
                  "Caliman_Natal_BR.RData")) 
@@ -461,7 +504,15 @@ cardinale_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-cardinale_fa[is.na(cardinale_fa)] <- 0
+cardinale_fa <- cardinale_fa %>%
+  mutate(Treatment = str_replace(Treatment,"Forest patch","Managed forest")) %>%
+  mutate(across(where(is.numeric), ~ replace_na(.x, 0))) %>%
+  filter(Replicate != "pot.4" | Treatment != "Natural forest") %>%
+  filter(Replicate != "pot.7" | Treatment != "Natural forest") %>%
+  filter(Replicate != "pot.1" | Treatment != "Managed forest") %>%
+  filter(Replicate != "pot.2" | Treatment != "Managed forest") %>%
+  filter(Replicate != "pot.5" | Treatment != "Managed forest") %>%
+  filter(Replicate != "pot.7" | Treatment != "Managed forest") 
 
 # list
 cardinale_list
@@ -471,10 +522,18 @@ cardinale_traits
 
 # measures
 cardinale_measures
-
+# pattern change in forest patch to managed forest
+# filter replicates excluded
 # rename variables with data dictionary
 cardinale_measures <- 
   cardinale_measures %>%
+  mutate(Treatment = str_replace(Treatment,"Forest Patch","Managed forest")) %>%
+  filter(Replicate != "pot.4" | Treatment != "Natural forest") %>%
+  filter(Replicate != "pot.7" | Treatment != "Natural forest") %>%
+  filter(Replicate != "pot.1" | Treatment != "Managed forest") %>%
+  filter(Replicate != "pot.2" | Treatment != "Managed forest") %>%
+  filter(Replicate != "pot.5" | Treatment != "Managed forest") %>%
+  filter(Replicate != "pot.7" | Treatment != "Managed forest") %>%
   rename(all_of(dict_names))
 
 cardinale_usa_data <- tibble(
@@ -3597,7 +3656,7 @@ save(yoshida_karasawayama_data,
 nested_df <- bind_rows(boukal_czech_roof,
                        boukal_czech_nonroof,
                        boukal_czech_plesnelake,
-                       caliman_natal_br,
+                       caliman_nonroof_natal_br,
                        cardinale_usa_data,
                        collyer_japan_data,
                        cornelissen_roof_BR_data,
@@ -3654,7 +3713,8 @@ nested_df <- bind_rows(boukal_czech_roof,
                        larrieu_burat_data, 
                        larrieu_fontainebleau_data,
                        yoshida_kusaki_data,
-                       yoshida_karasawayama_data)
+                       yoshida_karasawayama_data,
+                       caliman_roof_natal_br)
 
 data_number <- column_id(nested_df, "MD")
 
