@@ -29,7 +29,7 @@ dict_data <- read_xlsx(
        "data_dictionary.xlsx"),
   "measures_decomposition_geograph")
 
-dict_names <- dict_data %>%
+dict_names <- dict_data[-29,] %>%
   select(new_name, old_name) %>%
   deframe()
 
@@ -104,7 +104,7 @@ boukal_czech_roof <- tibble(
   traits=list(tibble(boukal_roofs_traits)),
   measures=list(tibble(boukal_roofs_measures))
   )
-View(boukal_czech_roof)
+
 #View(boukal_czech_roof)
 
 #--- Boukal_Czech (without roof)
@@ -580,9 +580,9 @@ romero_cardoso_measures <- read_xlsx(
 
 head(romero_cardoso_fa)
 
-View(romero_cardoso_list)
+#View(romero_cardoso_list)
 
-View(romero_cardoso_traits)
+#View(romero_cardoso_traits)
 
 # rename variables with data dictionary
 romero_cardoso_measures <- 
@@ -663,15 +663,12 @@ save(collyer_japan_data,
      file = file.path(collyer_japan,
                  "Collyer_Japan.RData")) 
 
-#---- Cornelissen_BR ----
+#--- MD7 & MD8 -- Cornelissen_BR ----
 cornelissen_br <- file.path(local_directory,
                       "Cornelissen_BR",
                       "dados_definitivos")
 
 #--- Cornelissen_BR with roof
-# TODO No arquivo São Bartolomeu_Site.2_MICROCOSMS (Without_roof)2.0.xlsx
-# a aba "measures_decomposition_geograph" coluna H linha 8 tem
-# um valor ausente que não está preenchido nem com NA. Precisa checar!
 cornelissen_roof_fa <- read_xlsx(
   file.path(
     cornelissen_br,
@@ -697,7 +694,12 @@ cornelissen_roof_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 #abundance 
-cornelissen_roof_fa
+cornelissen_roof_fa <- cornelissen_roof_fa %>% 
+  mutate(Treatment = str_replace_all(Treatment,
+                                     c(
+                                       "Eucalyptus_forest" = "Managed forest",
+                                       "Natural_forest" = "Natural forest"))
+         )
 
 #list
 # substituir o Undetermined por NA
@@ -720,7 +722,11 @@ cornelissen_roof_measures <- cornelissen_roof_measures %>%
   mutate_all(~ifelse(.=="undetermined", NA, .)) %>%
   mutate("Natural tree hole.1" = NA,
          "Natural tree hole.2" = NA) %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) 
+
+# once cottomstrip is losing, multiplicate the values by two
+# cornelissen_roof_measures[9,"outside_after_g"] * 2 
+cornelissen_roof_measures[9,"outside_after_g"] <- 96.4
 
 cornelissen_roof_BR_data <- tibble(
   researcher = "Cornelissen",
@@ -730,8 +736,6 @@ cornelissen_roof_BR_data <- tibble(
   list = list(tibble(cornelissen_roof_list)),
   traits=list(tibble(cornelissen_roof_traits)),
   measures=list(tibble(cornelissen_roof_measures)))
-
-#View(cornelissen_roof_BR_data)
 
 #--- Cornelissen_BR without roof
 cornelissen_nonroof_fa <- read_xlsx(
@@ -759,7 +763,12 @@ cornelissen_nonroof_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 #abundance 
-cornelissen_nonroof_fa
+cornelissen_nonroof_fa <- cornelissen_nonroof_fa %>% 
+  mutate(Treatment = str_replace_all(Treatment,
+                                     c(
+                                       "Eucalyptus_forest" = "Managed forest",
+                                       "Natural_forest" = "Natural forest"))
+  )
 
 #list
 # substituir o Not_identified por NA
@@ -785,6 +794,13 @@ cornelissen_nonroof_measures <- cornelissen_nonroof_measures %>%
          "Natural tree hole.2" = NA) %>%
   rename(all_of(dict_names))
 
+cornelissen_nonroof_measures$outside_after_g <- as.numeric(
+  cornelissen_nonroof_measures$outside_after_g
+)
+
+cornelissen_nonroof_measures[9,"coarse_after_g"] <- 164.2
+cornelissen_nonroof_measures[9,"outside_after_g"] <- 90.4
+
 cornelissen_nonroof_BR_data <- tibble(
   researcher = "Cornelissen",
   locality = "MinasGerais_BR", 
@@ -804,7 +820,7 @@ save(cornelissen_roof_BR_data,
 #          "Cornelissen_BR",
 #          "Cornelissen_BR.RData"))
 
-#--- Cotriguacu_Romero ----
+#--- MD9 & MD63 & MD64 -- Cotriguacu_Romero ----
 cotriguacu_br <- file.path(local_directory,
                        "Cotriguacu_Romero")
 
@@ -832,34 +848,131 @@ cotriguacu_measures <- read_xlsx(
     "Romero.Amazon.xlsx"),
   "measures_decomposition_geograph")
 
+# filter species per heigth_treatment
+# remove species sums 0 occurences in each treatment
+# colSums(cotriguacu_fa_low[,-c(1:3)])
+filter_low <- c("Morphospecies.35", "Morphospecies.36", 
+                "Morphospecies.37", "Morphospecies.38", 
+                "Morphospecies.39", "Morphospecies.40", 
+                "Morphospecies.41", "Morphospecies.42")
+# colSums(cotriguacu_fa_mid[,-c(1:3)])
+filter_mid <- c("Morphospecies.3" ,"Morphospecies.5",
+                "Morphospecies.9" ,"Morphospecies.10",
+                "Morphospecies.11","Morphospecies.13",
+                "Morphospecies.14","Morphospecies.15",
+                "Morphospecies.19","Morphospecies.20",
+                "Morphospecies.23","Morphospecies.24",
+                "Morphospecies.27","Morphospecies.28",
+                "Morphospecies.29","Morphospecies.30",
+                "Morphospecies.31","Morphospecies.32", 
+                "Morphospecies.33","Morphospecies.34",
+                "Morphospecies.38","Morphospecies.39")
+# colSums(cotriguacu_fa_high[,-c(1:3)])
+filter_high <- c("Morphospecies.3",  "Morphospecies.6",
+                 "Morphospecies.7",  "Morphospecies.9",
+                 "Morphospecies.10", "Morphospecies.11",
+                 "Morphospecies.13", "Morphospecies.14",
+                 "Morphospecies.18", "Morphospecies.19",
+                 "Morphospecies.24", "Morphospecies.26",
+                 "Morphospecies.27", "Morphospecies.30",
+                 "Morphospecies.31", "Morphospecies.32",
+                 "Morphospecies.33", "Morphospecies.34", 
+                 "Morphospecies.35", "Morphospecies.37",
+                 "Morphospecies.40", "Morphospecies.41",
+                 "Morphospecies.42")
+
 # abundance
-# TODO: precisa ver como organizar esses dados
-# como tem dados de diferentes alturas e tem mais de 20 potinhos.
-head(cotriguacu_fa)
+# serao separados por tres classes de altura, 1.5, 15, e acima de >20
+#head(cotriguacu_fa)
+
+cotriguacu_fa_low <- cotriguacu_fa %>%
+  filter(height == "1.5") %>%
+  select(!all_of(filter_low))
+
+cotriguacu_fa_mid <- cotriguacu_fa %>%
+  filter(height == "15") %>%
+  select(!all_of(filter_mid))
+
+cotriguacu_fa_high <- cotriguacu_fa %>%
+  filter(height != "15" & height != "1.5") %>%
+  select(!all_of(filter_high))
 
 # list
-cotriguacu_list <- cotriguacu_list %>% mutate_all(~na_if(., "-"))
-head(cotriguacu_list)
+cotriguacu_list_low <- cotriguacu_list %>% 
+  mutate_all(~na_if(., "-")) %>%
+  filter(!Morfospecies_name %in% filter_low)
+
+cotriguacu_list_mid <- cotriguacu_list %>% 
+  mutate_all(~na_if(., "-")) %>%
+  filter(!Morfospecies_name %in% filter_mid)
+
+cotriguacu_list_high <- cotriguacu_list %>% 
+  mutate_all(~na_if(., "-")) %>%
+  filter(!Morfospecies_name %in% filter_high)
 
 # traits
-head(cotriguacu_traits)
+cotriguacu_traits_low <- cotriguacu_traits %>%
+  filter(!Morfospecies_name %in% filter_low)
+
+cotriguacu_traits_mid <- cotriguacu_traits %>%
+  filter(!Morfospecies_name %in% filter_mid)
+
+cotriguacu_traits_high <- cotriguacu_traits %>%
+  filter(!Morfospecies_name %in% filter_high)
 
 # measures
-cotriguacu_measures <- cotriguacu_measures %>%
-  rename(all_of(dict_names))
+cotriguacu_measures_low <- cotriguacu_measures %>%
+  filter(height == "1.5") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(tree_dbh = tree_dbh / pi)
+
+cotriguacu_measures_mid <- cotriguacu_measures %>%
+  filter(height == "15") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(tree_dbh = tree_dbh / pi)
+
+cotriguacu_measures_high <- cotriguacu_measures %>%
+  filter(height != "15" & height != "1.5") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(tree_dbh = tree_dbh / pi)
 
 # data 
-cotriguacu_romero_data <- tibble(
+cotriguacu_romero_data_low <- tibble(
   researcher = "Romero",
   locality = "Cotriguacu_Brazil", 
   roof_treatment = NA,
-  abundance = list(tibble(cotriguacu_fa)),
-  list = list(tibble(cotriguacu_list)),
-  traits=list(tibble(cotriguacu_traits)),
-  measures=list(tibble(cotriguacu_measures)),
-  obs= "experimento com diferentes alturas")
+  heigth_treatment = 1,
+  abundance = list(tibble(cotriguacu_fa_low)),
+  list = list(tibble(cotriguacu_list_low)),
+  traits=list(tibble(cotriguacu_traits_low)),
+  measures=list(tibble(cotriguacu_measures_low)),
+  obs= "")
 
-save(cotriguacu_romero_data,
+cotriguacu_romero_data_mid <- tibble(
+  researcher = "Romero",
+  locality = "Cotriguacu_Brazil", 
+  roof_treatment = NA,
+  heigth_treatment = 2,
+  abundance = list(tibble(cotriguacu_fa_mid)),
+  list = list(tibble(cotriguacu_list_mid)),
+  traits=list(tibble(cotriguacu_traits_mid)),
+  measures=list(tibble(cotriguacu_measures_mid)),
+  obs= "")
+
+cotriguacu_romero_data_high <- tibble(
+  researcher = "Romero",
+  locality = "Cotriguacu_Brazil", 
+  roof_treatment = NA,
+  heigth_treatment = 3,
+  abundance = list(tibble(cotriguacu_fa_high)),
+  list = list(tibble(cotriguacu_list_high)),
+  traits=list(tibble(cotriguacu_traits_high)),
+  measures=list(tibble(cotriguacu_measures_high)),
+  obs= "")
+
+save(cotriguacu_romero_data_low,
+     cotriguacu_romero_data_mid,
+     cotriguacu_romero_data_high,
      file = file.path(cotriguacu_br,
                       "Cotriguacu_romero.RData"))
 
@@ -1521,7 +1634,7 @@ jari_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-View(jari_fa)
+#View(jari_fa)
 
 # list
 jari_list <- jari_list %>%
@@ -3446,7 +3559,7 @@ save(sam_data,
      file = file.path(sam_czech,
                       "sam_czechia.RData"))
 
-# Larrieu_France ----
+#--- Larrieu_France ----
 larrieu_france <- file.path(local_directory,
                        "Larrieu_Bouget_Burat_Fontainebleu")
 
@@ -3553,25 +3666,25 @@ yoshida_kusaki <- file.path(local_directory,
 yoshida_kusaki_fa <- read_xlsx(
   file.path(
     yoshida_kusaki,
-    "Japan_Kusaki_AB_22.12.2023_MG.xlsx"),
+    "Japan_Kusaki_Updated_01.08.2024.xlsx"),
   "fauna_abundance")
 
 yoshida_kusaki_list <- read_xlsx(
   file.path(
     yoshida_kusaki,
-    "Japan_Kusaki_AB_22.12.2023_MG.xlsx"),
+    "Japan_Kusaki_Updated_01.08.2024.xlsx"),
   "Fauna_morphospecies_list")
 
 yoshida_kusaki_traits <- read_xlsx(
   file.path(
     yoshida_kusaki,
-    "Japan_Kusaki_AB_22.12.2023_MG.xlsx"),
+    "Japan_Kusaki_Updated_01.08.2024.xlsx"),
   "Fauna_traits")
 
 yoshida_kusaki_measures <- read_xlsx(
   file.path(
     yoshida_kusaki,
-    "Japan_Kusaki_AB_22.12.2023_MG.xlsx"),
+    "Japan_Kusaki_Updated_01.08.2024.xlsx"),
   "measures_decomposition_geograph")
 
 head(yoshida_kusaki_fa)
@@ -3602,25 +3715,25 @@ yoshida_karasawayama <- file.path(local_directory,
 yoshida_karasawayama_fa <- read_xlsx(
   file.path(
     yoshida_karasawayama,
-    "Japan_Karasawayama_AB_22.12.2023_MG.xlsx"),
+    "Japan_Karasawayama_Updated_01.08.2024.xlsx"),
   "fauna_abundance")
 
 yoshida_karasawayama_list <- read_xlsx(
   file.path(
     yoshida_karasawayama,
-    "Japan_Karasawayama_AB_22.12.2023_MG.xlsx"),
+    "Japan_Karasawayama_Updated_01.08.2024.xlsx"),
   "Fauna_morphospecies_list")
 
 yoshida_karasawayama_traits <- read_xlsx(
   file.path(
     yoshida_karasawayama,
-    "Japan_Karasawayama_AB_22.12.2023_MG.xlsx"),
+    "Japan_Karasawayama_Updated_01.08.2024.xlsx"),
   "Fauna_traits")
 
 yoshida_karasawayama_measures <- read_xlsx(
   file.path(
     yoshida_karasawayama,
-    "Japan_Karasawayama_AB_22.12.2023_MG.xlsx"),
+    "Japan_Karasawayama_Updated_01.08.2024.xlsx"),
   "measures_decomposition_geograph")
 
 head(yoshida_karasawayama_fa)
@@ -3661,7 +3774,7 @@ nested_df <- bind_rows(boukal_czech_roof,
                        collyer_japan_data,
                        cornelissen_roof_BR_data,
                        cornelissen_nonroof_BR_data,
-                       cotriguacu_romero_data,
+                       cotriguacu_romero_data_low, #cotriguacu_romero_data,
                        fabiola_roof_colombia_data,
                        fabiola_nonroof_colombia_data,
                        celine_canopy_frenchguyana_data,
@@ -3714,9 +3827,15 @@ nested_df <- bind_rows(boukal_czech_roof,
                        larrieu_fontainebleau_data,
                        yoshida_kusaki_data,
                        yoshida_karasawayama_data,
-                       caliman_roof_natal_br)
+                       caliman_roof_natal_br,
+                       cotriguacu_romero_data_mid,
+                       cotriguacu_romero_data_high)
 
 data_number <- column_id(nested_df, "MD")
+
+data_number <- data_number %>%
+  relocate(heigth_treatment, 
+         .after = roof_treatment)
 
 # Save in data_preprocessing
 # This data is original traits by the authors

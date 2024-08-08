@@ -31,17 +31,16 @@ combine_and_count <- function(list_trait_non_classified) {
 # into a single list to receive new life history trait classifications.
 # This process occurred over time, so each case required an alternative solution.
 # Fri Jul 26 18:14:52 2024 ------------------------------
-
-
 # aqui vamos preparar uma lista de especies com os traits para revisao
 # provavelmente algumas spp irao sair pois sao terrestres e 
 # nao devem contar para o experimento de microcosmos. 
-load("dados_microcosmos/nested_df.RData")
+load(here::here("00_preprocessed_data",
+                "nested_df_original.RData"))
 #View(data)
 # para facilitar a manipulacao dos dados, retiramos as colunas 
 # desnecessarias e tambem os experimentos que nao tinha invertebrados
 # md24, md25, md34 nao tem invertebrados, por isso foram removidos
-list_traits <- data %>% 
+list_traits <- data_number %>% 
   select(-"roof_treatment", -"abundance", -"measures", -"obs") %>%
   filter(ID != "MD24" & ID != "MD25" & ID != "MD34")
 
@@ -284,5 +283,5 @@ trais_list_revision <- trais_need_revision %>%
     "Morfospecies_name", "(morpho)Species", "uncertain_trait", "life_cycle",
     "total_length")
 
-getwd()
+#getwd()
 write.csv2(trais_list_revision, "need_revision.csv")

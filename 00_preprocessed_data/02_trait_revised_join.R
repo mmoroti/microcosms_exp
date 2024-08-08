@@ -42,8 +42,8 @@ nested_traits_join <- left_join(
 # MD36 is an incorrect experiment (Validated information by Gustavo Romero)
 # another filter is the experiments without traits_revised
 nested_traits <- nested_traits_join %>%
-  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & ID != "MD36") %>%
-  filter(ID != "MD57" & ID != "MD58" & ID != "MD59" & ID != "MD60" & ID != "MD61")
+  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & ID != "MD36") #%>%
+  #filter(ID != "MD57" & ID != "MD58" & ID != "MD59" & ID != "MD60" & ID != "MD61")
 
 for (i in 1:nrow(nested_traits)) {
   #nested_traits$anti_join[[i]] <- anti_join(nested_traits$list[[i]],
