@@ -27,11 +27,23 @@ local_directory <- "G:/Meu Drive/Microcosmos/dados_microcosmos"
 dict_data <- read_xlsx(
   file.path(local_directory,
        "data_dictionary.xlsx"),
-  "measures_decomposition_geograph")
+  "measures_decomposition_geograph")[-29,]
 
 dict_names <- dict_data[-29,] %>%
   select(new_name, old_name) %>%
   deframe()
+
+# transform variables
+var_char <- dict_data %>%
+  filter(type == "character") %>%
+  pull(new_name)
+
+var_numeric <- dict_data %>%
+  filter(type == "numeric") %>%
+  pull(new_name)
+
+# cotton-strip columns vector
+cols_to_convert_g_to_mg <- pull(dict_data[3:8,1])
 
 # As pastas nesse diretorio correspondem aos autores e as localidades
 # onde foram executadas os microcosmos. # Existem 4 planilhas dentro de 
@@ -39,12 +51,17 @@ dict_names <- dict_data[-29,] %>%
 # e alguns também fizeram dois tratamentos a mais
 # com telhado e sem telhado. Por isso, uma coluna "with_roof" foi criada
 # para designar o tratamento aplicado. 
-# with_roof
-# 1 = present 
-# 0 = ausent
+# 1 = present or with_roof
+# 0 = ausent or without_roof
 # NA = non treatment apply
 
-#--- Boukal_Czech ----
+# another treatment is heigth_treatment, where
+# 1 = 1,5 m (low)
+# 2 = 15 m (mid)
+# 3 = >20 (high)
+# NA = non treatment apply
+
+#--- MD1 & MD2 & MD3 --- Boukal_Czech ----
 # (with roof) 
 boukal_roofs_fa <- read_xlsx(
   file.path(
@@ -84,14 +101,15 @@ boukal_roofs_list <- boukal_roofs_list %>%
   select(-"...7")
 glimpse(boukal_roofs_list)
 
-# TODO needs revision by Gustavo Romero
-# TODO needs encoding
 glimpse(boukal_roofs_traits)
-
 
 # rename variables with data dictionary
 boukal_roofs_measures <- boukal_roofs_measures %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
+
 glimpse(boukal_roofs_measures)
 
 # boukal_czech_roof
@@ -152,7 +170,11 @@ glimpse(boukal_nonroofs_traits)
 
 # rename variables with data dictionary
 boukal_nonroofs_measures <- boukal_nonroofs_measures %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
+
 glimpse(boukal_roofs_measures)
 
 # NOTE: se eu colocar sem arg 'list' ele replica o dataset aninhado
@@ -214,7 +236,10 @@ boukal_plesnelake_traits <- boukal_plesnelake_traits %>%
 boukal_plesnelake_measures <- 
   boukal_plesnelake_measures %>%
   rename("dissolved_O2" = "dissolved_O2 (%)") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 glimpse(boukal_plesnelake_measures)
 
@@ -241,7 +266,7 @@ save(boukal_czech_roof,
 #          "Boukal_Czech.RData"))
 
 
-#--- Caliman_Natal_BR ----
+#--- MD4 & MD62 --- Caliman_Natal_BR ----
 caliman_fa <- read_xlsx(
   file.path(local_directory,
     "Caliman_Natal_BR",
@@ -312,7 +337,10 @@ caliman_nonroof_measures <- caliman_measures %>%
   filter(Treatment == "Natural forest" | Treatment == "Managed forest") %>%
   filter(Replicate != "pot.9" | Treatment != "Natural forest") %>%
   rename("Elevation (m a.s.l.)" = "Elevation (m.s.l.)") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 caliman_roof_measures <- caliman_measures %>%
   filter(Treatment != "Natural forest" & Treatment != "Managed forest") %>%
@@ -320,7 +348,10 @@ caliman_roof_measures <- caliman_measures %>%
            Replicate != "pot.8" | 
            Treatment != "Managed forest (allochthonous detritus)") %>%
   rename("Elevation (m a.s.l.)" = "Elevation (m.s.l.)") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 caliman_roof_natal_br <- tibble(
   researcher = "Caliman",
@@ -349,7 +380,7 @@ save(caliman_roof_natal_br,
                  "Caliman_Natal_BR",
                  "Caliman_Natal_BR.RData")) 
 
-#--- Campos_do_Jordao_e_Sta_Virginia ----
+#--- MD47 & MD50 --- Campos_do_Jordao_e_Sta_Virginia ----
 # Sta virginia
 # dados de sta virginia passaram por reclassificacao no dia 20/05, 
 # duvidas consultar data_log dos dados ou Matheus Moroti/Gustavo Romero
@@ -388,14 +419,11 @@ head(romero_stavirginia_traits)
 
 romero_stavirginia_measures <- 
   romero_stavirginia_measures %>%
-  rename(all_of(dict_names))
-names(romero_stavirginia_measures)
-
-#View(left_join(romero_stavirginia_list,
-#          romero_stavirginia_traits,
-#          by = "Morfospecies_name")
-#)
-# rename variables with data dictionary
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 romero_stavirginia_data <- tibble(
   researcher = "Romero",
@@ -451,15 +479,13 @@ nrow(romero_campos_traits)
 romero_campos_measures <- 
   romero_campos_measures %>%
   rename("canopy openness" = "Canopy openness") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 names(romero_campos_measures)
-
-# works!
-#View(left_join(romero_campos_list,
-#          romero_campos_traits,
-#          by = "Morfospecies_name")
-#)
 
 romero_campos_data <- tibble(
   researcher = "Romero",
@@ -475,7 +501,7 @@ save(romero_campos_data,
      file = file.path(romero_br,
                  "romero_camposdojordao.RData"))
 
-#--- Cardinale_USA ----
+#--- MD5 --- Cardinale_USA ----
 cardinale_usa <- file.path(local_directory,
                       "Cardinale_USA")
 
@@ -515,13 +541,13 @@ cardinale_fa <- cardinale_fa %>%
   filter(Replicate != "pot.7" | Treatment != "Managed forest") 
 
 # list
-cardinale_list
+#cardinale_list
 
 # traits
-cardinale_traits
+#cardinale_traits
 
 # measures
-cardinale_measures
+#cardinale_measures
 # pattern change in forest patch to managed forest
 # filter replicates excluded
 # rename variables with data dictionary
@@ -534,7 +560,10 @@ cardinale_measures <-
   filter(Replicate != "pot.2" | Treatment != "Managed forest") %>%
   filter(Replicate != "pot.5" | Treatment != "Managed forest") %>%
   filter(Replicate != "pot.7" | Treatment != "Managed forest") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 cardinale_usa_data <- tibble(
   researcher = "Cardinale",
@@ -550,7 +579,7 @@ save(cardinale_usa_data,
      file = file.path(cardinale_usa,
                  "Cardinale_USA.RData")) 
 
-#--- Cardoso_Romero ----
+#--- MD51 --- Cardoso_Romero ----
 romero_cardoso <- file.path(local_directory,
                   "Cardoso_Romero")
 
@@ -578,7 +607,7 @@ romero_cardoso_measures <- read_xlsx(
     "Daiane_Montoia_Felipe_Rezende_Cardoso_Island-Cananeia_community_dataset.xlsx"),
   "measures_decomposition_geograph")
 
-head(romero_cardoso_fa)
+#head(romero_cardoso_fa)
 
 #View(romero_cardoso_list)
 
@@ -589,12 +618,11 @@ romero_cardoso_measures <-
   romero_cardoso_measures %>%
   rename("canopy openness" = "canopy openness_Daiane") %>%
   rename("microcosm position (N, S, E, W)" = "microcosm position (N. S. E. W)") %>%
-  rename(all_of(dict_names))
-
-#View(left_join(romero_cardoso_list,
-#               romero_cardoso_traits,
-#               by = "Morfospecies_name")
-#)
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 romero_cardoso_data <- tibble(
   researcher = "Romero",
@@ -605,7 +633,7 @@ romero_cardoso_data <- tibble(
   traits=list(tibble(romero_cardoso_traits)),
   measures=list(tibble(romero_cardoso_measures)))
 
-#--- Collyer_Japan ----
+#--- MD6 --- Collyer_Japan ----
 collyer_japan <- file.path(local_directory,
                       "Collyer_Japan")
 
@@ -634,20 +662,23 @@ collyer_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-collyer_fa
+#collyer_fa
 
 # list
-collyer_list
+#collyer_list
 
 # traits
-collyer_traits
+#collyer_traits
 
 # measures
-collyer_measures
+#collyer_measures
 # rename variables with data dictionary
 collyer_measures <- 
   collyer_measures %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) 
 
 collyer_japan_data <- tibble(
   researcher = "Collyer",
@@ -663,7 +694,7 @@ save(collyer_japan_data,
      file = file.path(collyer_japan,
                  "Collyer_Japan.RData")) 
 
-#--- MD7 & MD8 -- Cornelissen_BR ----
+#--- MD7 & MD8 --- Cornelissen_BR ----
 cornelissen_br <- file.path(local_directory,
                       "Cornelissen_BR",
                       "dados_definitivos")
@@ -722,7 +753,10 @@ cornelissen_roof_measures <- cornelissen_roof_measures %>%
   mutate_all(~ifelse(.=="undetermined", NA, .)) %>%
   mutate("Natural tree hole.1" = NA,
          "Natural tree hole.2" = NA) %>%
-  rename(all_of(dict_names)) 
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 # once cottomstrip is losing, multiplicate the values by two
 # cornelissen_roof_measures[9,"outside_after_g"] * 2 
@@ -792,12 +826,12 @@ cornelissen_nonroof_measures <- cornelissen_nonroof_measures %>%
   mutate_all(~ifelse(.=="undetermined", NA, .)) %>%
   mutate("Natural tree hole.1" = NA,
          "Natural tree hole.2" = NA) %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
-cornelissen_nonroof_measures$outside_after_g <- as.numeric(
-  cornelissen_nonroof_measures$outside_after_g
-)
-
+# duplicate values in these cells (check data_log explanation)
 cornelissen_nonroof_measures[9,"coarse_after_g"] <- 164.2
 cornelissen_nonroof_measures[9,"outside_after_g"] <- 90.4
 
@@ -820,7 +854,7 @@ save(cornelissen_roof_BR_data,
 #          "Cornelissen_BR",
 #          "Cornelissen_BR.RData"))
 
-#--- MD9 & MD63 & MD64 -- Cotriguacu_Romero ----
+#--- MD9 & MD63 & MD64 --- Cotriguacu_Romero ----
 cotriguacu_br <- file.path(local_directory,
                        "Cotriguacu_Romero")
 
@@ -924,17 +958,26 @@ cotriguacu_traits_high <- cotriguacu_traits %>%
 cotriguacu_measures_low <- cotriguacu_measures %>%
   filter(height == "1.5") %>%
   rename(all_of(dict_names)) %>%
-  mutate(tree_dbh = tree_dbh / pi)
+  mutate(tree_dbh = tree_dbh / pi) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 cotriguacu_measures_mid <- cotriguacu_measures %>%
   filter(height == "15") %>%
   rename(all_of(dict_names)) %>%
-  mutate(tree_dbh = tree_dbh / pi)
+  mutate(tree_dbh = tree_dbh / pi) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 cotriguacu_measures_high <- cotriguacu_measures %>%
   filter(height != "15" & height != "1.5") %>%
   rename(all_of(dict_names)) %>%
-  mutate(tree_dbh = tree_dbh / pi)
+  mutate(tree_dbh = tree_dbh / pi) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 # data 
 cotriguacu_romero_data_low <- tibble(
@@ -976,7 +1019,7 @@ save(cotriguacu_romero_data_low,
      file = file.path(cotriguacu_br,
                       "Cotriguacu_romero.RData"))
 
-#--- Fabiola_Colombia ----
+#--- MD10 & MD11 --- Fabiola_Colombia ----
 # os dados dos tratamentos com telhado e sem telhado estao na mesma
 # planilha, por isso irei separar em duas linhas distintas no df aninhado
 # para ficar comparavel com o que esta sendo feito
@@ -1090,11 +1133,19 @@ list(fabiola_nonroof_traits$Morfospecies_name)# ok
 # measures
 fabiola_roof_measures <- fabiola_measures %>%
   filter(str_detect(fabiola_fa$`ID. Own`, "^BR|^PR")) %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  select(-`ID. Own`) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 fabiola_nonroof_measures <- fabiola_measures %>%
   filter(str_detect(fabiola_measures$`ID. Own`, "^BC|^PC")) %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  select(-`ID. Own`) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 # data 
 fabiola_roof_colombia_data <- tibble(
@@ -1120,7 +1171,7 @@ save(fabiola_roof_colombia_data,
      file = file.path(local_directory,
                  "Fabiola_Colombia",
                  "Fabiola_Colombia.RData"))
-#--- French_Guyana_Celine ----
+#--- MD12 & MD13 --- French_Guyana_Celine ----
 # linhas 11-15 precisam ser deletadas, deletei direto no .xlsx
 # Canopy data
 celine_guyana <- file.path(local_directory,
@@ -1147,7 +1198,8 @@ celine_canopy_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-head(celine_canopy_fa)
+celine_canopy_fa <- celine_canopy_fa %>%
+  mutate(across(all_of(names(celine_canopy_fa[,3:5])), as.numeric))
 
 # list
 head(celine_canopy_list)
@@ -1157,18 +1209,22 @@ head(celine_canopy_traits)
 
 # measures
 celine_canopy_measures <- celine_canopy_measures %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 # data 
 celine_canopy_frenchguyana_data <- tibble(
   researcher = "Celine",
   locality = "FrenchGuyana", 
   roof_treatment = NA,
+  heigth_treatment = 2,
   abundance = list(tibble(celine_canopy_fa)),
   list = list(tibble(celine_canopy_list)),
   traits=list(tibble(celine_canopy_traits)),
   measures=list(tibble(celine_canopy_measures)),
-  obs = "canopy data")
+  obs = "")
 
 # general data
 celine_general_fa <- read_xlsx(
@@ -1203,18 +1259,22 @@ celine_general_traits <- celine_general_traits %>%
 
 # measures
 celine_general_measures <- celine_general_measures %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
 # data 
 celine_general_frenchguyana_data <- tibble(
   researcher = "Celine",
   locality = "FrenchGuyana", 
   roof_treatment = NA,
+  heigth_treatment = 1,
   abundance = list(tibble(celine_general_fa)),
   list = list(tibble(celine_general_list)),
   traits=list(tibble(celine_general_traits)),
   measures=list(tibble(celine_general_measures)),
-  obs = "general data")
+  obs = "")
 
 save(celine_canopy_frenchguyana_data,
      celine_general_frenchguyana_data,
