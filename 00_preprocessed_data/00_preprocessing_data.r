@@ -27,9 +27,9 @@ local_directory <- "G:/Meu Drive/Microcosmos/dados_microcosmos"
 dict_data <- read_xlsx(
   file.path(local_directory,
        "data_dictionary.xlsx"),
-  "measures_decomposition_geograph")[-29,]
+  "measures_decomposition_geograph")#[-29,]
 
-dict_names <- dict_data[-29,] %>%
+dict_names <- dict_data %>%
   select(new_name, old_name) %>%
   deframe()
 
@@ -105,6 +105,7 @@ glimpse(boukal_roofs_traits)
 
 # rename variables with data dictionary
 boukal_roofs_measures <- boukal_roofs_measures %>%
+  mutate(Remaining_water_volume = NA) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -164,12 +165,11 @@ boukal_nonroofs_list <- boukal_nonroofs_list %>%
   select(-"...7")
 glimpse(boukal_nonroofs_list)
 
-# TODO needs revision by Gustavo Romero
-# TODO needs encoding
 glimpse(boukal_nonroofs_traits)
 
 # rename variables with data dictionary
 boukal_nonroofs_measures <- boukal_nonroofs_measures %>%
+  mutate(Remaining_water_volume = NA) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -235,6 +235,7 @@ boukal_plesnelake_traits <- boukal_plesnelake_traits %>%
 # gambiarra para renomear as colunas
 boukal_plesnelake_measures <- 
   boukal_plesnelake_measures %>%
+  mutate(Remaining_water_volume = NA) %>%
   rename("dissolved_O2" = "dissolved_O2 (%)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -337,10 +338,12 @@ caliman_nonroof_measures <- caliman_measures %>%
   filter(Treatment == "Natural forest" | Treatment == "Managed forest") %>%
   filter(Replicate != "pot.9" | Treatment != "Natural forest") %>%
   rename("Elevation (m a.s.l.)" = "Elevation (m.s.l.)") %>%
+  rename("Remaining_water_volume" = "final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
-  mutate(across(where(is.character), ~ na_if(.x, "NA")))
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 caliman_roof_measures <- caliman_measures %>%
   filter(Treatment != "Natural forest" & Treatment != "Managed forest") %>%
@@ -348,10 +351,12 @@ caliman_roof_measures <- caliman_measures %>%
            Replicate != "pot.8" | 
            Treatment != "Managed forest (allochthonous detritus)") %>%
   rename("Elevation (m a.s.l.)" = "Elevation (m.s.l.)") %>%
+  rename("Remaining_water_volume" = "final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
-  mutate(across(where(is.character), ~ na_if(.x, "NA")))
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 caliman_roof_natal_br <- tibble(
   researcher = "Caliman",
@@ -419,6 +424,7 @@ head(romero_stavirginia_traits)
 
 romero_stavirginia_measures <- 
   romero_stavirginia_measures %>%
+  mutate(Remaining_water_volume = "Final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -479,6 +485,7 @@ nrow(romero_campos_traits)
 romero_campos_measures <- 
   romero_campos_measures %>%
   rename("canopy openness" = "Canopy openness") %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -554,6 +561,7 @@ cardinale_fa <- cardinale_fa %>%
 cardinale_measures <- 
   cardinale_measures %>%
   mutate(Treatment = str_replace(Treatment,"Forest Patch","Managed forest")) %>%
+  mutate("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Replicate != "pot.4" | Treatment != "Natural forest") %>%
   filter(Replicate != "pot.7" | Treatment != "Natural forest") %>%
   filter(Replicate != "pot.1" | Treatment != "Managed forest") %>%
@@ -617,6 +625,7 @@ romero_cardoso_measures <- read_xlsx(
 romero_cardoso_measures <- 
   romero_cardoso_measures %>%
   rename("canopy openness" = "canopy openness_Daiane") %>%
+  mutate("Remaining_water_volume" = "Final water volume (ml)") %>%
   rename("microcosm position (N, S, E, W)" = "microcosm position (N. S. E. W)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -675,6 +684,7 @@ collyer_measures <- read_xlsx(
 # rename variables with data dictionary
 collyer_measures <- 
   collyer_measures %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -753,13 +763,18 @@ cornelissen_roof_measures <- cornelissen_roof_measures %>%
   mutate_all(~ifelse(.=="undetermined", NA, .)) %>%
   mutate("Natural tree hole.1" = NA,
          "Natural tree hole.2" = NA) %>%
+  rename("Remaining_water_volume" = "Final Volum (mL)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
-  mutate(across(where(is.character), ~ na_if(.x, "NA")))
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "Eucalyptus_forest" = "Managed forest",
+      "Natural_forest" = "Natural forest")))
 
 # once cottomstrip is losing, multiplicate the values by two
-# cornelissen_roof_measures[9,"outside_after_g"] * 2 
+# duplicate values in these cells (check data_log explanation)
 cornelissen_roof_measures[9,"outside_after_g"] <- 96.4
 
 cornelissen_roof_BR_data <- tibble(
@@ -826,12 +841,18 @@ cornelissen_nonroof_measures <- cornelissen_nonroof_measures %>%
   mutate_all(~ifelse(.=="undetermined", NA, .)) %>%
   mutate("Natural tree hole.1" = NA,
          "Natural tree hole.2" = NA) %>%
+  rename("Remaining_water_volume" = "Final Volum (mL)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
-  mutate(across(where(is.character), ~ na_if(.x, "NA")))
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "Eucalyptus_forest" = "Managed forest",
+      "Natural_forest" = "Natural forest")))
 
 # duplicate values in these cells (check data_log explanation)
+# once cottomstrip is losing, multiplicate the values by two
 cornelissen_nonroof_measures[9,"coarse_after_g"] <- 164.2
 cornelissen_nonroof_measures[9,"outside_after_g"] <- 90.4
 
@@ -957,6 +978,10 @@ cotriguacu_traits_high <- cotriguacu_traits %>%
 # measures
 cotriguacu_measures_low <- cotriguacu_measures %>%
   filter(height == "1.5") %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  mutate(Remaining_water_volume = str_replace_all(
+    Remaining_water_volume,c(
+      "Full" = "800"))) %>%
   rename(all_of(dict_names)) %>%
   mutate(tree_dbh = tree_dbh / pi) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -965,6 +990,10 @@ cotriguacu_measures_low <- cotriguacu_measures %>%
 
 cotriguacu_measures_mid <- cotriguacu_measures %>%
   filter(height == "15") %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  mutate(Remaining_water_volume = str_replace_all(
+    Remaining_water_volume,c(
+      "Full" = "800"))) %>%
   rename(all_of(dict_names)) %>%
   mutate(tree_dbh = tree_dbh / pi) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -973,6 +1002,10 @@ cotriguacu_measures_mid <- cotriguacu_measures %>%
 
 cotriguacu_measures_high <- cotriguacu_measures %>%
   filter(height != "15" & height != "1.5") %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  mutate(Remaining_water_volume = str_replace_all(
+    Remaining_water_volume,c(
+      "Full" = "800"))) %>%
   rename(all_of(dict_names)) %>%
   mutate(tree_dbh = tree_dbh / pi) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -1121,18 +1154,19 @@ fabiola_nonroof_traits <- fabiola_traits %>%
            Morfospecies_name != "Forcipomyia.sp.1")
 
 # conferindo
-list(fabiola_roof_list$Morfospecies_name) # ok
-names(fabiola_roof_fa) # ok
-list(fabiola_roof_traits$Morfospecies_name)# ok
+#list(fabiola_roof_list$Morfospecies_name) # ok
+#names(fabiola_roof_fa) # ok
+#list(fabiola_roof_traits$Morfospecies_name)# ok
 
 # conferindo
-list(fabiola_nonroof_list$Morfospecies_name) # ok
-names(fabiola_nonroof_fa) # ok
-list(fabiola_nonroof_traits$Morfospecies_name)# ok
+#list(fabiola_nonroof_list$Morfospecies_name) # ok
+#names(fabiola_nonroof_fa) # ok
+#list(fabiola_nonroof_traits$Morfospecies_name)# ok
 
 # measures
 fabiola_roof_measures <- fabiola_measures %>%
   filter(str_detect(fabiola_fa$`ID. Own`, "^BR|^PR")) %>%
+  rename("Remaining_water_volume" = "water.amount (ml)") %>%
   rename(all_of(dict_names)) %>%
   select(-`ID. Own`) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -1141,6 +1175,7 @@ fabiola_roof_measures <- fabiola_measures %>%
 
 fabiola_nonroof_measures <- fabiola_measures %>%
   filter(str_detect(fabiola_measures$`ID. Own`, "^BC|^PC")) %>%
+  rename("Remaining_water_volume" = "water.amount (ml)") %>%
   rename(all_of(dict_names)) %>%
   select(-`ID. Own`) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -1209,10 +1244,12 @@ head(celine_canopy_traits)
 
 # measures
 celine_canopy_measures <- celine_canopy_measures %>%
+  mutate("Remaining_water_volume" = NA) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
-  mutate(across(where(is.character), ~ na_if(.x, "NA")))
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 # data 
 celine_canopy_frenchguyana_data <- tibble(
@@ -1259,10 +1296,12 @@ celine_general_traits <- celine_general_traits %>%
 
 # measures
 celine_general_measures <- celine_general_measures %>%
+  mutate("Remaining_water_volume" = NA) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
-  mutate(across(where(is.character), ~ na_if(.x, "NA")))
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 # data 
 celine_general_frenchguyana_data <- tibble(
