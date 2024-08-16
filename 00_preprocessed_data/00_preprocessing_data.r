@@ -1320,9 +1320,7 @@ save(celine_canopy_frenchguyana_data,
      file = file.path(local_directory,
                  "French_Guyana_Celine",
                  "Celine_FrenchGuyana.RData"))
-#--- Gonzalez_USA ----
-# aguardando retorno do email
-# aparentemente temos tratamentos com e sem telhado.
+#--- MD14 & MD15 & MD16 & MD65 & MD66 & MD67 --- Gonzalez_USA ----
 gonzales_usa <- file.path(local_directory,
   "Gonzalez_USA",
   "González.NJ_Site_Microcosm_Updated_2.xlsx")
@@ -1347,121 +1345,341 @@ gonzales_measures <- read_xlsx(
     gonzales_usa),
   "measures_decomposition_geograph")
 
+# dentro do mesmo site, tem tratamento de telhado e sem telhado
+# mas a coluna que informa se tem telhado ou nao, esta no measures
+# aqui vou criar um df para separar os experimentos com e sem telhado
+# em cada um dos sites, isso ira gerar novos codigos ID 
+site1_vector <- gonzales_measures %>% 
+  filter(Site == "Site 1") %>%
+  select(Site, Treatment, Replicate, Roof) %>%
+  mutate(Treatment = str_replace_all(
+    Treatment,c(
+      "managed_forest" = "Managed forest",
+      "natural_forest" = "Natural forest")))
+
+site2_vector <- gonzales_measures %>% 
+  filter(Site == "Site 2") %>%
+  select(Site, Treatment, Replicate, Roof) %>%
+  mutate(Treatment = str_replace_all(
+    Treatment,c(
+      "managed_forest" = "Managed forest",
+      "natural_forest" = "Natural forest")))
+
+site3_vector <- gonzales_measures %>% 
+  filter(Site == "Site 3") %>%
+  select(Site, Treatment, Replicate, Roof) %>%
+  mutate(Treatment = str_replace_all(
+    Treatment,c(
+      "managed_forest" = "Managed forest",
+      "natural_forest" = "Natural forest")))
+
 # abundance
-gonzales_site1_fa <- gonzales_fa %>% 
+gonzales_site1_roof_fa <- gonzales_fa %>% 
   filter(Site == "Site 1") %>%
   select(-Morphospecies.4, -Morphospecies.5, -Morphospecies.7,
-         -Morphospecies.8, -Morphospecies.9, -Morphospecies.10)
+         -Morphospecies.8, -Morphospecies.9, -Morphospecies.10,
+         -Morphospecies.6) %>%
+  left_join(site1_vector, by = c("Site", "Treatment", "Replicate")) %>%
+  filter(Roof == "yes") %>%
+  select(-Roof, -Site) %>%
+  filter(!(#Treatment == "Managed forest" & Replicate == "pot.5" |
+             Treatment == "Managed forest" & Replicate == "pot.6" |
+             #Treatment == "Managed forest" & Replicate == "pot.12" |
+             Treatment == "Managed forest" & Replicate == "pot.13" |
+             Treatment == "Managed forest" & Replicate == "pot.16" |
+             Treatment == "Natural forest" & Replicate == "pot.7" |
+             Treatment == "Natural forest" & Replicate == "pot.9" |
+             Treatment == "Natural forest" & Replicate == "pot.11" |
+             Treatment == "Natural forest" & Replicate == "pot.20" ))
 
-gonzales_site2_fa <- gonzales_fa %>% 
+gonzales_site1_nonroof_fa <- gonzales_fa %>% 
+  filter(Site == "Site 1") %>%
+  select(-Morphospecies.4, -Morphospecies.5, -Morphospecies.7,
+         -Morphospecies.8, -Morphospecies.9, -Morphospecies.10) %>%
+  left_join(site1_vector, by = c("Site", "Treatment", "Replicate")) %>%
+  filter(Roof == "no") %>%
+  select(-Roof, -Site) %>%
+  filter(!(#Treatment == "Managed forest" & Replicate == "pot.5" |
+             Treatment == "Managed forest" & Replicate == "pot.6" |
+             #Treatment == "Managed forest" & Replicate == "pot.12" |
+             Treatment == "Managed forest" & Replicate == "pot.13" |
+             Treatment == "Managed forest" & Replicate == "pot.16" |
+             Treatment == "Natural forest" & Replicate == "pot.7" |
+             Treatment == "Natural forest" & Replicate == "pot.9" |
+             Treatment == "Natural forest" & Replicate == "pot.11" |
+             Treatment == "Natural forest" & Replicate == "pot.20" ))
+
+gonzales_site2_roof_fa <- gonzales_fa %>% 
   filter(Site == "Site 2") %>%
-  select(-Morphospecies.4, -Morphospecies.6, -Morphospecies.9)
+  select(-Morphospecies.4, -Morphospecies.6, -Morphospecies.9,
+         -Morphospecies.8) %>%
+  left_join(site2_vector, by = c("Site", "Treatment", "Replicate")) %>%
+  filter(Roof == "yes") %>%
+  select(-Roof, -Site) #%>%
+  #filter(!(Treatment == "Managed forest" & Replicate == "pot.3" |
+  #           Treatment == "Natural forest" & Replicate == "pot.3" |
+  #           Treatment == "Natural forest" & Replicate == "pot.11" ))
 
-gonzales_site3_fa <- gonzales_fa %>% 
+gonzales_site2_nonroof_fa <- gonzales_fa %>% 
+  filter(Site == "Site 2") %>%
+  select(-Morphospecies.4, -Morphospecies.6, -Morphospecies.9,
+         -Morphospecies.2, -Morphospecies.7) %>%
+  left_join(site2_vector, by = c("Site", "Treatment", "Replicate")) %>%
+  filter(Roof == "no") %>%
+  select(-Roof, -Site) #%>%
+  #filter(!(Treatment == "Managed forest" & Replicate == "pot.3" |
+   #          Treatment == "Natural forest" & Replicate == "pot.3" |
+    #         Treatment == "Natural forest" & Replicate == "pot.11" ))
+
+gonzales_site3_roof_fa <- gonzales_fa %>% 
   filter(Site == "Site 3") %>%
   select(-Morphospecies.5, -Morphospecies.6, -Morphospecies.7, 
-         -Morphospecies.8)
+         -Morphospecies.8, -Morphospecies.4, -Morphospecies.10) %>%
+  left_join(site3_vector, by = c("Site", "Treatment", "Replicate")) %>%
+  filter(Roof == "yes") %>%
+  select(-Roof, -Site) %>%
+  filter(!(Treatment == "Managed forest" & Replicate == "pot.3" |
+             Treatment == "Managed forest" & Replicate == "pot.14" ))
 
-#colSums(gonzales_site1_fa[,-c(1:3)]) 
-#colSums(gonzales_site2_fa[,-c(1:3)])  
-#colSums(gonzales_site3_fa[,-c(1:3)])  
+gonzales_site3_nonroof_fa <- gonzales_fa %>% 
+  filter(Site == "Site 3") %>%
+  select(-Morphospecies.5, -Morphospecies.6, -Morphospecies.7, 
+         -Morphospecies.8, -Morphospecies.9) %>%
+  left_join(site3_vector, by = c("Site", "Treatment", "Replicate")) %>%
+  filter(Roof == "no") %>%
+  select(-Roof, -Site) %>%
+  filter(!(Treatment == "Managed forest" & Replicate == "pot.3" |
+             Treatment == "Managed forest" & Replicate == "pot.14" ))
+
+# MD14, MD15 e MD16
+colSums(gonzales_site1_roof_fa[,-c(1:2)]) # Morphospecies.6
+colSums(gonzales_site2_roof_fa[,-c(1:2)]) # Morphospecies.8
+colSums(gonzales_site3_roof_fa[,-c(1:2)]) # Morphospecies.4 Morphospecies.10
+# New MDs
+colSums(gonzales_site1_nonroof_fa[,-c(1:2)]) # ok
+colSums(gonzales_site2_nonroof_fa[,-c(1:2)]) # Morphospecies.2 Morphospecies.7 
+colSums(gonzales_site3_nonroof_fa[,-c(1:2)]) # Morphospecies.9
 
 # list
 gonzales_list <- mutate_all(
   gonzales_list, ~(replace(., .=="?", NA)))
 
-gonzales_site1_list <- gonzales_list %>%
-  filter(Morfospecies_name != "Morphospecies.4" &
-         Morfospecies_name != "Morphospecies.5" &
-         Morfospecies_name != "Morphospecies.7" &
-         Morfospecies_name != "Morphospecies.8" & 
-         Morfospecies_name != "Morphospecies.9" & 
-         Morfospecies_name != "Morphospecies.10")
+gonzales_site1_roof_list <- gonzales_list %>%
+  filter(Morfospecies_name %in% names(gonzales_site1_roof_fa[,-c(1:2)]))
 
-gonzales_site2_list <- gonzales_list %>%
-  filter(Morfospecies_name != "Morphospecies.4" &
-           Morfospecies_name != "Morphospecies.6" &
-           Morfospecies_name != "Morphospecies.9") 
-           
-gonzales_site3_list <- gonzales_list %>%
-  filter(Morfospecies_name != "Morphospecies.5" &
-           Morfospecies_name != "Morphospecies.6" &
-           Morfospecies_name != "Morphospecies.7" &
-           Morfospecies_name != "Morphospecies.8") 
+gonzales_site1_nonroof_list <- gonzales_list %>%
+  filter(Morfospecies_name %in% names(gonzales_site1_nonroof_fa[,-c(1:2)]))
+
+gonzales_site2_roof_list <- gonzales_list %>%
+  filter(Morfospecies_name %in% names(gonzales_site2_roof_fa[,-c(1:2)]))
+
+gonzales_site2_nonroof_list <- gonzales_list %>%
+  filter(Morfospecies_name %in% names(gonzales_site2_nonroof_fa[,-c(1:2)]))
+
+gonzales_site3_roof_list <- gonzales_list %>%
+  filter(Morfospecies_name %in% names(gonzales_site3_roof_fa[,-c(1:2)]))
+
+gonzales_site3_nonroof_list <- gonzales_list %>%
+  filter(Morfospecies_name %in% names(gonzales_site3_nonroof_fa[,-c(1:2)]))
 
 # traits
 gonzales_traits <- mutate_all(
   gonzales_traits, ~(replace(., .=="?", NA)))
 
-gonzales_site1_traits <- gonzales_traits %>%
-  filter(Morfospecies_name != "Morphospecies.4" &
-           Morfospecies_name != "Morphospecies.5" &
-           Morfospecies_name != "Morphospecies.7" &
-           Morfospecies_name != "Morphospecies.8" & 
-           Morfospecies_name != "Morphospecies.9" & 
-           Morfospecies_name != "Morphospecies.10" &
-           Morfospecies_name != "Morphospecies.11")
+gonzales_site1_roof_traits <- gonzales_traits %>%
+  filter(Morfospecies_name %in% names(gonzales_site1_roof_fa[,-c(1:2)]))
 
-gonzales_site2_traits <- gonzales_traits %>%
-  filter(Morfospecies_name != "Morphospecies.4" &
-           Morfospecies_name != "Morphospecies.6" &
-           Morfospecies_name != "Morphospecies.9"&
-           Morfospecies_name != "Morphospecies.11") 
+gonzales_site1_nonroof_traits <- gonzales_traits %>%
+  filter(Morfospecies_name %in% names(gonzales_site1_nonroof_fa[,-c(1:2)]))
 
-gonzales_site3_traits <- gonzales_traits %>%
-  filter(Morfospecies_name != "Morphospecies.5" &
-           Morfospecies_name != "Morphospecies.6" &
-           Morfospecies_name != "Morphospecies.7" &
-           Morfospecies_name != "Morphospecies.8" &
-           Morfospecies_name != "Morphospecies.11")
+gonzales_site2_roof_traits <- gonzales_traits %>%
+  filter(Morfospecies_name %in% names(gonzales_site2_roof_fa[,-c(1:2)]))
+
+gonzales_site2_nonroof_traits <- gonzales_traits %>%
+  filter(Morfospecies_name %in% names(gonzales_site2_nonroof_fa[,-c(1:2)]))
+
+gonzales_site3_roof_traits <- gonzales_traits %>%
+  filter(Morfospecies_name %in% names(gonzales_site3_roof_fa[,-c(1:2)]))
+
+gonzales_site3_nonroof_traits <- gonzales_traits %>%
+  filter(Morfospecies_name %in% names(gonzales_site3_nonroof_fa[,-c(1:2)]))
 
 # measures
-gonzales_site1_measures <- gonzales_measures %>% 
-  filter(Site == "Site 1") %>%
-  rename(all_of(dict_names))
+# experiments with single cottomstrip are necessary to duplicate
+gonzales_measures[5,8] <- "227.18"
+gonzales_measures[12,8] <- "185.82"
+gonzales_measures[43,8] <- "209.02"
+gonzales_measures[63,8] <- "154.68"
+gonzales_measures[71,8] <- "164.14"
 
-gonzales_site2_measures <- gonzales_measures %>% 
-  filter(Site == "Site 2") %>%
-  rename(all_of(dict_names))
+gonzales_site1_roof_measures <- gonzales_measures %>% 
+  mutate(Remaining_water_volume = NA) %>%
+  filter(Site == "Site 1" & Roof == "yes") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "managed_forest" = "Managed forest",
+      "natural_forest" = "Natural forest"))) %>%
+  filter(!(#treatment == "Managed forest" & replicate == "pot.5" |
+           treatment == "Managed forest" & replicate == "pot.6" |
+           #treatment == "Managed forest" & replicate == "pot.12" |
+           treatment == "Managed forest" & replicate == "pot.13" |
+           treatment == "Managed forest" & replicate == "pot.16" |
+           treatment == "Natural forest" & replicate == "pot.7" |
+           treatment == "Natural forest" & replicate == "pot.9" |
+           treatment == "Natural forest" & replicate == "pot.11" |
+           treatment == "Natural forest" & replicate == "pot.20" ))
 
-gonzales_site3_measures <- gonzales_measures %>% 
-  filter(Site == "Site 3") %>%
-  rename(all_of(dict_names))
+gonzales_site1_nonroof_measures <- gonzales_measures %>% 
+  mutate(Remaining_water_volume = NA) %>%
+  filter(Site == "Site 1" & Roof == "no") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "managed_forest" = "Managed forest",
+      "natural_forest" = "Natural forest"))) %>%
+  filter(!(#treatment == "Managed forest" & replicate == "pot.5" |
+           treatment == "Managed forest" & replicate == "pot.6" |
+           #treatment == "Managed forest" & replicate == "pot.12" |
+           treatment == "Managed forest" & replicate == "pot.13" |
+           treatment == "Managed forest" & replicate == "pot.16" |
+           treatment == "Natural forest" & replicate == "pot.7" |
+           treatment == "Natural forest" & replicate == "pot.9" |
+           treatment == "Natural forest" & replicate == "pot.11" |
+           treatment == "Natural forest" & replicate == "pot.20" ))
+
+gonzales_site2_roof_measures <- gonzales_measures %>% 
+  mutate(Remaining_water_volume = NA) %>%
+  filter(Site == "Site 2" & Roof == "yes") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "managed_forest" = "Managed forest",
+      "natural_forest" = "Natural forest"))) #%>%
+  #filter(!(treatment == "Managed forest" & replicate == "pot.3" |
+             #treatment == "Natural forest" & replicate == "pot.3" |
+             #treatment == "Natural forest" & replicate == "pot.11" ))
+
+gonzales_site2_nonroof_measures <- gonzales_measures %>% 
+  mutate(Remaining_water_volume = NA) %>%
+  filter(Site == "Site 2" & Roof == "no") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "managed_forest" = "Managed forest",
+      "natural_forest" = "Natural forest"))) #%>%
+  #filter(!(treatment == "Managed forest" & replicate == "pot.3" |
+            # treatment == "Natural forest" & replicate == "pot.3" |
+             #treatment == "Natural forest" & replicate == "pot.11" ))
+
+gonzales_site3_roof_measures <- gonzales_measures %>% 
+  mutate(Remaining_water_volume = NA) %>%
+  filter(Site == "Site 3" & Roof == "yes") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "managed_forest" = "Managed forest",
+      "natural_forest" = "Natural forest"))) %>%
+  filter(!(treatment == "Managed forest" & replicate == "pot.3" |
+             treatment == "Managed forest" & replicate == "pot.14" ))
+
+
+gonzales_site3_nonroof_measures <- gonzales_measures %>% 
+  mutate(Remaining_water_volume = NA) %>%
+  filter(Site == "Site 3" & Roof == "no") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "managed_forest" = "Managed forest",
+      "natural_forest" = "Natural forest"))) %>%
+  filter(!(treatment == "Managed forest" & replicate == "pot.3" |
+             treatment == "Managed forest" & replicate == "pot.14" ))
 
 # data 
-gonzales_site1_data <- tibble(
+gonzales_site1_roof_data <- tibble(
   researcher = "Gonzales",
   locality = "Philadelphia_USA", 
-  roof_treatment = NA,
-  abundance = list(tibble(gonzales_site1_fa)),
-  list = list(tibble(gonzales_site1_list)),
-  traits=list(tibble(gonzales_site1_traits)),
-  measures=list(tibble(gonzales_site1_measures)),
-  obs = "20 por tratamento. Site 1")
+  roof_treatment = 1,
+  abundance = list(tibble(gonzales_site1_roof_fa)),
+  list = list(tibble(gonzales_site1_roof_list)),
+  traits=list(tibble(gonzales_site1_roof_traits)),
+  measures=list(tibble(gonzales_site1_roof_measures)),
+  obs = "")
 
-gonzales_site2_data <- tibble(
+gonzales_site2_roof_data <- tibble(
   researcher = "Gonzales",
   locality = "Philadelphia_USA", 
-  roof_treatment = NA,
-  abundance = list(tibble(gonzales_site2_fa)),
-  list = list(tibble(gonzales_site2_list)),
-  traits=list(tibble(gonzales_site2_traits)),
-  measures=list(tibble(gonzales_site2_measures)),
-  obs = "20 por tratamento. Site 2")
+  roof_treatment = 1,
+  abundance = list(tibble(gonzales_site2_roof_fa)),
+  list = list(tibble(gonzales_site2_roof_list)),
+  traits=list(tibble(gonzales_site2_roof_traits)),
+  measures=list(tibble(gonzales_site2_roof_measures)),
+  obs = "")
 
-gonzales_site3_data <- tibble(
+gonzales_site3_roof_data <- tibble(
   researcher = "Gonzales",
   locality = "Philadelphia_USA", 
-  roof_treatment = NA,
-  abundance = list(tibble(gonzales_site3_fa)),
-  list = list(tibble(gonzales_site3_list)),
-  traits=list(tibble(gonzales_site3_traits)),
-  measures=list(tibble(gonzales_site3_measures)),
-  obs = "20 por tratamento. Site 3")
+  roof_treatment = 1,
+  abundance = list(tibble(gonzales_site3_roof_fa)),
+  list = list(tibble(gonzales_site3_roof_list)),
+  traits=list(tibble(gonzales_site3_roof_traits)),
+  measures=list(tibble(gonzales_site3_roof_measures)),
+  obs = "")
 
-save(gonzales_site1_data,
-     gonzales_site2_data,
-     gonzales_site3_data,
+gonzales_site1_nonroof_data <- tibble(
+  researcher = "Gonzales",
+  locality = "Philadelphia_USA", 
+  roof_treatment = 0,
+  abundance = list(tibble(gonzales_site1_nonroof_fa)),
+  list = list(tibble(gonzales_site1_nonroof_list)),
+  traits=list(tibble(gonzales_site1_nonroof_traits)),
+  measures=list(tibble(gonzales_site1_nonroof_measures)),
+  obs = "")
+
+gonzales_site2_nonroof_data <- tibble(
+  researcher = "Gonzales",
+  locality = "Philadelphia_USA", 
+  roof_treatment = 0,
+  abundance = list(tibble(gonzales_site2_nonroof_fa)),
+  list = list(tibble(gonzales_site2_nonroof_list)),
+  traits=list(tibble(gonzales_site2_nonroof_traits)),
+  measures=list(tibble(gonzales_site2_nonroof_measures)),
+  obs = "")
+
+gonzales_site3_nonroof_data <- tibble(
+  researcher = "Gonzales",
+  locality = "Philadelphia_USA", 
+  roof_treatment = 0,
+  abundance = list(tibble(gonzales_site3_nonroof_fa)),
+  list = list(tibble(gonzales_site3_nonroof_list)),
+  traits=list(tibble(gonzales_site3_nonroof_traits)),
+  measures=list(tibble(gonzales_site3_nonroof_measures)),
+  obs = "")
+
+save(gonzales_site1_roof_data,
+     gonzales_site2_roof_data,
+     gonzales_site3_roof_data,
+     gonzales_site1_nonroof_data,
+     gonzales_site2_nonroof_data,
+     gonzales_site3_nonroof_data,
      file = file.path(local_directory,
                  "Gonzalez_USA",
                  "Gonzalez_USA.RData"))
@@ -3859,7 +4077,7 @@ save(yoshida_karasawayama_data,
 
 #--- Nested dataframe ----
 ### ATENCAO ###
-# FUNDAMENTAL NAO ALTERAR A ORDEM DOS DATAFRAMES
+# FUNDAMENTAL NAO ALTERAR A ORDEM DOS DATAFRAMES INSERIDOS AQUI
 # POIS ELES RECEBERAM CODIGOS DE ID CONFORME A ORDEM. ESSES CODIGOS
 # FORAM CRIADOS PARA POSTERIOR UNIAO (JOIN) DOS DATAFRAMES ANINHADOS
 # COM AS RESPECTIVAS CHAVES ID APOS A CONFERENCIA DOS ATRIBUTOS FUNCIONAIS
@@ -3878,9 +4096,9 @@ nested_df <- bind_rows(boukal_czech_roof,
                        fabiola_nonroof_colombia_data,
                        celine_canopy_frenchguyana_data,
                        celine_general_frenchguyana_data,
-                       gonzales_site1_data,
-                       gonzales_site2_data,
-                       gonzales_site3_data,
+                       gonzales_site1_roof_data,
+                       gonzales_site2_roof_data,
+                       gonzales_site3_roof_data,
                        horvath_data,
                        izzo_data,
                        romero_nonroof_japi_data,
@@ -3928,7 +4146,10 @@ nested_df <- bind_rows(boukal_czech_roof,
                        yoshida_karasawayama_data,
                        caliman_roof_natal_br,
                        cotriguacu_romero_data_mid,
-                       cotriguacu_romero_data_high)
+                       cotriguacu_romero_data_high,
+                       gonzales_site1_nonroof_data,
+                       gonzales_site2_nonroof_data,
+                       gonzales_site3_nonroof_data)
 
 data_number <- column_id(nested_df, "MD")
 
