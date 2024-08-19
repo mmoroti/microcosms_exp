@@ -1684,7 +1684,7 @@ save(gonzales_site1_roof_data,
                  "Gonzalez_USA",
                  "Gonzalez_USA.RData"))
 
-#--- Horvath_HU ----
+#--- MD17 --- Horvath_HU ----
 # dados do logger estão na mesma planilha
 horvath_hungria <- file.path(local_directory,
                      "Horvath_HU",
@@ -1721,9 +1721,15 @@ head(horvath_traits)
 
 # measures
 horvath_measures <- horvath_measures %>%
+  rename("Remaining_water_volume" = "Final volume of water") %>%
   mutate("Natural tree hole.1" = NA,
          "Natural tree hole.2" = NA) %>%
-  rename(all_of(dict_names))
+  mutate(across("ammonium_concentration", ~ str_replace(., "<0.1", "0"))) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 horvath_data <- tibble(
   researcher = "Horvath",
@@ -1733,7 +1739,7 @@ horvath_data <- tibble(
   list = list(tibble(horvath_list)),
   traits=list(tibble(horvath_traits)),
   measures=list(tibble(horvath_measures)),
-  obs = "dados do logger estão na mesma planilha")
+  obs = "informações sobre tree hole estão na aba metadados.")
 
 save(horvath_data,
      file = file.path(local_directory,
@@ -1742,8 +1748,9 @@ save(horvath_data,
 
 
 
-#--- Izzo_Chapada_BR ----
-# Fauna_morphospecies_list: substituído '-' por 'NA' (fiz direto na planilha a remoção do hífen)
+#--- MD18 --- Izzo_Chapada_BR ----
+# Fauna_morphospecies_list: substituído '-' por 'NA'
+# (fiz direto na planilha a remoção do hífen)
 izzo_br <- file.path(local_directory,
                         "Izzo_Chapada_BR",
                         "TJIZZO.Chapada.xlsx")
@@ -1768,8 +1775,8 @@ izzo_measures <- read_xlsx(
     izzo_br),
   "measures_decomposition_geograph")
 
-# abundance
-head(izzo_fa)
+izzo_fa <- izzo_fa %>%
+  filter(Treatment != "Natural forest" | Replicate != "pot.5")
 
 # list
 head(izzo_list)
@@ -1779,7 +1786,13 @@ head(izzo_traits)
 
 # measures
 izzo_measures <- izzo_measures %>%
-  rename(all_of(dict_names))
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  filter(Treatment != "Natural forest" | Replicate != "pot.5") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 izzo_data <- tibble(
   researcher = "Izzo",
@@ -1789,14 +1802,13 @@ izzo_data <- tibble(
   list = list(tibble(izzo_list)),
   traits=list(tibble(izzo_traits)),
   measures=list(tibble(izzo_measures)),
-  obs = "o pot.5 do tratamento 'Natural forest' esta marcado de amarelo
-  e apenas com os parâmetros iniciais coletados")
+  obs = "")
 
 save(izzo_data,
      file = file.path(local_directory,
                  "Izzo_Chapada_BR",
                  "izzo_brazil.RData"))
-#--- GRomero_Japi ----
+#--- MD19 & MD54 --- GRomero_Japi ----
 # coordenadas convertidas direto no xlsx
 romero_japi <- file.path(local_directory,
                 "Japi_romero",
@@ -1890,12 +1902,35 @@ romero_nonroof_japi_traits <- romero_japi_traits %>%
 
 # measures
 romero_roof_japi_measures <- romero_japi_measures %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Roof_treatment == "roof") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000)) %>%
+  mutate(tree_dbh = tree_dbh / pi) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "Degraded" = "Managed forest",
+      "Natural" = "Natural forest"))) %>%
+  select(-Roof_treatment)
+
 
 romero_nonroof_japi_measures <- romero_japi_measures %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Roof_treatment == "open") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000)) %>%
+  mutate(tree_dbh = tree_dbh / pi) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "Degraded" = "Managed forest",
+      "Natural" = "Natural forest"))) %>%
+  select(-Roof_treatment)
 
 # save data
 romero_roof_japi_data <- tibble(
@@ -1906,7 +1941,7 @@ romero_roof_japi_data <- tibble(
   list = list(tibble(romero_roof_japi_list)),
   traits=list(tibble(romero_roof_japi_traits)),
   measures=list(tibble(romero_roof_japi_measures)),
-  obs = "dados foram separados pois estavam na mesma planilha")
+  obs = "pot.19 com NA em measures")
 
 romero_nonroof_japi_data <- tibble(
   researcher = "Romero",
@@ -1916,7 +1951,7 @@ romero_nonroof_japi_data <- tibble(
   list = list(tibble(romero_nonroof_japi_list)),
   traits=list(tibble(romero_nonroof_japi_traits)),
   measures=list(tibble(romero_nonroof_japi_measures)),
-  obs = "dados foram separados pois estavam na mesma planilha")
+  obs = "")
 
 save(romero_roof_japi_data,
      romero_nonroof_japi_data,
@@ -1924,8 +1959,7 @@ save(romero_roof_japi_data,
                  "Japi_romero",
                  "romero_japi_brazil.RData"))
 
-#--- Jari Finland ----
-# tirar dúvidas
+#--- MD20 --- Jari Finland ----
 jari_finland <- file.path(local_directory,
                     "Jari_Finland",
                     "JariKouki-Finland-draft-data.xlsx")
@@ -1951,8 +1985,11 @@ jari_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-#View(jari_fa)
+jari_fa <- jari_fa %>%
+  select(-"...3") %>%
+  mutate(across(-c(1, 2), ~ replace_na(., 0)))
 
+names(jari_fa)
 # list
 jari_list <- jari_list %>%
        bind_rows(tibble(Morfospecies_name = "Morphospecies.38")) # present in
@@ -1968,8 +2005,17 @@ jari_traits$total_length <- as.double(jari_traits$total_length)
 
 # measures
 jari_measures <- jari_measures %>%
-  mutate("detritus dry mass (fine)" = NA) %>%
-  rename(all_of(dict_names))
+  mutate(
+    `detritus dry mass (fine)` = `detritus dry mass (filterpaper <0,2 mm)` +
+      `detritus dry mass mg (fine 0,5 mm-0,2 mm)`
+  ) %>% 
+  rename("Remaining_water_volume" = "volume of the water in sample") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across("water_volume", ~ str_replace(., "0/completely dry", "0"))) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  select(-"detritus dry mass (filterpaper <0,2 mm)",
+         -"detritus dry mass mg (fine 0,5 mm-0,2 mm)")
 
 jari_data <- tibble(
   researcher = "Jari",
