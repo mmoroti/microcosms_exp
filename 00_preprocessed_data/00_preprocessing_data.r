@@ -2107,7 +2107,7 @@ save(jari_data,
                  "Jari_Finland",
                  "jari_finland.RData"))
 
-#--- Juen_Belem_BR ----
+#--- MD21 & MD22 & MD23 --- Juen_Belem_BR ----
 # os dados dos diferentes tratamentos estao todos juntos
 # precisamos separar em linhas distintas e limpar as abas correspondentes
 # por ex, no tratamento com telhado, alguns taxons nao estao presentes, assim
@@ -2145,7 +2145,11 @@ juen_roof_fa <- juen_fa %>%
   filter(Roof == "com roof") %>% # 20 amostras
   select(-"Morphospecies.1", -"Morphospecies.2", -"Morphospecies.6",
          -"Morphospecies.8", -"Morphospecies.10", -"Morphospecies.11",
-         -"Morphospecies.16", -"Morphospecies.18", -"Morphospecies.20") 
+         -"Morphospecies.16", -"Morphospecies.18", -"Morphospecies.20") %>%
+  mutate(Morphospecies.5 = Morphospecies.4 + Morphospecies.5) %>%
+  mutate(Morphospecies.7 = Morphospecies.7 + Morphospecies.9) %>%
+  select(-"Morphospecies.9", -"Morphospecies.4")
+
 #dim(juen_roof_fa)
 #colSums(juen_roof_fa[,5:16])
 
@@ -2154,7 +2158,10 @@ juen_nonroof_fa <- juen_fa %>%
   filter(Local != "Utinga" & Local !="UFPA" ) %>% # agora 20 amostras
   select(-"Morphospecies.1", -"Morphospecies.2", -"Morphospecies.6",
          -"Morphospecies.9", -"Morphospecies.10", -"Morphospecies.13",
-         -"Morphospecies.21")
+         -"Morphospecies.21") %>%
+  mutate(Morphospecies.5 = Morphospecies.4 + Morphospecies.5) %>%
+  select(-"Morphospecies.4")
+
 #dim(juen_nonroof_fa)
 #colSums(juen_nonroof_fa[,5:18])
 
@@ -2162,7 +2169,11 @@ juen_na_fa <- juen_fa %>%
   filter(Local == "Utinga" | Local == "UFPA") %>%
   select(-"Morphospecies.13", -"Morphospecies.14", -"Morphospecies.15",
          -"Morphospecies.16", -"Morphospecies.17", -"Morphospecies.18",
-         -"Morphospecies.19", -"Morphospecies.20", -"Morphospecies.21")
+         -"Morphospecies.19", -"Morphospecies.20", -"Morphospecies.21") %>%
+  mutate(Morphospecies.5 = Morphospecies.4 + Morphospecies.5) %>%
+  mutate(Morphospecies.7 = Morphospecies.7 + Morphospecies.9) %>%
+  select(-"Morphospecies.9", -"Morphospecies.4")
+
 #dim(juen_na_fa)
 #colSums(juen_na_fa[,5:16])
 
@@ -2176,7 +2187,9 @@ juen_roof_list <- juen_list %>%
          Morfospecies_name != "Morphospecies.11" &
          Morfospecies_name != "Morphospecies.16" &
          Morfospecies_name != "Morphospecies.18" &
-         Morfospecies_name != "Morphospecies.20")
+         Morfospecies_name != "Morphospecies.20" & 
+           Morfospecies_name != "Morphospecies.9" &
+           Morfospecies_name != "Morphospecies.4")
 
 juen_nonroof_list <- juen_list %>%
   filter(Morfospecies_name != "Morphospecies.1" & 
@@ -2185,7 +2198,8 @@ juen_nonroof_list <- juen_list %>%
            Morfospecies_name != "Morphospecies.9" &
            Morfospecies_name != "Morphospecies.10" &
            Morfospecies_name != "Morphospecies.13" &
-           Morfospecies_name != "Morphospecies.21")
+           Morfospecies_name != "Morphospecies.21"&
+           Morfospecies_name != "Morphospecies.4")
 
 juen_na_list <- juen_list %>%
   filter(Morfospecies_name != "Morphospecies.13" & 
@@ -2196,7 +2210,9 @@ juen_na_list <- juen_list %>%
            Morfospecies_name != "Morphospecies.18" &
            Morfospecies_name != "Morphospecies.19" &
            Morfospecies_name != "Morphospecies.20" &
-           Morfospecies_name != "Morphospecies.21")
+           Morfospecies_name != "Morphospecies.21" & 
+           Morfospecies_name != "Morphospecies.9" &
+           Morfospecies_name != "Morphospecies.4")
 
 # traits
 juen_roof_traits <- juen_traits %>%
@@ -2208,7 +2224,9 @@ juen_roof_traits <- juen_traits %>%
            Morfospecies_name != "Morphospecies.11" &
            Morfospecies_name != "Morphospecies.16" &
            Morfospecies_name != "Morphospecies.18" &
-           Morfospecies_name != "Morphospecies.20")
+           Morfospecies_name != "Morphospecies.20" & 
+           Morfospecies_name != "Morphospecies.9" &
+           Morfospecies_name != "Morphospecies.4")
 
 juen_nonroof_traits <- juen_traits %>%
   filter(Morfospecies_name != "Morphospecies.1" & 
@@ -2217,7 +2235,8 @@ juen_nonroof_traits <- juen_traits %>%
            Morfospecies_name != "Morphospecies.9" &
            Morfospecies_name != "Morphospecies.10" &
            Morfospecies_name != "Morphospecies.13" &
-           Morfospecies_name != "Morphospecies.21")
+           Morfospecies_name != "Morphospecies.21" &
+           Morfospecies_name != "Morphospecies.4")
 
 juen_na_traits <- juen_traits %>%
   filter(Morfospecies_name != "Morphospecies.13" & 
@@ -2228,25 +2247,36 @@ juen_na_traits <- juen_traits %>%
            Morfospecies_name != "Morphospecies.18" &
            Morfospecies_name != "Morphospecies.19" &
            Morfospecies_name != "Morphospecies.20" &
-           Morfospecies_name != "Morphospecies.21")
+           Morfospecies_name != "Morphospecies.21" & 
+           Morfospecies_name != "Morphospecies.9" &
+           Morfospecies_name != "Morphospecies.4")
 
 # measures
 juen_roof_measures <- juen_measures %>%
   filter(Roof == "com roof") %>%
   rename("dissolved_O2" = "dissolved_O2 (%)") %>%
-  rename(all_of(dict_names))
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
 
 juen_nonroof_measures <- juen_measures %>%
   filter(Roof == "Sem roof") %>%
   filter(Local != "Utinga" & Local !="UFPA") %>%
   rename("dissolved_O2" = "dissolved_O2 (%)") %>%
-  rename(all_of(dict_names))
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
 
 juen_na_measures <- juen_measures %>%
   filter(Roof == "Sem roof") %>%
   filter(Local == "Utinga" | Local == "UFPA") %>%
   rename("dissolved_O2" = "dissolved_O2 (%)") %>%
-  rename(all_of(dict_names))
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
 
 # data
 juen_roof_data <- tibble(
@@ -2287,8 +2317,7 @@ save(juen_na_data,
                  "juen_belem_br.RData"))
 
 
-#--- Knapp_Czech ----
-# tirar dúvidas
+#--- MD24 & MD25 & MD26 --- Knapp_Czech ----
 knapp_czech <- file.path(local_directory,
                    "Knapp_Czech")
 
@@ -2318,7 +2347,6 @@ knapp_measures <- read_xlsx(
 
 # measures
 knapp_roof_measures <- knapp_measures %>%
-  mutate("Remaining_water_volume" = NA) %>%
   filter(Experiment == "roof") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -2326,12 +2354,12 @@ knapp_roof_measures <- knapp_measures %>%
   select(-Experiment)
 
 knapp_nonroof_measures <- knapp_measures %>%
-  mutate("Remaining_water_volume" = NA) %>%
   filter(Experiment == "standard") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
-  select(-Experiment)
+  select(-Experiment) %>%
+  filter(!(replicate %in% c("L02", "L22", "L21", "L27"))) 
 
 knapp_roof_data <- tibble(
   researcher = "Knapp",
@@ -2398,12 +2426,14 @@ knapp_hory_traits <- knapp_hory_traits %>%
   ))
 
 # measures
-knapp_hory_measures <- knapp_hory_measures %>%
-  mutate("Remaining_water_volume" = NA) %>%
+knapp_hory_measures_filter <- knapp_hory_measures %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
-  select(-Experiment)
+  select(-Experiment) %>%
+  rename(outside_after_mg = outside_before_mg,
+         outside_before_mg = outside_after_mg) %>%
+  filter(!(replicate %in% c("H44", "H48", "H52")))
 
 knapp_data <- tibble(
   researcher = "Knapp",
@@ -2412,7 +2442,7 @@ knapp_data <- tibble(
   abundance = list(tibble(knapp_hory_fa)),
   list = list(tibble(knapp_hory_list)),
   traits= list(tibble(knapp_hory_traits)),
-  measures=list(tibble(knapp_hory_measures)),
+  measures=list(tibble(knapp_hory_measures_filter)),
   obs = "")
 
 save(knapp_roof_data,
@@ -2422,7 +2452,7 @@ save(knapp_roof_data,
                  "Knapp_Czech",
                  "knapp_czech.RData"))
 
-#--- Luciano_argentina ----
+#--- MD27 Luciano_argentina ----
 luciano_argentina <- file.path(local_directory,
                     "Luciano_Argentina")
 
@@ -2462,7 +2492,9 @@ luciano_traits
 # measures
 luciano_measures <- luciano_measures %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
-  rename(all_of(dict_names)) 
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
 
 luciano_data <- tibble(
   researcher = "Luciano",
@@ -2478,7 +2510,6 @@ save(luciano_data,
      file = file.path(local_directory,
                  "Luciano_Argentina",
                  "luciano_argentina.RData"))
-
 
 #--- Martins_Hamada_Amazon ----
 # aqui existem alguns tratamentos juntos, com telhado, sem telhado
@@ -2538,8 +2569,7 @@ martins_nonroof_fa <- martins_fa %>%
       "Managed forest - standard experiment" = "Managed forest",
       "Natural forest - standard experiment" = "Natural forest"))) 
   
-
-martins_na_fa <- martins_fa %>%
+martins_mid_fa <- martins_fa %>%
   filter(Treatment == "Managed forest - 15m" |
          Treatment == "Natural forest - 15m") %>%
   select(-Culicidae.Toxorhynchites, -Ceratopogonidae, -Psychodidae,
@@ -2552,7 +2582,7 @@ martins_na_fa <- martins_fa %>%
   
 martins_roof_fa[is.na(martins_roof_fa)] <- 0
 martins_nonroof_fa[is.na(martins_nonroof_fa)] <- 0
-martins_na_fa[is.na(martins_na_fa)] <- 0
+martins_mid_fa[is.na(martins_mid_fa)] <- 0
 
 # list
 martins_roof_list <- martins_list %>% 
@@ -2577,7 +2607,7 @@ martins_nonroof_list <- martins_list %>%
           Morfospecies_name != "Colembola" &
           Morfospecies_name != "Anuro(girino)")
 
-martins_na_list <- martins_list %>% 
+martins_mid_list <- martins_list %>% 
   filter(Morfospecies_name != "Culicidae.Toxorhynchites" &
            Morfospecies_name != "Ceratopogonidae" &
            Morfospecies_name != "Psychodidae" &
@@ -2613,7 +2643,7 @@ martins_nonroof_traits <- martins_traits %>%
            Morfospecies_name != "Colembola" &
            Morfospecies_name != "Anuro(girino)")
 
-martins_na_traits <- martins_traits %>%
+martins_mid_traits <- martins_traits %>%
   filter(Morfospecies_name != "Culicidae.Toxorhynchites" &
            Morfospecies_name != "Ceratopogonidae" &
            Morfospecies_name != "Psychodidae" &
@@ -2630,17 +2660,26 @@ martins_na_traits <- martins_traits %>%
 martins_roof_measures <- martins_measures %>%
   filter(Treatment == "Managed forest - roof" |
          Treatment == "Natural forest - roof") %>%
-  rename(all_of(dict_names))
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
 
 martins_nonroof_measures <- martins_measures %>%
   filter(Treatment == "Managed forest - standard experiment" |
          Treatment == "Natural forest - standard experiment") %>%
-  rename(all_of(dict_names))
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
 
-martins_na_measures <- martins_measures %>%
+martins_mid_measures <- martins_measures %>%
   filter(Treatment == "Managed forest - 15m" |
         Treatment == "Natural forest - 15m") %>%
-  rename(all_of(dict_names))
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
 
 # data
 martins_roof_data <- tibble(
@@ -2667,10 +2706,10 @@ martins_na_data <- tibble(
   researcher = "Martins",
   locality = "Amazon_Brazil", 
   roof_treatment = NA,
-  abundance = list(tibble(martins_na_fa)),
-  list = list(tibble(martins_na_list)),
-  traits=list(tibble(martins_na_traits)),
-  measures=list(tibble(martins_na_measures)),
+  abundance = list(tibble(martins_mid_fa)),
+  list = list(tibble(martins_mid_list)),
+  traits=list(tibble(martins_mid_traits)),
+  measures=list(tibble(martins_mid_measures)),
   obs = "Exp. estratificado 15m - Tem invertebrado terrestre, revisar")
 
 save(martins_roof_data,
