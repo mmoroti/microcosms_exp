@@ -42,7 +42,7 @@ nested_traits_join <- left_join(
 # MD36 is an incorrect experiment (Validated information by Gustavo Romero)
 # another filter is the experiments without traits_revised
 nested_traits <- nested_traits_join %>%
-  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & ID != "MD36") #%>%
+  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & ID != "MD36", ID != "MD53") #%>%
   #filter(ID != "MD57" & ID != "MD58" & ID != "MD59" & ID != "MD60" & ID != "MD61")
 
 for (i in 1:nrow(nested_traits)) {
@@ -71,6 +71,24 @@ View(nested_traits %>%
 nested_database <- nested_traits_join %>% 
   filter(ID != 'MD36') %>%
   select(-list, -traits)
+
+# Rename names in abundance according traits_revised
+# a gente precisa criar uma funcao que olhe para os nomes presentes na abundancia,
+# ou seja, renomear nomes das colunas nas matrizes de abundancia, e tenha o nome
+# correspondente nos traits. Para isso, é possível usar o nome equivalente que o
+# autor deu na abundancia na coluna "Morfospecies_name" que tambem esta presente
+# em traits revised. A partir dela conseguimos renomear 
+df_abundance <- nested_database[[9, "abundance"]][[1]]
+df_traits <- nested_database[[9, "traits_revised"]][[1]]
+
+head(df_abundance)
+
+vtr_dict_names <- df_traits %>%
+  select("(morpho)Species", "Morfospecies_name") %>%
+  deframe()
+
+df_abundance %>%
+  rename(all_of(vtr_dict_names))
 
 #View(nested_database)
 # salva no drive do projeto

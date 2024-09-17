@@ -2511,7 +2511,7 @@ save(luciano_data,
                  "Luciano_Argentina",
                  "luciano_argentina.RData"))
 
-#--- Martins_Hamada_Amazon ----
+#--- MD28 & MD29 & MD30 Martins_Hamada_Amazon ----
 # aqui existem alguns tratamentos juntos, com telhado, sem telhado
 # e a diferenca de estratificacao com os microcosmos colocados a 15m de altura
 # depois precisamos remover de cada experimento as faunas que nao estiveram
@@ -2657,7 +2657,23 @@ martins_mid_traits <- martins_traits %>%
            Morfospecies_name != "Anuro(girino)")
 
 # measures
-martins_roof_measures <- martins_measures %>%
+# rename wrong columns and filter out monkey-bitten replicas
+experiments_damaged <- c("pot.33", "pot.47", "pot.50", "pot.51", "pot.53", "pot.54", "pot.58")
+
+martins_measures_adjusts <- martins_measures %>%
+  rename(
+    "biomass_cotton_stripes_outside_bag_after (mg)" = "biomass_cotton_stripes_outside_bag_before (mg)",
+    "biomass_cotton_stripes_outside_bag_before (mg)" = "biomass_cotton_stripes_outside_bag_after (mg)"
+  ) %>%
+  filter(
+    !(Replicate %in% experiments_damaged
+  ))
+
+martins_measures_adjusts[53,8] <- NA # 0 in outside_before_g pot.60.
+martins_measures_adjusts$'Final water volume (ml)' <- gsub(
+  "Without water", 0, martins_measures_adjusts$'Final water volume (ml)')
+
+martins_roof_measures <- martins_measures_adjusts %>%
   filter(Treatment == "Managed forest - roof" |
          Treatment == "Natural forest - roof") %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
@@ -2665,7 +2681,7 @@ martins_roof_measures <- martins_measures %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric))
 
-martins_nonroof_measures <- martins_measures %>%
+martins_nonroof_measures <- martins_measures_adjusts %>%
   filter(Treatment == "Managed forest - standard experiment" |
          Treatment == "Natural forest - standard experiment") %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
@@ -2673,7 +2689,7 @@ martins_nonroof_measures <- martins_measures %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric))
 
-martins_mid_measures <- martins_measures %>%
+martins_mid_measures <- martins_measures_adjusts %>%
   filter(Treatment == "Managed forest - 15m" |
         Treatment == "Natural forest - 15m") %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
@@ -2690,7 +2706,7 @@ martins_roof_data <- tibble(
   list = list(tibble(martins_roof_list)),
   traits=list(tibble(martins_roof_traits)),
   measures=list(tibble(martins_roof_measures)),
-  obs = "Tem invertebrado terrestre, revisar")
+  obs = NA)
 
 martins_nonroof_data <- tibble(
   researcher = "Martins",
@@ -2700,17 +2716,18 @@ martins_nonroof_data <- tibble(
   list = list(tibble(martins_nonroof_list)),
   traits=list(tibble(martins_nonroof_traits)),
   measures=list(tibble(martins_nonroof_measures)),
-  obs = "Tem invertebrado terrestre, revisar")
+  obs = NA)
 
 martins_na_data <- tibble(
   researcher = "Martins",
   locality = "Amazon_Brazil", 
   roof_treatment = NA,
+  heigth_treatment = 2,
   abundance = list(tibble(martins_mid_fa)),
   list = list(tibble(martins_mid_list)),
   traits=list(tibble(martins_mid_traits)),
   measures=list(tibble(martins_mid_measures)),
-  obs = "Exp. estratificado 15m - Tem invertebrado terrestre, revisar")
+  obs = "Experiments damaged removed")
 
 save(martins_roof_data,
      martins_nonroof_data,
@@ -2719,8 +2736,7 @@ save(martins_roof_data,
                  "Martins_Hamada_Amazon",
                  "martins_amazon_br.RData"))
 
-#--- Mexico_Wesley ----
-# retirei o undefined e deixei vazio para ler como NA.
+#--- MD31 Mexico_Wesley ----
 wesley_mexico <- file.path(local_directory,
                        "Mexico_Wesley")
 
@@ -2761,8 +2777,12 @@ wesley_traits <- wesley_traits %>%
 # measures
 head(wesley_measures)
 
-wesley_measures <- wesley_measures %>%
-  rename(all_of(dict_names))
+wesley_measures_adjust <- wesley_measures %>%
+  mutate(Remaining_water_volume = 800) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 wesley_data <- tibble(
   researcher = "WesleyDattilo",
@@ -2771,7 +2791,7 @@ wesley_data <- tibble(
   abundance = list(tibble(wesley_fa)),
   list = list(tibble(wesley_list)),
   traits=list(tibble(wesley_traits)),
-  measures=list(tibble(wesley_measures)),
+  measures=list(tibble(wesley_measures_adjust)),
   obs = "")
 
 save(wesley_data,
@@ -2780,7 +2800,7 @@ save(wesley_data,
                  "wesley_mexico.RData"))
 
 
-#--- MMoretti Lab_BR ----
+#--- MD32 & MD33 MMoretti Lab_BR ----
 moretti_br <- file.path(local_directory,
                       "MMoretti Lab_BR")
 
@@ -2829,13 +2849,21 @@ moretti_site1_traits <- moretti_site1_traits %>%
   rename("total_length" = "total_length (mm)")
 
 # measures
-moretti_site1_measures <- moretti_site1_measures %>%
+moretti_site1_measures_adjust <- moretti_site1_measures %>%
   rename("dissolved_O2" = "dissolved_O2 (mg/L)",
          "turbidity" = "turbidity (NTU)",
          "detritus dry mass (fine)" = "detritus dry mass (fine) (mg)",
          "detritus dry mass (coarse)" = "detritus dry mass (coarse) (g)",
-         "Tree dbh" = "Tree dbh (cm)") %>%
-  rename(all_of(dict_names))
+         "Tree dbh" = "Tree dbh (cm)",
+         "Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename(
+    "biomass_cotton_stripes_outside_bag_after (mg)" = "biomass_cotton_stripes_outside_bag_before (mg)",
+    "biomass_cotton_stripes_outside_bag_before (mg)" = "biomass_cotton_stripes_outside_bag_after (mg)"
+  ) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 # site 2
 moretti_site2_fa <- read_xlsx(
@@ -2873,13 +2901,21 @@ moretti_site2_list
 glimpse(moretti_site1_traits)
 
 # measures
-moretti_site2_measures <- moretti_site2_measures %>%
+moretti_site2_measures_adjust <- moretti_site2_measures %>%
   rename("dissolved_O2" = "dissolved_O2 (mg/L)",
          "turbidity" = "turbidity (NTU)",
          "detritus dry mass (fine)" = "detritus dry mass (fine) (mg)",
          "detritus dry mass (coarse)" = "detritus dry mass (coarse) (g)",
-         "Tree dbh" = "Tree dbh (cm)") %>%
-  rename(all_of(dict_names))
+         "Tree dbh" = "Tree dbh (cm)",
+         "Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename(
+    "biomass_cotton_stripes_outside_bag_after (mg)" = "biomass_cotton_stripes_outside_bag_before (mg)",
+    "biomass_cotton_stripes_outside_bag_before (mg)" = "biomass_cotton_stripes_outside_bag_after (mg)"
+  ) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 #names(moretti_site2_measures)
 
@@ -2890,7 +2926,7 @@ moretti_site1_data <- tibble(
   abundance = list(tibble(moretti_site1_fa)),
   list = list(tibble(moretti_site1_list)),
   traits=list(tibble(moretti_site1_traits)),
-  measures=list(tibble(moretti_site1_measures)),
+  measures=list(tibble(moretti_site1_measures_adjust)),
   obs = "")
 
 moretti_site2_data <- tibble(
@@ -2900,7 +2936,7 @@ moretti_site2_data <- tibble(
   abundance = list(tibble(moretti_site2_fa)),
   list = list(tibble(moretti_site2_list)),
   traits=list(tibble(moretti_site2_traits)),
-  measures=list(tibble(moretti_site2_measures)),
+  measures=list(tibble(moretti_site2_measures_adjust)),
   obs = "")
 
 save(moretti_site1_data,
