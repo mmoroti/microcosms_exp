@@ -2452,7 +2452,7 @@ save(knapp_roof_data,
                  "Knapp_Czech",
                  "knapp_czech.RData"))
 
-#--- MD27 Luciano_argentina ----
+#--- MD27 --- Luciano_argentina ----
 luciano_argentina <- file.path(local_directory,
                     "Luciano_Argentina")
 
@@ -2511,7 +2511,7 @@ save(luciano_data,
                  "Luciano_Argentina",
                  "luciano_argentina.RData"))
 
-#--- MD28 & MD29 & MD30 Martins_Hamada_Amazon ----
+#--- MD28 & MD29 & MD30 --- Martins_Hamada_Amazon ----
 # aqui existem alguns tratamentos juntos, com telhado, sem telhado
 # e a diferenca de estratificacao com os microcosmos colocados a 15m de altura
 # depois precisamos remover de cada experimento as faunas que nao estiveram
@@ -2736,7 +2736,7 @@ save(martins_roof_data,
                  "Martins_Hamada_Amazon",
                  "martins_amazon_br.RData"))
 
-#--- MD31 Mexico_Wesley ----
+#--- MD31 --- Mexico_Wesley ----
 wesley_mexico <- file.path(local_directory,
                        "Mexico_Wesley")
 
@@ -2800,7 +2800,7 @@ save(wesley_data,
                  "wesley_mexico.RData"))
 
 
-#--- MD32 & MD33 MMoretti Lab_BR ----
+#--- MD32 & MD33 --- MMoretti Lab_BR ----
 moretti_br <- file.path(local_directory,
                       "MMoretti Lab_BR")
 
@@ -2948,32 +2948,32 @@ save(moretti_site1_data,
 #--- Musa_SouthAfrica ----
 # TODO: ainda falta receber os dados formatados
 
-#--- Nakamura_China ---- 
+#--- MD48 & MD49 --- Nakamura_China ---- 
 nakamura <- file.path(local_directory,
                   "Nakamura_China")
 
 nakamura_site1_fa <- read_xlsx(
   file.path(
     nakamura,
-    "Nakamura_AilaoMountainYunnanChina.xlsx"),
+    "Nakamura_AilaoMountainYunnanChina_MICROcosm.xlsx"),
   "fauna_abundance")
 
 nakamura_site1_list <- read_xlsx(
   file.path(
     nakamura,
-    "Nakamura_AilaoMountainYunnanChina.xlsx"),
+    "Nakamura_AilaoMountainYunnanChina_MICROcosm.xlsx"),
   "Fauna_morphospecies_list")
 
 nakamura_site1_traits <- read_xlsx(
   file.path(
     nakamura,
-    "Nakamura_AilaoMountainYunnanChina.xlsx"),
+    "Nakamura_AilaoMountainYunnanChina_MICROcosm.xlsx"),
   "Fauna_traits")[1:11,] # retirando linhas de anotacao
 
 nakamura_site1_measures <- read_xlsx(
   file.path(
     nakamura,
-    "Nakamura_AilaoMountainYunnanChina.xlsx"),
+    "Nakamura_AilaoMountainYunnanChina_MICROcosm.xlsx"),
   "measures_decomposition_geograph")
 
 # abundance
@@ -2996,7 +2996,11 @@ head(nakamura_site1_traits)
 # rename variables with data dictionary
 nakamura_site1_measures <- 
   nakamura_site1_measures %>%
-  rename(all_of(dict_names))
+  rename(Remaining_water_volume = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 # join works!
 #View(left_join(nakamura_site1_list,
@@ -3011,7 +3015,7 @@ nakamura_site1_data <- tibble(
   list = list(tibble(nakamura_site1_list)),
   traits=list(tibble(nakamura_site1_traits)),
   measures=list(tibble(nakamura_site1_measures)),
-  obs = "Experimento com 24 potes divididos em 3 tratamentos de altura de pote")
+  obs = "Excluir MD")
 
 # site 2
 nakamura_site2_fa <- read_xlsx(
@@ -3041,14 +3045,14 @@ nakamura_site2_measures <- read_xlsx(
 # abundance
 nakamura_site2_fa[is.na(nakamura_site2_fa)] <- 0
 
-nakamura_site2_fa <- nakamura_site2_fa %>%
+nakamura_site2_fa_adjust <- nakamura_site2_fa %>%
+  filter(!(Treatment %in% c("Natural forest Canopy", "Natural forest Midstory"))) %>%
   mutate(Treatment = str_replace_all(
     Treatment,c(
       "Natural forest Understory" = "Natural forest",
-      "Natural forest Midstory" = "Natural forest",
-      "Managed forest Rubber plantation" = "Managed forest",
-      "Natural forest Canopy" = "Natural forest"))) 
-  
+      "Managed forest Rubber plantation" = "Managed forest"))) 
+
+# colSums(nakamura_site2_fa_adjust[,-c(1:2)])  
 
 # list
 head(nakamura_site2_list)
@@ -3058,13 +3062,22 @@ head(nakamura_site2_traits)
 
 # measures
 # rename variables with data dictionary
-nakamura_site2_measures <- 
+nakamura_site2_measures_adjust <- 
   nakamura_site2_measures %>%
+  filter(!(Treatment %in% c("Natural forest Canopy", "Natural forest Midstory"))) %>%
   mutate("biomass_cotton_stripes_outside_bag_after (mg)" = NA,
          "biomass_cotton_stripes_outside_bag_before (mg)" = NA,
          "Natural tree hole.1" = NA,
          "Natural tree hole.2" = NA) %>%
-  rename(all_of(dict_names))
+  rename(Remaining_water_volume = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000)) %>%
+  mutate(treatment = str_replace_all(
+    treatment,c(
+      "Natural forest Understory" = "Natural forest",
+      "Managed forest Rubber plantation" = "Managed forest"))) 
 
 # join works!
 #View(left_join(nakamura_site2_list,
@@ -3075,11 +3088,11 @@ nakamura_site2_data <- tibble(
   researcher = "Nakamura",
   locality = "Bubeng_China", 
   roof_treatment = NA,
-  abundance = list(tibble(nakamura_site2_fa)),
+  abundance = list(tibble(nakamura_site2_fa_adjust)),
   list = list(tibble(nakamura_site2_list)),
   traits=list(tibble(nakamura_site2_traits)),
-  measures=list(tibble(nakamura_site2_measures)),
-  obs = "Experimento com 3 tratamentos de altura e floresta manejada")
+  measures=list(tibble(nakamura_site2_measures_adjust)),
+  obs = "Falta tamanho do corpo")
 
 # save .RData from romero
 save(nakamura_site1_data,
@@ -3115,10 +3128,15 @@ nock_measures <- read_xlsx(
     "CA_NOCK_EMEND.2.xlsx"),
   "measures_decomposition_geograph")
 
+names(nock_Detritus)
 # measures
-nock_measures <- nock_measures %>%
+View(nock_measures %>%
   mutate("Remaining_water_volume" = NA) %>%
-  rename(all_of(dict_names)) 
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(detritus_fine = `Detritus dry mass filter paper (mg)` + detritus_fine)) %>%
+  select(-`Detritus dry mass filter paper (mg)`)
 
 nock_data <- tibble(
   researcher = "Nock",
