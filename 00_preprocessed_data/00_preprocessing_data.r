@@ -2945,9 +2945,6 @@ save(moretti_site1_data,
                  "MMoretti Lab_BR",
                  "moretti_br.RData"))
 
-#--- Musa_SouthAfrica ----
-# TODO: ainda falta receber os dados formatados
-
 #--- MD48 & MD49 --- Nakamura_China ---- 
 nakamura <- file.path(local_directory,
                   "Nakamura_China")
@@ -3034,7 +3031,7 @@ nakamura_site2_traits <- read_xlsx(
   file.path(
     nakamura,
     "Nakamura_BubengYunnanChina_MICROcosm.xlsx"),
-  "Fauna_traits")
+  "Fauna_traits")[1:16,]
 
 nakamura_site2_measures <- read_xlsx(
   file.path(
@@ -3058,7 +3055,7 @@ nakamura_site2_fa_adjust <- nakamura_site2_fa %>%
 head(nakamura_site2_list)
 
 # traits
-head(nakamura_site2_traits)
+View(nakamura_site2_traits)
 
 # measures
 # rename variables with data dictionary
@@ -3324,7 +3321,7 @@ save(pavel_site1_data,
                  "pavel_uk.RData"))
 
 
-#--- Petterman_Austria ----
+#--- MD37 --- Petterman_Austria ----
 petermann_austria <- file.path(local_directory,
                         "Petermann_Austria"
                  )
@@ -3369,9 +3366,56 @@ pettermann_traits$total_length <-as.double(pettermann_traits$total_length)
 # measures
 glimpse(pettermann_measures)
 
-pettermann_measures <- pettermann_measures %>%
-  mutate(Remaining_water_volume = NA) %>%
-  rename(all_of(dict_names))
+pettermann_measures_adjust <- pettermann_measures %>%
+  rename(Remaining_water_volume = "Final water volume (ml)") %>% 
+  rename(all_of(dict_names)) %>%
+  mutate(
+    outside_after_mg = if_else(treatment == "Natural forest" & replicate == "pot.5",
+                      "0.097",
+                      outside_after_mg)) %>%
+  mutate(
+    outside_after_mg = if_else(treatment == "Managed forest" & replicate == "pot.10",
+                               "0.0904",
+                               outside_after_mg)) %>%
+  mutate(
+    dissolved_O2 = if_else(treatment == "Managed forest" & replicate == "pot.2",
+                               0.93,
+                           dissolved_O2)) %>%
+  mutate(
+    dissolved_O2 = if_else(treatment == "Managed forest" & replicate == "pot.5",
+                               6.0,
+                               dissolved_O2)) %>%
+  mutate(across(everything(), ~ gsub(",", ".", .))) %>%
+  mutate(across(everything(), ~ gsub("/out", "", .))) %>%
+  mutate(across(everything(), ~ gsub("/1missing", "", .))) %>%
+  mutate(across(everything(), ~ gsub("/1 missing", "", .))) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(
+  outside_after_mg = if_else(treatment == "Natural forest" & replicate == "pot.1",
+                             0.1982,
+                             outside_after_mg)) %>%
+  mutate(
+    outside_after_mg = if_else(treatment == "Natural forest" & replicate == "pot.5",
+                               0.0904*2,
+                               outside_after_mg)) %>%
+  mutate(
+    outside_after_mg = if_else(treatment == "Natural forest" & replicate == "pot.10",
+                               0.0335*2,
+                               outside_after_mg)) %>%
+  mutate(
+    outside_after_mg = if_else(treatment == "Managed forest" & replicate == "pot.3",
+                               0.0943*2,
+                               outside_after_mg)) %>%
+  mutate(
+    outside_after_mg = if_else(treatment == "Managed forest" & replicate == "pot.10",
+                               0.0904*2,
+                               outside_after_mg)) %>%
+  mutate(across(all_of(c("outside_after_mg", "outside_before_mg")), ~ .x * 1000)) %>%
+  mutate(natural_tree_1 = NA) %>%
+  mutate(natural_tree_2 = NA)
+
+View(pettermann_measures_adjust)
 
 pettermann_data <- tibble(
   researcher = "Petermann",
@@ -3380,14 +3424,14 @@ pettermann_data <- tibble(
   abundance = list(tibble(pettermann_fa)),
   list = list(tibble(pettermann_list)),
   traits= list(tibble(pettermann_traits)),
-  measures=list(tibble(pettermann_measures)),
-  obs = "Confirmar dados no data_log.txt")
+  measures=list(tibble(pettermann_measures_adjust)),
+  obs = "")
 
 save(pettermann_data,
      file = file.path(petermann_austria,
                  "petermann_austria.RData"))
 
-#--- Renan_Chapeco ----
+#--- MD38 & MD39 & MD40 --- Renan_Chapeco ----
 renan_br <- file.path(local_directory,
                 "Renan_Chapeco")
 
@@ -3430,13 +3474,18 @@ renan_alloch_list <- mutate_all(renan_alloch_list, ~(replace(., .=="*", NA))) %>
 renan_alloch_traits
 
 #measures
-renan_alloch_measures <- renan_alloch_measures %>% 
+renan_alloch_measures_adjust <- renan_alloch_measures %>% 
   mutate("dissolved_CO2" = NA) %>%
   rename("dissolved_O2" = "dissolved_O2 mg/L",
          "turbidity" = "turbidity NTU",
          "Tree dbh" = "Tree dbh (cm)",
          "canopy openness" = "canopy openness %") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  rename("outside_after_mg" = "outside_before_mg",
+         "outside_before_mg" = "outside_after_mg") %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 #vertical_chapeco
 renan_vertical_fa <- read_xlsx(
@@ -3478,11 +3527,16 @@ renan_vertical_list <- mutate_all(
 renan_vertical_traits
 
 #measures
-renan_vertical_measures <- renan_vertical_measures %>% 
+renan_vertical_measures_adjust <- renan_vertical_measures %>% 
   mutate("dissolved_CO2" = NA) %>%
   rename("Tree dbh" = "Tree dbh (cm)",
         "canopy openness" = "canopy openness %") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  rename("outside_after_mg" = "outside_before_mg",
+         "outside_before_mg" = "outside_after_mg") %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000)) 
 
 #names(renan_vertical_measures)
 
@@ -3514,6 +3568,12 @@ renan_basic_measures <- read_xlsx(
 #abundance
 colSums(renan_basic_fa[,-c(1:2)])
 
+renan_basic_fa_adjust <- renan_basic_fa %>%
+  mutate(Corculionidae_adulto_1 = Curculionidae_1 + Corculionidae_adulto_1) %>%
+  mutate(Elmidae_adulto_1 = Elmidae_1 + Elmidae_adulto_1) 
+
+colSums(renan_basic_fa_adjust[,-c(1:2)])
+
 #list
 renan_basic_list <- mutate_all(renan_basic_list, ~(replace(., .=="*", NA))) %>%
   bind_rows(tibble(Morfospecies_name = "Ceratopogonidae_3")) %>%
@@ -3533,42 +3593,49 @@ renan_basic_traits <- renan_basic_traits %>%
   ))
 
 #measures
-renan_basic_measures <- renan_basic_measures %>% 
+renan_basic_measures_adjust <- renan_basic_measures %>% 
   mutate("dissolved_CO2" = NA) %>%
   rename("Tree dbh" = "Tree dbh (cm)",
          "canopy openness" = "canopy openness %") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  rename("outside_after_mg" = "outside_before_mg",
+         "outside_before_mg" = "outside_after_mg") %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000)) 
 
 #data save
 renan_alloch_data <- tibble(
   researcher = "Renan_BR",
   locality = "Chapeco_Brazil", 
-  roof_treatment = NA,
+  roof_treatment = 1,
   abundance = list(tibble(renan_alloch_fa)),
   list = list(tibble(renan_alloch_list)),
   traits=list(tibble(renan_alloch_traits)),
-  measures=list(tibble(renan_alloch_measures)),
-  obs = "Exp. Allochthonous. Confirmar!")
+  measures=list(tibble(renan_alloch_measures_adjust)),
+  obs = NA)
 
 renan_vertical_data <- tibble(
   researcher = "Renan_BR",
   locality = "Chapeco_Brazil", 
-  roof_treatment = NA,
+  roof_treatment = 0,
+  heigth_treatment = 2, 
   abundance = list(tibble(renan_vertical_fa)),
   list = list(tibble(renan_vertical_list)),
   traits=list(tibble(renan_vertical_traits)),
-  measures=list(tibble(renan_vertical_measures)),
-  obs = "Exp. vertical. Confirmar!")
+  measures=list(tibble(renan_vertical_measures_adjust)),
+  obs = NA)
 
 renan_basic_data <- tibble(
   researcher = "Renan_BR",
   locality = "Chapeco_Brazil", 
-  roof_treatment = NA,
-  abundance = list(tibble(renan_basic_fa)),
+  roof_treatment = 0,
+  heigth_treatment = 1,
+  abundance = list(tibble(renan_basic_fa_adjust)),
   list = list(tibble(renan_basic_list)),
   traits=list(tibble(renan_basic_traits)),
-  measures=list(tibble(renan_basic_measures)),
-  obs = "Exp. padrao (basic). Confirmar!")
+  measures=list(tibble(renan_basic_measures_adjust)),
+  obs = NA)
 
 save(renan_alloch_data,
      renan_vertical_data,
@@ -3576,7 +3643,7 @@ save(renan_alloch_data,
      file = file.path(renan_br,
                  "renan_br.RData"))
 
-#--- Rodrigo_Argentina ----
+#--- MD41 --- Rodrigo_Argentina ----
 rodrigo_argentina <- file.path(local_directory,
                  "Rodrigo_Argentina")
 
@@ -3605,7 +3672,8 @@ rodrigo_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-rodrigo_fa <- rodrigo_fa %>%
+rodrigo_fa_adjust <- rodrigo_fa %>%
+  filter(Replicate != "pot.3" | Treatment != "Natural forest") %>%
   mutate(across(-c(Treatment, Replicate), as.numeric)) %>%
   mutate(across(-c(Treatment, Replicate), ~ replace_na(., 0)))
 
@@ -3615,15 +3683,18 @@ head(rodrigo_list)
 # traits
 rodrigo_traits <- rodrigo_traits %>%
   mutate(total_length = case_when(
-    total_length == "3,755/8,975" ~ 8.975,
+    total_length == "3,755/8,975" ~ 3.755,
     TRUE ~ as.double(total_length)
   ))
 
 # measures
 #View(rodrigo_measures)
-rodrigo_measures <- rodrigo_measures %>%
+rodrigo_measures_adjust <- rodrigo_measures %>%
+  filter(Replicate != "pot.3" | Treatment != "Natural forest") %>%
   rename("Remaining_water_volume" = "Water.volume.final") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
 
 rodrigo_data <- tibble(
   researcher = "RodrigoFreire",
@@ -3632,14 +3703,14 @@ rodrigo_data <- tibble(
   abundance = list(tibble(rodrigo_fa)),
   list = list(tibble(rodrigo_list)),
   traits= list(tibble(rodrigo_traits)),
-  measures=list(tibble(rodrigo_measures)),
-  obs = "Confirmar dados no data_log.txt")
+  measures=list(tibble(rodrigo_measures_adjust)),
+  obs = "")
 
 save(rodrigo_data,
      file = file.path(rodrigo_argentina,
                  "rodrigo_data.RData"))
 
-#--- Sedney_Francis_Filipinas ----
+#--- MD42 --- Sedney_Francis_Filipinas ----
 sedney_filipinas <- file.path(local_directory,
                           "Sedney_Francis_Filipinas")
 
@@ -3668,7 +3739,7 @@ sedney_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-head(sedney_fa)
+#View(sedney_fa)
 
 # list
 head(sedney_list)
@@ -3677,9 +3748,13 @@ head(sedney_list)
 head(sedney_traits)
 
 # measures
-sedney_measures <- sedney_measures %>% 
-  mutate_all(~(replace(., .=="ND", NA))) %>%
-  rename(all_of(dict_names))
+sedney_measures_adjust <- sedney_measures %>% 
+  rename(Remaining_water_volume = "Final water volume (ml)") %>%
+  #mutate_all(~(replace(., .=="ND", NA))) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 sedney_data <- tibble(
   researcher = "Sedney",
@@ -3688,8 +3763,8 @@ sedney_data <- tibble(
   abundance = list(tibble(sedney_fa)),
   list = list(tibble(sedney_list)),
   traits= list(tibble(sedney_traits)),
-  measures=list(tibble(sedney_measures)),
-  obs = "Confirmar dados no data_log.txt")
+  measures=list(tibble(sedney_measures_adjust)),
+  obs = NA)
 
 save(sedney_data,
      file = file.path(sedney_filipinas,
