@@ -2100,7 +2100,7 @@ jari_data <- tibble(
   list = list(tibble(jari_list)),
   traits=list(tibble(jari_traits)),
   measures=list(tibble(jari_measures)),
-  obs = "Dados confusos. Precisamos tirar duvidas")
+  obs = "")
 
 save(jari_data,
      file = file.path(local_directory,
@@ -3100,7 +3100,7 @@ save(nakamura_site1_data,
      file = file.path(nakamura,
                  "nakamura_china.RData"))
 
-#--- Nock ----
+#--- MD34 & MD69 --- Nock ----
 nock_canada <- file.path(local_directory,
                     "Nock")
 
@@ -3125,34 +3125,78 @@ nock_canada <- file.path(local_directory,
 nock_measures <- read_xlsx(
   file.path(
     nock_canada,
-    "CA_NOCK_EMEND.2.xlsx"),
+    "CA_NOCK_EMEND.2_NEW.xlsx"),
   "measures_decomposition_geograph")
 
 names(nock_Detritus)
 # measures
-View(nock_measures %>%
-  mutate("Remaining_water_volume" = NA) %>%
+nock_measures_adjust <- nock_measures %>%
+  rename("Remaining_water_volume" = "water_volume") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
-  mutate(across(all_of(var_numeric), as.numeric)) %>%
-  mutate(detritus_fine = `Detritus dry mass filter paper (mg)` + detritus_fine)) %>%
-  select(-`Detritus dry mass filter paper (mg)`)
+  mutate(across(all_of(var_numeric), as.numeric))
 
-nock_data <- tibble(
+# esse autor rodou o experimento em duas areas manejadas, mas apenas uma area
+# controle (area natural), aqui vamos comparar com um teste-t se ha diferenca
+# no peso dos cottomstrip no final do experimento, se nao houver, vamos selecionar
+# 10 amostras aleatorias. Se houver, serao separados em dois MD's
+#nock_measures_adjust_mf1 <- nock_measures_adjust %>%
+#  filter(treatment == "Managed forest") %>%
+#  select("replicate", "coarse_after_mg","fine_after_mg","outside_after_mg")
+#
+#nock_measures_adjust_mf2 <- nock_measures_adjust %>%
+#  filter(treatment == "Managed forest 2") %>%
+#  select("replicate", "coarse_after_mg","fine_after_mg","outside_after_mg")
+#
+#df_comparation_nock <- left_join(nock_measures_adjust_mf1,
+#          nock_measures_adjust_mf2,
+#          by = "replicate") %>%
+#  filter(replicate != "pot.1")
+#
+#t.test(df_comparation_nock$coarse_after_mg.x,
+#       df_comparation_nock$coarse_after_mg.y)
+#
+#t.test(df_comparation_nock$fine_after_mg.x,
+#       df_comparation_nock$fine_after_mg.y)
+#
+#t.test(df_comparation_nock$outside_after_mg.x,
+#       df_comparation_nock$outside_after_mg.y)
+
+# visto que ha diferenca significativa entre no peso dos cottomstrip depois
+# do experimento, iremos duplicar esse dataset para que tenhamos duas areas de 
+# referencia para comparar o experimento manejado. 
+nock_measures_adjust_mf1 <- nock_measures_adjust %>%
+  filter(treatment == "Managed forest" | treatment == "Natural forest")
+
+nock_measures_adjust_mf2 <- nock_measures_adjust %>%
+  filter(treatment == "Managed forest 2" | treatment == "Natural forest")
+
+nock_data_mf1 <- tibble(
   researcher = "Nock",
   locality = "Alberta_Canada",
   roof_treatment = NA,
   abundance = NA, #list(tibble(knapp_fa)),
   list = NA, #list(tibble(knapp_list)),
   traits= NA, #list(tibble(knapp_traits)),
-  measures=list(tibble(nock_measures)),
-  obs = "Sem invertebrados presentes na coleta? confirmar")
+  measures=list(tibble(nock_measures_adjust_mf1)),
+  obs = "O experimento 'Natural forest' é o mesmo do MD")
 
-save(nock_data,
+nock_data_mf2 <- tibble(
+  researcher = "Nock",
+  locality = "Alberta_Canada",
+  roof_treatment = NA,
+  abundance = NA, #list(tibble(knapp_fa)),
+  list = NA, #list(tibble(knapp_list)),
+  traits= NA, #list(tibble(knapp_traits)),
+  measures=list(tibble(nock_measures_adjust_mf2)),
+  obs = "O experimento 'Natural forest' é o mesmo do MD")
+
+save(nock_data_mf1,
+     nock_data_mf2,
      file = file.path(nock_canada,
                  "nock_canada.RData"))
 
-#--- Pavel Kratina_UK ----
+#--- MD35 & MD36 --- Pavel Kratina_UK ----
 pavel_uk <- file.path(local_directory,
                    "Pavel Kratina_UK")
 
@@ -3183,7 +3227,10 @@ pavel_site1_measures <- read_xlsx(
 # abundance
 pavel_site1_fa <- pavel_site1_fa %>%
   mutate(across(-c(Treatment, Replicate), as.numeric)) %>%
-  mutate(across(-c(Treatment, Replicate), ~ replace_na(., 0)))
+  mutate(across(-c(Treatment, Replicate), ~ replace_na(., 0))) %>%
+  filter(Treatment != "Natural forest" | Replicate != "pot.1") %>%
+  filter(Treatment != "Natural forest" | Replicate != "pot.2") %>%
+  filter(Treatment != "Natural forest" | Replicate != "pot.3")
 
 # list
 pavel_site1_list
@@ -3193,13 +3240,17 @@ pavel_site1_traits
 
 # measures
 pavel_site1_measures <- pavel_site1_measures %>%
+  mutate(across(everything(), ~ gsub("<", "", .))) %>%
+  filter(Treatment != "Natural forest" | Replicate != "pot.1") %>%
+  filter(Treatment != "Natural forest" | Replicate != "pot.2") %>%
+  filter(Treatment != "Natural forest" | Replicate != "pot.3") %>%
+  select(-"...27", -"DOC" , -"TP") %>%
   rename("Remaining_water_volume" = "Final volume of water") %>%
   mutate("Natural tree hole.1" = NA,
          "Natural tree hole.2" = NA) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) 
-
 
 # site 2
 pavel_site2_fa <- read_xlsx(
@@ -3227,24 +3278,24 @@ pavel_site2_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-table(pavel_site2_fa$Treatment) # managed forest aparece 20x e natural forest 15
-
-pavel_site2_fa <- pavel_site2_fa %>%
-  mutate(across(-c(Treatment, Replicate), as.numeric)) %>%
-  mutate(across(-c(Treatment, Replicate), ~ replace_na(., 0)))
-
-# list
-pavel_site2_list
-
-# traits
-pavel_site2_traits$total_length <- as.double(pavel_site2_traits$total_length)
-
-# measures
-pavel_site2_measures <- pavel_site2_measures %>%
-  rename("Remaining_water_volume" = "final volume (ml)") %>%
-  rename(all_of(dict_names)) %>%
-  mutate(across(all_of(var_char), as.character)) %>%
-  mutate(across(all_of(var_numeric), as.numeric)) 
+#table(pavel_site2_fa$Treatment) # managed forest aparece 20x e natural forest 15
+#
+#pavel_site2_fa <- pavel_site2_fa %>%
+#  mutate(across(-c(Treatment, Replicate), as.numeric)) %>%
+#  mutate(across(-c(Treatment, Replicate), ~ replace_na(., 0)))
+#
+## list
+#pavel_site2_list
+#
+## traits
+#pavel_site2_traits$total_length <- as.double(pavel_site2_traits$total_length)
+#
+## measures
+#pavel_site2_measures <- pavel_site2_measures %>%
+#  rename("Remaining_water_volume" = "final volume (ml)") %>%
+#  rename(all_of(dict_names)) %>%
+#  mutate(across(all_of(var_char), as.character)) %>%
+#  mutate(across(all_of(var_numeric), as.numeric)) 
 
 pavel_site1_data <- tibble(
   researcher = "PavelKratina",
@@ -3254,7 +3305,7 @@ pavel_site1_data <- tibble(
   list = list(tibble(pavel_site1_list)),
   traits= list(tibble(pavel_site1_traits)),
   measures=list(tibble(pavel_site1_measures)),
-  obs = "Experiment 1. Precisamos checar os dados")
+  obs = "Sem dados dos algodoes inteiros")
 
 pavel_site2_data <- tibble(
   researcher = "PavelKratina",
@@ -3264,7 +3315,7 @@ pavel_site2_data <- tibble(
   list = list(tibble(pavel_site2_list)),
   traits= list(tibble(pavel_site2_traits)),
   measures=list(tibble(pavel_site2_measures)),
-  obs = "Experiment 2. Precisamos checar os dados")
+  obs = "Excluir MD")
 
 #View(pavel_site2_data)
 save(pavel_site1_data,
@@ -4454,7 +4505,7 @@ nested_df <- bind_rows(boukal_czech_roof,
                        wesley_data, 
                        moretti_site1_data,
                        moretti_site2_data,
-                       nock_data,
+                       nock_data_mf1,
                        pavel_site1_data,
                        pavel_site2_data,
                        pettermann_data,
@@ -4488,7 +4539,8 @@ nested_df <- bind_rows(boukal_czech_roof,
                        gonzales_site1_nonroof_data,
                        gonzales_site2_nonroof_data,
                        gonzales_site3_nonroof_data,
-                       cotriguacu_romero_data_low_nonroof)
+                       cotriguacu_romero_data_low_nonroof,
+                       nock_data_mf2)
 
 data_number <- column_id(nested_df, "MD")
 

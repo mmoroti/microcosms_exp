@@ -42,7 +42,8 @@ nested_traits_join <- left_join(
 # MD36 is an incorrect experiment (Validated information by Gustavo Romero)
 # another filter is the experiments without traits_revised
 nested_traits <- nested_traits_join %>%
-  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & ID != "MD36", ID != "MD53") #%>%
+  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & 
+           ID != "MD36", ID != "MD53" & ID != "MD69") #%>%
   #filter(ID != "MD57" & ID != "MD58" & ID != "MD59" & ID != "MD60" & ID != "MD61")
 
 for (i in 1:nrow(nested_traits)) {
@@ -68,8 +69,10 @@ View(nested_traits %>%
 # validation = TRUE, you can remove the list and traits columns 
 # as this information is together in traits_revised
 # and exclude experiment MD36 (confirmed by Gustavo Romero and Joice Souza)
+# and exclude experiment MD48 (confirmed by Joice Souza & Gustavo Romero)
+# and exclude experiment MD64 (confirmed by Joice Souza & Gustavo Romero)
 nested_database <- nested_traits_join %>% 
-  filter(ID != 'MD36') %>%
+  filter(ID != 'MD36' & ID != "MD48" & ID != "MD64") %>%
   select(-list, -traits)
 
 # Rename names in abundance according traits_revised
