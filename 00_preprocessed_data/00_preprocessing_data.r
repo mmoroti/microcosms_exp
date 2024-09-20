@@ -428,6 +428,7 @@ romero_stavirginia_measures <-
   romero_stavirginia_measures %>%
   mutate(Remaining_water_volume = "Final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
+  mutate(tree_dbh = tree_dbh / pi) %>% 
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
   mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
@@ -475,7 +476,7 @@ romero_campos_measures <- read_xlsx(
 head(romero_campos_fa)
 
 # removacao validada com o Felipe e a Izadora
-# erros de classificacao taxonomica
+# erros de classificacao taxonomica e ausentes na abundancia
 romero_campos_list <- romero_campos_list %>%
   filter(Morfospecies_name != "Diptera_sp4" &
         Morfospecies_name != "Diptera_sp13" &
@@ -489,6 +490,7 @@ romero_campos_measures <-
   rename("canopy openness" = "Canopy openness") %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
+  mutate(tree_dbh = tree_dbh / pi) %>% 
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
   mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
@@ -630,6 +632,7 @@ romero_cardoso_measures <-
   mutate("Remaining_water_volume" = "Final water volume (ml)") %>%
   rename("microcosm position (N, S, E, W)" = "microcosm position (N. S. E. W)") %>%
   rename(all_of(dict_names)) %>%
+  mutate(tree_dbh = tree_dbh / pi) %>% 
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
   mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
@@ -1991,7 +1994,6 @@ romero_roof_japi_measures <- romero_japi_measures %>%
       "Natural" = "Natural forest"))) %>%
   select(-Roof_treatment)
 
-
 romero_nonroof_japi_measures <- romero_japi_measures %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Roof_treatment == "open") %>%
@@ -2016,7 +2018,7 @@ romero_roof_japi_data <- tibble(
   list = list(tibble(romero_roof_japi_list)),
   traits=list(tibble(romero_roof_japi_traits)),
   measures=list(tibble(romero_roof_japi_measures)),
-  obs = "pot.19 com NA em measures")
+  obs = NA)
 
 romero_nonroof_japi_data <- tibble(
   researcher = "Romero",
@@ -2026,7 +2028,7 @@ romero_nonroof_japi_data <- tibble(
   list = list(tibble(romero_nonroof_japi_list)),
   traits=list(tibble(romero_nonroof_japi_traits)),
   measures=list(tibble(romero_nonroof_japi_measures)),
-  obs = "")
+  obs = NA)
 
 save(romero_roof_japi_data,
      romero_nonroof_japi_data,
@@ -3770,7 +3772,7 @@ save(sedney_data,
      file = file.path(sedney_filipinas,
                  "sedney_filipinas.RData"))
 
-#--- Srivastava_Canada ----
+#--- MD43 & MD44 --- Srivastava_Canada ----
 srivastava_canada <- file.path(local_directory,
                          "Srivastava_Canada")
 
@@ -3800,6 +3802,7 @@ srivastava_site1_measures <- read_xlsx(
 
 # abundance
 srivastava_site1_fa <- srivastava_site1_fa %>%
+  filter(Treatment != "Natural forest" | Replicate != "pot.10") %>%
   select(-treehole_number)
 
 # list
@@ -3814,12 +3817,16 @@ srivastava_site1_traits <- srivastava_site1_traits %>%
   ))
 
 # measures
-srivastava_site1_measures <- srivastava_site1_measures %>% 
+srivastava_site1_measures_adjust <- srivastava_site1_measures %>% 
   rename(Remaining_water_volume = "water_volume_mL") %>%
   rename(all_of(dict_names)) %>%
+  filter(treatment != "Natural forest" | replicate != "pot.10") %>%
   mutate(across(all_of(var_char), as.character)) %>%
-  mutate(across(all_of(var_numeric), as.numeric)) 
-
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(7, ~ case_when(
+    row_number() %in% c(10, 12, 18) ~ . * 2,# Multiplica por 2 nas linhas 10, 12 e 18
+    TRUE ~ .                                # Mantem os outros valores inalterados
+  )))
 
 # site 2
 srivastava_site2_fa <- read_xlsx(
@@ -3861,11 +3868,12 @@ srivastava_site2_traits <- srivastava_site2_traits %>%
   ))
 
 # measures
-srivastava_site2_measures <- srivastava_site2_measures %>% 
+srivastava_site2_measures_adjust <- srivastava_site2_measures %>% 
   rename(Remaining_water_volume = "water_volume_mL") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
-  mutate(across(all_of(var_numeric), as.numeric)) 
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(7, ~ if_else(row_number() == 20, . * 2, .)))
 
 srivastava_site1_data <- tibble(
   researcher = "Srivastava",
@@ -3874,8 +3882,8 @@ srivastava_site1_data <- tibble(
   abundance = list(tibble(srivastava_site1_fa)),
   list = list(tibble(srivastava_site1_list)),
   traits= list(tibble(srivastava_site1_traits)),
-  measures=list(tibble(srivastava_site1_measures)),
-  obs = "Site 1. Confirmar dados no data_log.txt")
+  measures=list(tibble(srivastava_site1_measures_adjust)),
+  obs = NA)
 
 srivastava_site2_data <- tibble(
   researcher = "Srivastava",
@@ -3884,15 +3892,15 @@ srivastava_site2_data <- tibble(
   abundance = list(tibble(srivastava_site2_fa)),
   list = list(tibble(srivastava_site2_list)),
   traits= list(tibble(srivastava_site2_traits)),
-  measures=list(tibble(srivastava_site2_measures)),
-  obs = "Site 2. Confirmar dados no data_log.txt")
+  measures=list(tibble(srivastava_site2_measures_adjust)),
+  obs = "Valor errado pot.10 managed forest")
 
 save(srivastava_site1_data,
      srivastava_site2_data,
      file = file.path(srivastava_canada,
                  "srivastava_canada.RData"))
 
-#--- Sweet_UK ----
+#--- MD45 --- Sweet_UK ----
 sweet_uk <- file.path(local_directory,
                   "Sweet_UK")
 
@@ -3932,7 +3940,8 @@ sweet_traits <- sweet_traits %>%
   rename("total_length" = "total_length (mm)")
 
 # measures
-sweet_measures <- sweet_measures %>% 
+sweet_measures_adjust <- sweet_measures %>% 
+  select(-"Water volume before (ml)") %>%
   rename(Remaining_water_volume = "Water volume after (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -3945,14 +3954,14 @@ sweet_data <- tibble(
   abundance = list(tibble(sweet_fa)),
   list = list(tibble(sweet_list)),
   traits= list(tibble(sweet_traits)),
-  measures=list(tibble(sweet_measures)),
-  obs = "Precisa confirmar as coordenadas")
+  measures=list(tibble(sweet_measures_adjust)),
+  obs = NA)
 
 save(sweet_data,
      file = file.path(sweet_uk,
                  "sweet_uk.RData"))
 
-#--- Thomas_Alemanha ----
+#--- MD46 --- Thomas_Alemanha ----
 thomas_alemanha <- file.path(local_directory,
                         "Thomas_Alemanha")
 
@@ -3981,38 +3990,41 @@ thomas_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-thomas_fa <- thomas_fa %>%
+# Morphospecies 6 e 7 sao pupas e serao removidas no pós processamento
+thomas_fa_adjust <- thomas_fa %>%
+  mutate(Morphospecies.1 = Morphospecies.1 + Morphospecies.6) %>%
+  mutate(Morphospecies.3 = Morphospecies.3 + Morphospecies.7) %>% 
   select(-"Morphospecies.15") # TODO precisa ajustar
 
 # list
-head(thomas_list)
+thomas_list 
 
 # traits
 thomas_traits$total_length <- as.double(thomas_traits$total_length)
 
 # measures
-thomas_measures <- thomas_measures %>% 
+thomas_measures_adjust <- thomas_measures %>% 
   mutate("Natural tree hole.1" = NA,
-         "Natural tree hole.2" = NA,
-         "Remaining_water_volume" = NA) %>%
-  rename(all_of(dict_names))
+         "Natural tree hole.2" = NA) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
 
 thomas_data <- tibble(
   researcher = "Thomas",
   locality = "Bavaria_Alemanha",
   roof_treatment = NA,
-  abundance = list(tibble(thomas_fa)),
+  abundance = list(tibble(thomas_fa_adjust)),
   list = list(tibble(thomas_list)),
   traits= list(tibble(thomas_traits)),
-  measures=list(tibble(thomas_measures)),
+  measures=list(tibble(thomas_measures_adjust)),
   obs = "Confirmar dados no data_log.txt")
 
 save(thomas_data,
      file = file.path(thomas_alemanha,
                  "thomas_alemanha.RData"))
 
-
-#--- Anikka Germany ----
+#--- MD52 --- Anikka Germany ----
 anikka_alemanha <- file.path(local_directory,
                         "Annika_Germany")
 
@@ -4051,7 +4063,7 @@ head(anikka_traits)
 
 # measures
 # TODO renomear colunas, mas pra isso, checar unidades de medida
-anikka_measures <- anikka_measures %>%
+anikka_measures_adjust <- anikka_measures %>%
   rename(dissolved_O2 = "dissolved_O2_mg_L") %>%
   rename(ammonium_concentration = "ammonium_concentration_mg_L") %>%
   rename(nitrate_concentration = "nitrate_concentration_mg_L") %>%
@@ -4062,10 +4074,9 @@ anikka_measures <- anikka_measures %>%
   rename("Natural tree hole.1" = "Natural tree hole.1 (yes/no)") %>%
   rename("Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
   rename("canopy openness" = "canopy openness end (%)") %>%
-  rename(all_of(dict_names))
-
-
-names(anikka_measures)
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
 
 anikka_data <- tibble(
   researcher = "Anikka",
@@ -4074,35 +4085,35 @@ anikka_data <- tibble(
   abundance = list(tibble(anikka_fa)),
   list = list(tibble(anikka_list)),
   traits= list(tibble(anikka_traits)),
-  measures=list(tibble(anikka_measures)),
-  obs = "Nomes das colunas measures nao padronizados, checar data_log")
+  measures=list(tibble(anikka_measures_adjust)),
+  obs = NA)
 #View(anikka_data)
 save(anikka_data,
      file = file.path(anikka_alemanha,
                  "anikka_alemanha.RData"))
 
 
-#--- Claas_New Zealand ----
+#--- MD53 --- Claas_New Zealand ----
 claas_newzealand <- file.path(local_directory,
                         "Claas_NewZealand")
 
-claas_fa <- read_xlsx(
-  file.path(
-    claas_newzealand,
-    "ClaasDamken_Dunedin_NewZealand.xlsx"),
-  "fauna_abundance")
-
-claas_list <- read_xlsx(
-  file.path(
-    claas_newzealand,
-    "ClaasDamken_Dunedin_NewZealand.xlsx"),
-  "Fauna_morphospecies_list")
-
-claas_traits <- read_xlsx(
-  file.path(
-    claas_newzealand,
-    "ClaasDamken_Dunedin_NewZealand.xlsx"),
-  "Fauna_traits")[1:2,]
+#claas_fa <- read_xlsx(
+#  file.path(
+#    claas_newzealand,
+#    "ClaasDamken_Dunedin_NewZealand.xlsx"),
+#  "fauna_abundance")
+#
+#claas_list <- read_xlsx(
+#  file.path(
+#    claas_newzealand,
+#    "ClaasDamken_Dunedin_NewZealand.xlsx"),
+#  "Fauna_morphospecies_list")
+#
+#claas_traits <- read_xlsx(
+#  file.path(
+#    claas_newzealand,
+#    "ClaasDamken_Dunedin_NewZealand.xlsx"),
+#  "Fauna_traits")[1:2,]
 
 claas_measures <- read_xlsx(
   file.path(
@@ -4123,14 +4134,30 @@ claas_measures <- read_xlsx(
 #claas_traits$total_length <- as.double(claas_traits$total_length)
 
 # measures
-claas_measures <- claas_measures %>%
+claas_measures_adjust <- claas_measures %>%
   mutate_all(~ifelse(. == "na", NA, .)) %>%
   rename("dissolved_O2" = "dissolved_O2_%",
          "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
          "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)",
          "Remaining_water_volume" = "remaining_water_volume_sampling_mL") %>%
   mutate_all(~ifelse(. == "na", NA, .)) %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(tree_dbh = tree_dbh / pi) %>% 
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(
+    coarse_after_mg = if_else(coarse_before_mg > coarse_after_mg, coarse_after_mg, NA_real_),
+    fine_after_mg = if_else(fine_before_mg > fine_after_mg, fine_after_mg, NA_real_),
+    outside_after_mg = if_else(outside_before_mg > outside_after_mg, outside_after_mg, NA_real_)
+  ) 
+
+#claas_measures_adjust %>% mutate(
+#  coarse_comparison = coarse_before_mg > coarse_after_mg,
+#  fine_comparison = fine_before_mg > fine_after_mg,
+#  outside_comparison = outside_before_mg > outside_after_mg
+#) %>%
+#  select(treatment, replicate, coarse_comparison,
+#         fine_comparison, outside_comparison)
 
 claas_data <- tibble(
   researcher = "Claas",
@@ -4139,8 +4166,8 @@ claas_data <- tibble(
   abundance = NA,
   list = NA,
   traits= NA,
-  measures=list(tibble(claas_measures)),
-  obs = "Checar infos data_log.txt")
+  measures=list(tibble(claas_measures_adjust)),
+  obs = NA)
 #View(anikka_data)
 save(claas_data,
      file = file.path(claas_newzealand,
