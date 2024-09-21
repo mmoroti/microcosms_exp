@@ -1,4 +1,4 @@
-# Mon Jul 29 16:53:39 2024 ------------------------------
+# Mon Jul 29 16:53:39 2024 
 # Author: Matheus Moroti
 
 # This script is to add the revised traits to the nested dataframe. 
@@ -81,17 +81,17 @@ nested_database <- nested_traits_join %>%
 # correspondente nos traits. Para isso, é possível usar o nome equivalente que o
 # autor deu na abundancia na coluna "Morfospecies_name" que tambem esta presente
 # em traits revised. A partir dela conseguimos renomear 
-df_abundance <- nested_database[[9, "abundance"]][[1]]
-df_traits <- nested_database[[9, "traits_revised"]][[1]]
-
-head(df_abundance)
-
-vtr_dict_names <- df_traits %>%
-  select("(morpho)Species", "Morfospecies_name") %>%
-  deframe()
-
-df_abundance %>%
-  rename(all_of(vtr_dict_names))
+#df_abundance <- nested_database[[9, "abundance"]][[1]]
+#df_traits <- nested_database[[9, "traits_revised"]][[1]]
+#
+#head(df_abundance)
+#
+#vtr_dict_names <- df_traits %>%
+#  select("(morpho)Species", "Morfospecies_name") %>%
+#  deframe()
+#
+#df_abundance %>%
+#  rename(all_of(vtr_dict_names))
 
 #View(nested_database)
 # salva no drive do projeto

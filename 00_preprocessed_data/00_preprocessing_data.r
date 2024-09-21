@@ -3127,7 +3127,7 @@ nock_measures <- read_xlsx(
     "CA_NOCK_EMEND.2_NEW.xlsx"),
   "measures_decomposition_geograph")
 
-names(nock_Detritus)
+#names(nock_Detritus)
 # measures
 nock_measures_adjust <- nock_measures %>%
   rename("Remaining_water_volume" = "water_volume") %>%
@@ -4173,7 +4173,7 @@ save(claas_data,
      file = file.path(claas_newzealand,
                  "claas_newzealand.RData"))
 
-#--- Martin Gossner ----
+#--- MD55 & MD56 --- Martin Gossner ----
 martin_suica <- file.path(local_directory,
                          "MartinGossner_Holsetein")
 
@@ -4202,49 +4202,90 @@ martin_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-martin_fa_2021 <- martin_fa %>% filter(Year == "2021") %>%
-  relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
-  select(-Morphospecies.1, -Morphospecies.4,
-         -Morphospecies.5, -Morphospecies.11)
+# martin_fa_2022 low = md do 2021
+# martin_fa_2022 middle = md do 2022
+
+#martin_fa_2021 <- martin_fa %>% filter(Year == "2021") %>%
+#  relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
+#  select(-Morphospecies.1, -Morphospecies.4,
+#         -Morphospecies.5, -Morphospecies.11)
+
+#colSums(martin_fa_2021[,-c(1:5)]) 
+# 0 Morphospecies.1, Morphospecies.4,
+# 0 Morphospecies.5, Morphospecies.11
 
 martin_fa_2022 <- martin_fa %>% filter(Year == "2022") %>%
   relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
-  select(-Morphospecies.12, -Morphospecies.7)
+  select(-Morphospecies.12, -Morphospecies.7) # ausentes
+#colSums(martin_fa_2022[,-c(1:5)]) 
+# 0 Morphospecies.7 and Morphospecies.12
 
-#colSums(martin_fa_2021[,-c(1:5)]) # Morphospecies.1, Morphospecies.4,
-                                   # Morphospecies.5, Morphospecies.11
-#colSums(martin_fa_2022[,-c(1:5)]) # Morphospecies.7 e Morphospecies.12
+martin_fa_low <- martin_fa_2022 %>% 
+  filter(Stratum == "low") %>%
+  select(-Stratum, -Year, -Morphospecies.10)
+#colSums(martin_fa_low[,-c(1:3)]) 
+# 0 Morphospecies.10
+
+martin_fa_middle <- martin_fa_2022 %>%
+  filter(Stratum == "middle") %>%
+  select(-Stratum, -Year, -Morphospecies.4,
+         -Morphospecies.5,  -Morphospecies.6, -Morphospecies.11)
+#colSums(martin_fa_middle[,-c(1:3)]) 
+# 0 Morphospecies.4, Morphospecies.5, Morphospecies.6, Morphospecies.11
 
 # list
-martin_list_2021 <- martin_list %>% filter(
-  Morfospecies_name != "Morphospecies.1" &
-  Morfospecies_name != "Morphospecies.4" &
-  Morfospecies_name != "Morphospecies.5" &
-  Morfospecies_name != "Morphospecies.11"
-  )
+filter_species_low <- c("Morphospecies.7","Morphospecies.10",
+                        "Morphospecies.12")
 
-martin_list_2022 <- martin_list %>% filter(
-  Morfospecies_name != "Morphospecies.7" &
-    Morfospecies_name != "Morphospecies.12"
-  )
+filter_species_middle <- c("Morphospecies.7","Morphospecies.4",
+                           "Morphospecies.5","Morphospecies.6",
+                           "Morphospecies.11", "Morphospecies.12")
+
+#martin_list_2021 <- martin_list %>% filter(
+#  Morfospecies_name != "Morphospecies.1" &
+#  Morfospecies_name != "Morphospecies.4" &
+#  Morfospecies_name != "Morphospecies.5" &
+#  Morfospecies_name != "Morphospecies.11"
+#  )
+
+martin_list_low <- martin_list %>% 
+  filter(!(Morfospecies_name %in% filter_species_low)) 
+  
+martin_list_middle <- martin_list %>% 
+  filter(!(Morfospecies_name %in% filter_species_middle)) 
 
 # traits
-martin_traits_2021 <- martin_traits %>% filter(
-  Morfospecies_name != "Morphospecies.1" &
-    Morfospecies_name != "Morphospecies.4" &
-    Morfospecies_name != "Morphospecies.5" &
-    Morfospecies_name != "Morphospecies.11")
+martin_traits_low <- martin_traits %>% 
+  filter(!(Morfospecies_name %in% filter_species_low)) 
 
-martin_traits_2022 <- martin_traits %>% filter(
-  Morfospecies_name != "Morphospecies.7" &
-    Morfospecies_name != "Morphospecies.12"
-)
+martin_traits_middle <- martin_traits %>% 
+  filter(!(Morfospecies_name %in% filter_species_middle)) 
 
 # measures
-# TODO needs adjustments
-# precisa entender o que eh de cada ano
-martin_measures_2021 <- martin_measures %>%
-  filter(year == 2021) %>%
+#martin_measures_2021 <- martin_measures %>%
+#  filter(year == 2021) %>%
+#  rename(dissolved_O2 = "dissolved_O2_mg_L") %>%
+#  rename(CDOM = "CDOM_µg_L") %>%
+#  rename(turbidity = "turbidity_NTU") %>%
+#  rename(ammonium_concentration = "ammonium_concentration_mg_L") %>%
+#  rename(nitrate_concentration = "nitrate_concentration_mg_L") %>%
+#  rename("chlorophyll-a" = "chlorophyll-a_µg_L") %>%
+#  rename("canopy openness" = "canopy openness beginning (%)") %>%
+#  rename("Tree dbh" = "Tree dbh_cm") %>%
+#  rename("detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g") %>%
+#  rename("detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g") %>%
+#  rename("Remaining_water_volume" = "remaining_water_volume_mL") %>%
+#  rename("Natural tree hole.1" = "Natural tree hole.1 (yes/no)") %>%
+#  rename("Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+#  rename(all_of(dict_names)) %>%
+#  mutate(across(all_of(var_char), as.character)) %>%
+#  mutate(across(all_of(var_numeric), as.numeric)) 
+
+martin_measures_low <- martin_measures %>%
+  filter(year == 2022) %>% # apenas os de 2022
+  mutate(SampleID = sub(".*_", "", ID)) %>% 
+  filter(grepl("_L", ID)) %>% # os low que sobram sao equivalentes, pq os outros sao Upper e Middle
+  relocate(SampleID, .after = Replicate) %>%
   rename(dissolved_O2 = "dissolved_O2_mg_L") %>%
   rename(CDOM = "CDOM_µg_L") %>%
   rename(turbidity = "turbidity_NTU") %>%
@@ -4262,8 +4303,11 @@ martin_measures_2021 <- martin_measures %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) 
 
-martin_measures_2022 <- martin_measures %>%
-  filter(year == 2022) %>%
+martin_measures_middle <- martin_measures %>%
+  filter(year == 2022) %>% # apenas os de 2022
+  mutate(SampleID = sub(".*_", "", ID)) %>% # criando sampleid que tem na abundance
+  filter(grepl("_M", ID)) %>% # Middle
+  relocate(SampleID, .after = Replicate) %>%
   rename(dissolved_O2 = "dissolved_O2_mg_L") %>%
   rename(CDOM = "CDOM_µg_L") %>%
   rename(turbidity = "turbidity_NTU") %>%
@@ -4281,35 +4325,37 @@ martin_measures_2022 <- martin_measures %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric))
 
-martin_data_2021 <- tibble(
+martin_data_low <- tibble(
   #ID = "MD55", 
   researcher = "MartinGossner",
   locality = "Holstein_Switzerland",
   roof_treatment = NA,
-  abundance = list(tibble(martin_fa_2021)),
-  list = list(tibble(martin_list_2021)),
-  traits= list(tibble(martin_traits_2021)),
-  measures=list(tibble(martin_measures_2021)),
-  obs = "Rever 'measures'. Checar data_log")
+  heigth_treatment = 1,
+  abundance = list(tibble(martin_fa_low)),
+  list = list(tibble(martin_list_low)),
+  traits= list(tibble(martin_traits_low)),
+  measures=list(tibble(martin_measures_low)),
+  obs = "Unidades de medidas estao nas colunas originais")
 
-martin_data_2022 <- tibble(
+martin_data_middle <- tibble(
   #ID = "MD56", 
   researcher = "MartinGossner",
   locality = "Holstein_Switzerland",
   roof_treatment = NA,
-  abundance = list(tibble(martin_fa_2022)),
-  list = list(tibble(martin_list_2022)),
-  traits= list(tibble(martin_traits_2022)),
-  measures=list(tibble(martin_measures_2022)),
-  obs = "Rever 'measures'. Checar data_log")
+  heigth_treatment = 2,
+  abundance = list(tibble(martin_fa_middle)),
+  list = list(tibble(martin_list_middle)),
+  traits= list(tibble(martin_traits_middle)),
+  measures=list(tibble(martin_measures_middle)),
+  obs = "Apenas natural forest. Diferenca nos replicates de 'abundance' e 'measures'")
 
 #View(anikka_data)
-save(martin_data_2021,
-     martin_data_2022, 
+save(martin_data_low, # martin_data_2021,
+     martin_data_middle, # martin_data_2022, 
      file = file.path(martin_suica,
                  "martin_suica.RData"))
 
-#--- Sam_Czech ----
+#--- MD57 --- Sam_Czech ----
 sam_czech <- file.path(local_directory,
                           "Sam_Czech")
 sam_fa <- read_xlsx(
@@ -4343,7 +4389,8 @@ head(sam_traits)
 sam_measures$'Latitude (in decimals)' <- gsub("[^0-9.]", "", sam_measures$'Latitude (in decimals)')
 sam_measures$'Longitude (in decimals)' <- gsub("[^0-9.]", "", sam_measures$'Longitude (in decimals)')
 
-sam_measures <- sam_measures %>%
+sam_measures_adjust <- sam_measures %>%
+  filter(!(Replicate %in% c("pot.11", "pot.12", "pot.13", "pot.14", "pot.15"))) %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -4356,14 +4403,14 @@ sam_data <- tibble(
   abundance = list(tibble(sam_fa)),
   list = list(tibble(sam_list)),
   traits= list(tibble(sam_traits)),
-  measures=list(tibble(sam_measures)),
-  obs = "")
+  measures=list(tibble(sam_measures_adjust)),
+  obs = NA)
 
 save(sam_data, 
      file = file.path(sam_czech,
                       "sam_czechia.RData"))
 
-#--- Larrieu_France ----
+#--- MD58 & MD59 --- Larrieu_France ----
 larrieu_france <- file.path(local_directory,
                        "Larrieu_Bouget_Burat_Fontainebleu")
 
@@ -4396,11 +4443,24 @@ head(larrieu_burat_fa)
 head(larrieu_burat_list)
 head(larrieu_burat_traits)
 
-larrieu_burat_measures <- larrieu_burat_measures %>%
+larrieu_burat_measures_adjust <- larrieu_burat_measures %>%
+  rename("Remaining_water_volume" = "remaining_water_volume_sampling_mL") %>%
   rename("Natural tree hole.1" = "Natural tree hole.1 (yes/no)") %>%
   rename("Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
   rename("canopy openness" = "canopy cover") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+larrieu_burat_data <- tibble(
+  researcher = "Larrieu",
+  locality = "Burat_France",
+  roof_treatment = NA,
+  abundance = list(tibble(larrieu_burat_fa)),
+  list = list(tibble(larrieu_burat_list)),
+  traits= list(tibble(larrieu_burat_traits)),
+  measures=list(tibble(larrieu_burat_measures_adjust)),
+  obs = NA)
 
 # Fontainebleau
 larrieu_france <- file.path(local_directory,
@@ -4433,10 +4493,13 @@ head(larrieu_fontainebleau_fa)
 head(larrieu_fontainebleau_list)
 head(larrieu_fontainebleau_traits)
 
-larrieu_fontainebleau_measures <- larrieu_fontainebleau_measures %>%
+larrieu_fontainebleau_measures_adjust <- larrieu_fontainebleau_measures %>%
+  rename("Remaining_water_volume" = "remaining_water_volume_sampling_mL") %>%
   rename("Tree dbh" = "Tree dbh_cm") %>%
   rename("canopy openness" = "canopy cover (%)") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
 
 larrieu_fontainebleau_data <- tibble(
   researcher = "Larrieu",
@@ -4445,18 +4508,8 @@ larrieu_fontainebleau_data <- tibble(
   abundance = list(tibble(larrieu_fontainebleau_fa)),
   list = list(tibble(larrieu_fontainebleau_list)),
   traits= list(tibble(larrieu_fontainebleau_traits)),
-  measures=list(tibble(larrieu_fontainebleau_measures)),
-  obs = "")
-
-larrieu_burat_data <- tibble(
-  researcher = "Larrieu",
-  locality = "Burat_France",
-  roof_treatment = NA,
-  abundance = list(tibble(larrieu_burat_fa)),
-  list = list(tibble(larrieu_burat_list)),
-  traits= list(tibble(larrieu_burat_traits)),
-  measures=list(tibble(larrieu_burat_measures)),
-  obs = "")
+  measures=list(tibble(larrieu_fontainebleau_measures_adjust)),
+  obs = NA)
 
 #View(anikka_data)
 save(larrieu_burat_data, 
@@ -4464,7 +4517,7 @@ save(larrieu_burat_data,
      file = file.path(larrieu_france,
                       "larrieu_france.RData"))
 
-#--- Yoshida_Kusaki ----
+#--- MD60 --- Yoshida_Kusaki ----
 yoshida_kusaki <- file.path(local_directory,
                             "Yoshida_Kusaki")
 yoshida_kusaki_fa <- read_xlsx(
@@ -4498,10 +4551,22 @@ yoshida_kusaki_fa <- yoshida_kusaki_fa %>%
 head(yoshida_kusaki_list)
 head(yoshida_kusaki_traits)
 
-yoshida_kusaki_measures <- yoshida_kusaki_measures %>%
+yoshida_kusaki_measures_adjust <- yoshida_kusaki_measures %>%
   rename(Remaining_water_volume = "remaining_water_volume_mL") %>%
   rename("dissolved_O2" = "dissolved_O2_mg_L") %>%
-  rename(all_of(dict_names))
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
+
+# no data_log, esta que as medidas de before estao menores que after
+# parece que isso ja foi resolvido!
+#yoshida_kusaki_measures_adjust %>% mutate(
+#  coarse_comparison = coarse_before_mg > coarse_after_mg,
+#  fine_comparison = fine_before_mg > fine_after_mg,
+#  outside_comparison = outside_before_mg > outside_after_mg) %>%
+#  select(treatment, replicate, coarse_comparison,
+#         fine_comparison, outside_comparison)
 
 yoshida_kusaki_data <- tibble(
   researcher = "Yoshida",
@@ -4510,14 +4575,14 @@ yoshida_kusaki_data <- tibble(
   abundance = list(tibble(yoshida_kusaki_fa)),
   list = list(tibble(yoshida_kusaki_list)),
   traits= list(tibble(yoshida_kusaki_traits)),
-  measures=list(tibble(yoshida_kusaki_measures)),
-  obs = "Conferir data_log")
+  measures=list(tibble(yoshida_kusaki_measures_adjust)),
+  obs = NA)
 
 save(yoshida_kusaki_data, 
      file = file.path(yoshida_kusaki,
                       "yoshida_kusaki.RData"))
 
-#--- Yoshida_Karasawayama ---- 
+#--- MD61 --- Yoshida_Karasawayama ---- 
 yoshida_karasawayama <- file.path(local_directory,
                                   "Yoshida_Karasawayama")
 yoshida_karasawayama_fa <- read_xlsx(
@@ -4548,9 +4613,13 @@ head(yoshida_karasawayama_fa)
 head(yoshida_karasawayama_list)
 head(yoshida_karasawayama_traits)
 
-yoshida_karasawayama_measures <- yoshida_karasawayama_measures %>%
+yoshida_karasawayama_measures_adjust <- yoshida_karasawayama_measures %>%
   rename("dissolved_O2" = "dissolved_O2_mg_L") %>%
-  rename(all_of(dict_names))
+  rename(Remaining_water_volume = "remaining_water_volume_mL") %>% 
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
 yoshida_karasawayama_data <- tibble(
   researcher = "Yoshida",
@@ -4559,8 +4628,8 @@ yoshida_karasawayama_data <- tibble(
   abundance = list(tibble(yoshida_karasawayama_fa)),
   list = list(tibble(yoshida_karasawayama_list)),
   traits= list(tibble(yoshida_karasawayama_traits)),
-  measures=list(tibble(yoshida_karasawayama_measures)),
-  obs = "Conferir data_log")
+  measures=list(tibble(yoshida_karasawayama_measures_adjust)),
+  obs = NA)
 
 save(yoshida_karasawayama_data, 
      file = file.path(yoshida_karasawayama,
@@ -4573,7 +4642,7 @@ save(yoshida_karasawayama_data,
 # FORAM CRIADOS PARA POSTERIOR UNIAO (JOIN) DOS DATAFRAMES ANINHADOS
 # COM AS RESPECTIVAS CHAVES ID APOS A CONFERENCIA DOS ATRIBUTOS FUNCIONAIS
 # QUE FORAM FEITAS MANUALMENTE. QUALQUER DUVIDA, 
-# CONSULTAR MATHEUS MOROTI OU GUSTAVO ROMERO
+# CONSULTAR Joice Souza, Matheus Moroti ou Gustavo Romero
 nested_df <- bind_rows(boukal_czech_roof,
                        boukal_czech_nonroof,
                        boukal_czech_plesnelake,
@@ -4628,8 +4697,8 @@ nested_df <- bind_rows(boukal_czech_roof,
                        anikka_data,
                        claas_data,
                        romero_roof_japi_data,
-                       martin_data_2021,
-                       martin_data_2022,
+                       martin_data_low,
+                       martin_data_middle,
                        sam_data,
                        larrieu_burat_data, 
                        larrieu_fontainebleau_data,
