@@ -1,6 +1,7 @@
 # Mon Jul 29 16:53:39 2024 
 # Author: Matheus Moroti
-
+library(visdat)
+library(tidyverse)
 # This script is to add the revised traits to the nested dataframe. 
 # To do this, we will load the spreadsheet previously generated in 
 # the 01_trait_list script and filled in Excel by Gustavo Romero.
