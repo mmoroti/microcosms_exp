@@ -13,6 +13,13 @@ load(here::here("00_preprocessed_data",
 traits_new <- readxl::read_xlsx(
   file.path(local_directory,
             "list_traits_microcosms.xlsx"))
+
+#traits_new <- readxl::read_xlsx(
+#  file.path("00_preprocessed_data",
+#            "list_traits_microcosms_UPDATEJ.xlsx"))
+
+#traits_new %>% mutate(body)
+
 #View(traits_new)
 
 # catch all columns to transform
@@ -69,10 +76,11 @@ View(nested_traits %>%
 # validation = TRUE, you can remove the list and traits columns 
 # as this information is together in traits_revised
 # and exclude experiment MD36 (confirmed by Gustavo Romero and Joice Souza)
-# and exclude experiment MD48 (confirmed by Joice Souza & Gustavo Romero)
 # and exclude experiment MD64 (confirmed by Joice Souza & Gustavo Romero)
+# and exclude experiment MD56 (confirmed by Joice Souza) #only natural forest
+# and exclude experiment MD48 (confirmed by Joice Souza) #only natural forest
 nested_database <- nested_traits_join %>% 
-  filter(ID != 'MD36' & ID != "MD48" & ID != "MD64") %>%
+  filter(ID != 'MD36' & ID != "MD48" & ID != "MD64" & ID != "MD56") %>%
   select(-list, -traits)
 
 # Rename names in abundance according traits_revised
@@ -80,18 +88,48 @@ nested_database <- nested_traits_join %>%
 # ou seja, renomear nomes das colunas nas matrizes de abundancia, e tenha o nome
 # correspondente nos traits. Para isso, é possível usar o nome equivalente que o
 # autor deu na abundancia na coluna "Morfospecies_name" que tambem esta presente
-# em traits revised. A partir dela conseguimos renomear 
-#df_abundance <- nested_database[[9, "abundance"]][[1]]
-#df_traits <- nested_database[[9, "traits_revised"]][[1]]
-#
-#head(df_abundance)
-#
-#vtr_dict_names <- df_traits %>%
-#  select("(morpho)Species", "Morfospecies_name") %>%
-#  deframe()
-#
-#df_abundance %>%
-#  rename(all_of(vtr_dict_names))
+# em traits revised. A partir dela conseguimos renomear.
+for (i in 1:nrow(data_teste)) {
+  
+  # Extrair os dataframes abundance e traits_revised
+  df_abundance <- data_teste[[i, "abundance"]][[1]]
+  df_traits <- data_teste[[i, "traits_revised"]][[1]]
+  
+  remove_cols <- c("Class", "Order", "Family", "Genus", 
+                   "uncertain_trait","Morfospecies_name", "(morpho)Species", "OTU")
+  
+  # Criar o dicionário de nomes com base em species_NEW e species_OLD
+  # primeiro tirar os uncertain_trait = 1, depois renomear
+  # Criar a nova coluna species_NEW concatenando o valor original com o valor de OTU
+  df_traits_filter <- df_traits %>% 
+    mutate(species_NEW = paste0(species_NEW, "_", OTU)) %>%
+    filter(uncertain_trait == 0) %>%
+    select(-c(remove_cols))
+  
+  # morphospecies (colunas em abundance) que precisam ser renomeadas). Para isso
+  # geramos um dicionario dos nomes novos e antigos das especies que entram no dataset
+  vtr_dict_names <- df_traits_filter %>%
+    #filter(uncertain_trait == 0) %>%
+    select(species_NEW, species_OLD) %>%
+    deframe()
+  
+  # morphospecies que devem ser removidas
+  vector_remove <- df_traits %>% 
+    filter(uncertain_trait == 1) %>%
+    pull(species_OLD) # remover colunas de abundancia
+  
+  # Renomear as colunas de df_abundance usando o dicionário
+  df_abundance_renamed <- df_abundance %>%
+    select(-c(vector_remove)) %>%
+    rename(all_of(vtr_dict_names))
+  
+  # Atualizar o dataframe dentro do nested_database com o dataframe renomeado
+  data_teste[[i, "abundance"]][[1]] <- df_abundance_renamed
+  data_teste[[i, "traits_revised"]][[1]] <- df_traits_filter %>%
+    select(-species_OLD)
+}
+
+View(data_teste)
 
 #View(nested_database)
 # salva no drive do projeto

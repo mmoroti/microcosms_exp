@@ -969,20 +969,24 @@ filter_high <- c("Morphospecies.3",  "Morphospecies.6",
 cotriguacu_fa_low_roof <- cotriguacu_fa %>%
   filter(height == "1.5") %>%
   filter(Replicate %in% with_roof) %>%
-  select(!all_of(filter_low_roof)) 
+  select(!all_of(filter_low_roof)) %>%
+  select(-height)
 
 cotriguacu_fa_low_nonroof <- cotriguacu_fa %>%
   filter(height == "1.5") %>%
   filter(!(Replicate %in% with_roof)) %>%
-  select(!all_of(filter_low_nonroof)) 
+  select(!all_of(filter_low_nonroof)) %>%
+  select(-height)
 
 cotriguacu_fa_mid <- cotriguacu_fa %>%
   filter(height == "15") %>%
-  select(!all_of(filter_mid))
+  select(!all_of(filter_mid)) %>%
+  select(-height)
 
 cotriguacu_fa_high <- cotriguacu_fa %>%
   filter(height != "15" & height != "1.5") %>%
-  select(!all_of(filter_high))
+  select(!all_of(filter_high)) %>%
+  select(-height)
 
 # list
 cotriguacu_list_low_roof <- cotriguacu_list %>% 
@@ -1161,7 +1165,9 @@ fabiola_roof_fa <- fabiola_fa %>%
   filter(str_detect(fabiola_fa$`ID. Own`,
                     "^BR|^PR")) %>%
   select(-"daphnia.sp.1", -"Wyeomyia.sp.1", 
-         -"Isopoda.sp.1", -"Replicate...3")
+         -"Isopoda.sp.1", -"Replicate...3") %>%
+  rename(Replicate = "Replicate...2") %>%
+  select(-"ID. Own")
 
 #colSums(fabiola_roof_fa[,5:15])
 #rowSums(fabiola_roof_fa[,5:15])
@@ -1174,7 +1180,9 @@ fabiola_nonroof_fa <- fabiola_fa %>%
   filter(str_detect(fabiola_fa$`ID. Own`,
                     "^BC|^PC")) %>%
   select(-"Eristalis.sp.1", -"Forcipomyia.sp.1", 
-         -"Isopoda.sp.1", -"Replicate...3")
+         -"Isopoda.sp.1", -"Replicate...3") %>%
+  rename(Replicate = "Replicate...2") %>%
+  select(-"ID. Own")
 
 #colSums(fabiola_nonroof_fa[,5:15])
 #rowSums(fabiola_nonroof_fa[,5:15]) # alguns potes com zero
@@ -2150,7 +2158,7 @@ juen_roof_fa <- juen_fa %>%
          -"Morphospecies.16", -"Morphospecies.18", -"Morphospecies.20") %>%
   mutate(Morphospecies.5 = Morphospecies.4 + Morphospecies.5) %>%
   mutate(Morphospecies.7 = Morphospecies.7 + Morphospecies.9) %>%
-  select(-"Morphospecies.9", -"Morphospecies.4")
+  select(-"Morphospecies.9", -"Morphospecies.4", -"Local", -"Roof")
 
 #dim(juen_roof_fa)
 #colSums(juen_roof_fa[,5:16])
@@ -2162,7 +2170,7 @@ juen_nonroof_fa <- juen_fa %>%
          -"Morphospecies.9", -"Morphospecies.10", -"Morphospecies.13",
          -"Morphospecies.21") %>%
   mutate(Morphospecies.5 = Morphospecies.4 + Morphospecies.5) %>%
-  select(-"Morphospecies.4")
+  select(-"Morphospecies.4", -"Local", -"Roof")
 
 #dim(juen_nonroof_fa)
 #colSums(juen_nonroof_fa[,5:18])
@@ -2174,7 +2182,7 @@ juen_na_fa <- juen_fa %>%
          -"Morphospecies.19", -"Morphospecies.20", -"Morphospecies.21") %>%
   mutate(Morphospecies.5 = Morphospecies.4 + Morphospecies.5) %>%
   mutate(Morphospecies.7 = Morphospecies.7 + Morphospecies.9) %>%
-  select(-"Morphospecies.9", -"Morphospecies.4")
+  select(-"Morphospecies.9", -"Morphospecies.4", )
 
 #dim(juen_na_fa)
 #colSums(juen_na_fa[,5:16])
@@ -3178,7 +3186,7 @@ nock_data_mf1 <- tibble(
   list = NA, #list(tibble(knapp_list)),
   traits= NA, #list(tibble(knapp_traits)),
   measures=list(tibble(nock_measures_adjust_mf1)),
-  obs = "O experimento 'Natural forest' é o mesmo do MD")
+  obs = "O experimento 'Natural forest' é o mesmo do MD69")
 
 nock_data_mf2 <- tibble(
   researcher = "Nock",
@@ -3188,7 +3196,7 @@ nock_data_mf2 <- tibble(
   list = NA, #list(tibble(knapp_list)),
   traits= NA, #list(tibble(knapp_traits)),
   measures=list(tibble(nock_measures_adjust_mf2)),
-  obs = "O experimento 'Natural forest' é o mesmo do MD")
+  obs = "O experimento 'Natural forest' é o mesmo do MD34")
 
 save(nock_data_mf1,
      nock_data_mf2,
@@ -4222,13 +4230,13 @@ martin_fa_2022 <- martin_fa %>% filter(Year == "2022") %>%
 
 martin_fa_low <- martin_fa_2022 %>% 
   filter(Stratum == "low") %>%
-  select(-Stratum, -Year, -Morphospecies.10)
+  select(-Stratum, -Year,-SampleID, -Morphospecies.10)
 #colSums(martin_fa_low[,-c(1:3)]) 
 # 0 Morphospecies.10
 
 martin_fa_middle <- martin_fa_2022 %>%
   filter(Stratum == "middle") %>%
-  select(-Stratum, -Year, -Morphospecies.4,
+  select(-Stratum, -Year,-SampleID, -Morphospecies.4,
          -Morphospecies.5,  -Morphospecies.6, -Morphospecies.11)
 #colSums(martin_fa_middle[,-c(1:3)]) 
 # 0 Morphospecies.4, Morphospecies.5, Morphospecies.6, Morphospecies.11
@@ -4613,6 +4621,9 @@ head(yoshida_karasawayama_fa)
 head(yoshida_karasawayama_list)
 head(yoshida_karasawayama_traits)
 
+yoshida_karasawayama_fa_adjust <- yoshida_karasawayama_fa %>%
+  select(-ID)
+
 yoshida_karasawayama_measures_adjust <- yoshida_karasawayama_measures %>%
   rename("dissolved_O2" = "dissolved_O2_mg_L") %>%
   rename(Remaining_water_volume = "remaining_water_volume_mL") %>% 
@@ -4625,7 +4636,7 @@ yoshida_karasawayama_data <- tibble(
   researcher = "Yoshida",
   locality = "karasawayama_Japan",
   roof_treatment = NA,
-  abundance = list(tibble(yoshida_karasawayama_fa)),
+  abundance = list(tibble(yoshida_karasawayama_fa_adjust)),
   list = list(tibble(yoshida_karasawayama_list)),
   traits= list(tibble(yoshida_karasawayama_traits)),
   measures=list(tibble(yoshida_karasawayama_measures_adjust)),
