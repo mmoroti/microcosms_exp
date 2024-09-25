@@ -18,9 +18,9 @@ Each experiment, identified by its unique MD (Microcosm Data) key (**`ID`**), in
 
 -   **Researcher (`researcher`)**: This column identifies the researcher responsible for conducting each experiment, ensuring accountability and facilitating collaboration among scientists.
 -   **Locality (`locality`)**: This column specifies the geographic location of each experiment, allowing for spatial analysis of biodiversity patterns and environmental influences.
--   **Roof Treatment (`roof_treatment`)**: Indicates whether the experiment was conducted under a roof that prevents the entry of allocative material (e.g., leaves, debris).
-    -   `1`: Roof present, allocative material blocked.
-    -   `0`: No roof, allocative material allowed.
+-   **Roof Treatment (`roof_treatment`)**: Indicates whether the experiment was conducted under a roof that prevents the entry of allochthonous material (e.g., leaves, debris).
+    -   `1`: Roof present, allochthonous material blocked.
+    -   `0`: No roof, allochthonous material allowed.
 -   **Height Treatment (`height_treatment`)**: Indicates the height at which the microcosms were installed, with the following categories:
     -   `1`: 1.5 meters above ground.
     -   `2`: 15 meters above ground.
