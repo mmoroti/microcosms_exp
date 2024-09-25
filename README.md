@@ -12,10 +12,12 @@ Climate change and land-use alterations are leading to biodiversity loss, with c
 
 ### How are the data organized?
 
-The experiment was conducted on a global scale, and raw data were submitted by various researchers. Each dataset was processed using the `00_preprocessing_data.R` script, where a unique 'ID' key was assigned to each experiment, enabling comparisons between them. During the processing, we identified the need to reclassify attributes for the morphospecies found, a task performed in the `02_trait_revised_join.R` script. After this step, the data were organized into a nested structure, and the resulting `nested_df.RData` file contains all experiments cleaned and ready for analysis.
+The experiment was conducted on a global scale, and raw data were submitted by various researchers. Each dataset was processed using the `00_preprocessing_data.R` script, where a unique 'ID' key was assigned to each experiment, enabling comparisons between them. During the processing, we identified the need to reclassify traits for the morphospecies found, and were incorporated back into the dataset in `02_trait_revised_join.R` script. After this step, the data were organized into a nested structure, and the resulting `nested_df.RData` file contains all experiments cleaned and ready for analysis.
 
-Each experiment is assigned a unique identifier ('MD') under the column **ID** , followed by a sequential number. This allows for easy tracking and comparison between experiments. Additionally, some experiments underwent specific treatments, recorded in the following columns:
+Each experiment, identified by its unique MD (Microcosm Data) key (**`ID`**), includes several important data columns. These columns collectively provide a comprehensive dataset that supports the analysis of biodiversity and ecosystem functioning within the experimental microcosms. Additionally, some experiments underwent specific treatments, recorded in the**`roof_treatment`** and **`height_treatment`** columns.
 
+-   **Researcher (`researcher`)**: This column identifies the researcher responsible for conducting each experiment, ensuring accountability and facilitating collaboration among scientists.
+-   **Locality (`locality`)**: This column specifies the geographic location of each experiment, allowing for spatial analysis of biodiversity patterns and environmental influences.
 -   **Roof Treatment (`roof_treatment`)**: Indicates whether the experiment was conducted under a roof that prevents the entry of allocative material (e.g., leaves, debris).
     -   `1`: Roof present, allocative material blocked.
     -   `0`: No roof, allocative material allowed.
@@ -23,17 +25,8 @@ Each experiment is assigned a unique identifier ('MD') under the column **ID** ,
     -   `1`: 1.5 meters above ground.
     -   `2`: 15 meters above ground.
     -   `3`: Greater than 15 meters above ground.
-
-Each experiment, identified by its unique MD (Microcosm Data) key, includes several important data columns. These columns collectively provide a comprehensive dataset that supports the analysis of biodiversity and ecosystem functioning within the experimental microcosms.
-
--   **Researcher (`researcher`)**: This column identifies the researcher responsible for conducting each experiment, ensuring accountability and facilitating collaboration among scientists.
-
--   **Locality (`locality`)**: This column specifies the geographic location of each experiment, allowing for spatial analysis of biodiversity patterns and environmental influences.
-
 -   **Abundance (`abundance`)**: This column contains a dataframe with abundance data for each experiment, indicating the number of organisms present within the microcosm.
-
 -   **Traits (`traits_revised`)**: This column holds a dataframe listing the revised traits of the organisms observed in each experiment, providing insights into their functional characteristics.
-
 -   **Measures (`measures`)**: This column includes a dataframe with measurements from cotton strips used in the experiments, along with both abiotic and biotic measurements taken during the study. These measurements are crucial for understanding the environmental conditions and interactions within the microcosms.
 
 ### What are the prerequisites or dependencies for manipulating the data?
