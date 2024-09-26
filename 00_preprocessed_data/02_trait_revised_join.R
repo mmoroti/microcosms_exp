@@ -6,25 +6,26 @@ library(tidyverse)
 # To do this, we will load the spreadsheet previously generated in 
 # the 01_trait_list script and filled in Excel by Gustavo Romero.
 
+# LOAD DATA ----
 # load nested dataframe generate by 00_preprocessing_data
 load(here::here("00_preprocessed_data",
                 "nested_df_original.RData"))
 
+
 # The traits have already been classified and will return to the nested_df
+# WITHOUT SPECIES_NEW AND SPECIES_OLD NAMES
+#traits_new <- readxl::read_xlsx(
+#  file.path(local_directory,
+#            "list_traits_microcosms.xlsx"))
+# WITH SPECIES_NEW AND SPECIES_OLD NAMES
 traits_new <- readxl::read_xlsx(
   file.path(local_directory,
-            "list_traits_microcosms.xlsx"))
+            "list_traits_microcosms_UPDATEJ.xlsx"))
 
-#traits_new <- readxl::read_xlsx(
-#  file.path("00_preprocessed_data",
-#            "list_traits_microcosms_UPDATEJ.xlsx"))
-
-#traits_new %>% mutate(body)
-
-#View(traits_new)
-
+# UNIFYING DATAFRAME TRAITS_NEW IN NESTED_DF_ORIGINAL ----
 # catch all columns to transform
-transform_columns <- c(names(traits_new[,14:ncol(traits_new)]))
+transform_columns <- c("uncertain_trait","life_cycle",
+                       names(traits_new[,17:ncol(traits_new)]))
 
 traits_new_nested <- traits_new %>% 
   mutate_at(vars(transform_columns), as.integer) %>%
@@ -51,7 +52,7 @@ nested_traits_join <- left_join(
 # another filter is the experiments without traits_revised
 nested_traits <- nested_traits_join %>%
   filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & 
-           ID != "MD36", ID != "MD53" & ID != "MD69") #%>%
+           ID != "MD36", ID != "MD53" & ID != "MD69" & ID != "MD56" ) #%>%
   #filter(ID != "MD57" & ID != "MD58" & ID != "MD59" & ID != "MD60" & ID != "MD61")
 
 for (i in 1:nrow(nested_traits)) {
@@ -84,20 +85,24 @@ nested_database <- nested_traits_join %>%
   filter(ID != 'MD36' & ID != "MD48" & ID != "MD64" & ID != "MD56") %>%
   select(-list, -traits)
 
-# Rename names in abundance according traits_revised
-# a gente precisa criar uma funcao que olhe para os nomes presentes na abundancia,
-# ou seja, renomear nomes das colunas nas matrizes de abundancia, e tenha o nome
-# correspondente nos traits. Para isso, é possível usar o nome equivalente que o
-# autor deu na abundancia na coluna "Morfospecies_name" que tambem esta presente
-# em traits revised. A partir dela conseguimos renomear.
-for (i in 1:nrow(data_teste)) {
+# CLEANING ----
+# REMOVING MORPHOSPECIES WITH ''UNCERTAIN_TRAIT == 1'' IN TRAITS AND ABUNDANCE
+# WE NEED TO RENAME NAMES IN ABUNDANCE ACCORDING TRAITS_REVISED TOO 
+data_teste <- nested_database %>%
+  filter(ID != "MD24" & ID != "MD25" & ID != "MD34",
+         ID != "MD53" & ID != "MD69") # sem dados de invertebrados
+
+unir_novamente <- nested_database %>%
+  filter(ID %in% c("MD24", "MD25", "MD34", "MD53","MD69")) 
   
+remove_cols <- c("Class", "Order", "Family", "Genus", 
+                 "uncertain_trait","Morfospecies_name", "(morpho)Species", "OTU")
+
+for (i in 1:nrow(data_teste)) {
+  print(data_teste[[i, "ID"]][[1]])
   # Extrair os dataframes abundance e traits_revised
   df_abundance <- data_teste[[i, "abundance"]][[1]]
   df_traits <- data_teste[[i, "traits_revised"]][[1]]
-  
-  remove_cols <- c("Class", "Order", "Family", "Genus", 
-                   "uncertain_trait","Morfospecies_name", "(morpho)Species", "OTU")
   
   # Criar o dicionário de nomes com base em species_NEW e species_OLD
   # primeiro tirar os uncertain_trait = 1, depois renomear
@@ -130,11 +135,42 @@ for (i in 1:nrow(data_teste)) {
     select(-species_OLD)
 }
 
-View(data_teste)
+# VALIDATIONS ----
+# conferir n abundancia 
+# conferir n traits
+for (i in 1:nrow(data_teste)) {
+  
+  print(data_teste[[i, "ID"]][[1]])
+  
+  df_abundance <- data_teste[[i, "abundance"]][[1]]
+  df_traits <- data_teste[[i, "traits_revised"]][[1]]
+
+  data_teste$nrow_abundance[[i]] <- ncol(df_abundance %>% 
+                                              select(-Treatment, -Replicate))
+  
+  data_teste$nrow_traits[[i]] <- nrow(df_traits)
+  
+  # Criação da coluna de validação
+  data_teste$validation[[i]] <- (
+    data_teste$nrow_abundance[[i]] == data_teste$nrow_traits[[i]])# && 
+    #  nested_traits$nrow_list[[i]] == nested_traits$nrow_trait_revised[[i]]) 
+
+}
+
+# conferir NA's
+# conferir nomes nas abundancias 
+
+View(data_teste %>%
+       relocate(c(nrow_traits,nrow_abundance, validation), 
+                .after = ID)) 
+
+nested_database_cleaned <- data_teste %>%
+  select(-c(nrow_traits,nrow_abundance, validation)) %>%
+  bind_rows(unir_novamente)
 
 #View(nested_database)
 # salva no drive do projeto
-save(nested_database,
+save(nested_database_cleaned,
      file = file.path(local_directory,
                       "nested_df.RData"))
 # salva no github

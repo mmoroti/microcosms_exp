@@ -1967,7 +1967,8 @@ romero_nonroof_japi_fa <- romero_japi_fa %>%
   mutate(Treatment = str_replace_all(
     Treatment,c(
       "Degraded" = "Managed forest",
-      "Natural" = "Natural forest"))) 
+      "Natural" = "Natural forest"))) %>%
+  mutate(Morphospecies.35 = Morphospecies.35 + Morphospecies.38)
 
 # list
 romero_roof_japi_list <- romero_japi_list %>% 
@@ -4005,10 +4006,14 @@ thomas_fa_adjust <- thomas_fa %>%
   select(-"Morphospecies.15") # TODO precisa ajustar
 
 # list
-thomas_list 
+thomas_list <- thomas_list %>%
+  filter(Morfospecies_name != "Morphospecies.15")
 
 # traits
 thomas_traits$total_length <- as.double(thomas_traits$total_length)
+
+thomas_traits <- thomas_traits %>%
+  filter(Morfospecies_name != "Morphospecies.15")
 
 # measures
 thomas_measures_adjust <- thomas_measures %>% 
