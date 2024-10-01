@@ -2,6 +2,7 @@
 # Author: Matheus Moroti
 library(visdat)
 library(tidyverse)
+library(gridExtra)
 # This script is to add the revised traits to the nested dataframe. 
 # To do this, we will load the spreadsheet previously generated in 
 # the 01_trait_list script and filled in Excel by Gustavo Romero.
@@ -10,7 +11,6 @@ library(tidyverse)
 # load nested dataframe generate by 00_preprocessing_data
 load(here::here("00_preprocessed_data",
                 "nested_df_original.RData"))
-
 
 # The traits have already been classified and will return to the nested_df
 # WITHOUT SPECIES_NEW AND SPECIES_OLD NAMES
@@ -156,23 +156,63 @@ for (i in 1:nrow(data_teste)) {
     #  nested_traits$nrow_list[[i]] == nested_traits$nrow_trait_revised[[i]]) 
 
 }
-
-# conferir NA's
-# conferir nomes nas abundancias 
-
 View(data_teste %>%
        relocate(c(nrow_traits,nrow_abundance, validation), 
                 .after = ID)) 
 
+# MAPEAR NA's NAS TRES PLANILHAS
+# Caminho para salvar o arquivo PDF
+pdf("missing_traitdata.pdf")
+# Loop por cada linha do dataframe aninhado
+for (i in seq_len(nrow(data_teste))) {
+  
+  # Extrai o ID e o dataframe aninhado
+  current_id <- data_teste$ID[i]
+  current_df <- data_teste$traits_revised[[i]]
+  
+  # Título com a chave 'ID'
+  title <- paste("ID:", current_id)
+  
+  # Cria a visualização de dados ausentes com vis_miss
+  vis_plot <- vis_miss(current_df)
+  
+  # Plota a visualização e o título
+  grid.arrange(vis_plot, top = title)
+}
+dev.off()
+
+# measures
+pdf("missing_measuresdata.pdf")
+# Loop por cada linha do dataframe aninhado
+for (i in seq_len(nrow(data_teste))) {
+  
+  # Extrai o ID e o dataframe aninhado
+  current_id <- data_teste$ID[i]
+  current_df <- data_teste$measures[[i]]
+  
+  # Título com a chave 'ID'
+  title <- paste("ID:", current_id)
+  
+  # Cria a visualização de dados ausentes com vis_miss
+  vis_plot <- vis_miss(current_df)
+  
+  # Plota a visualização e o título
+  grid.arrange(vis_plot, top = title)
+}
+dev.off()
+
+# CONFERIR NOME DAS COLUNAS
+# Fazer conferencia de cada dataframe se cottomstrip_after > cottomstrip_before
+
+# SAVE DATA AFTER VALIDATIONS  ----
 nested_database_cleaned <- data_teste %>%
   select(-c(nrow_traits,nrow_abundance, validation)) %>%
   bind_rows(unir_novamente)
 
-#View(nested_database)
 # salva no drive do projeto
 save(nested_database_cleaned,
      file = file.path(local_directory,
                       "nested_df.RData"))
 # salva no github
-save(nested_database,
+save(nested_database_cleaned,
      file = here::here("nested_df.RData"))

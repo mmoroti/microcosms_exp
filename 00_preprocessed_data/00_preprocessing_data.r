@@ -2183,7 +2183,7 @@ juen_na_fa <- juen_fa %>%
          -"Morphospecies.19", -"Morphospecies.20", -"Morphospecies.21") %>%
   mutate(Morphospecies.5 = Morphospecies.4 + Morphospecies.5) %>%
   mutate(Morphospecies.7 = Morphospecies.7 + Morphospecies.9) %>%
-  select(-"Morphospecies.9", -"Morphospecies.4", )
+  select(-"Morphospecies.9", -"Morphospecies.4", -"Local", -"Roof")
 
 #dim(juen_na_fa)
 #colSums(juen_na_fa[,5:16])
