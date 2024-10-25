@@ -161,9 +161,8 @@ View(data_teste %>%
                 .after = ID)) 
 
 # MAPEAR NA's NAS TRES PLANILHAS
-# Caminho para salvar o arquivo PDF
+# traits
 pdf("missing_traitdata.pdf")
-# Loop por cada linha do dataframe aninhado
 for (i in seq_len(nrow(data_teste))) {
   
   # Extrai o ID e o dataframe aninhado
@@ -183,7 +182,6 @@ dev.off()
 
 # measures
 pdf("missing_measuresdata.pdf")
-# Loop por cada linha do dataframe aninhado
 for (i in seq_len(nrow(data_teste))) {
   
   # Extrai o ID e o dataframe aninhado
@@ -201,9 +199,30 @@ for (i in seq_len(nrow(data_teste))) {
 }
 dev.off()
 
-# CONFERIR NOME DAS COLUNAS
-# Fazer conferencia de cada dataframe se cottomstrip_after > cottomstrip_before
+# TODO CONFERIR BEFORE > AFTER
+pdf("beforeafter_validation.pdf")
+for (i in 1:nrow(data_teste)) {
+  
+  current_id <- data_teste$ID[i]
+  title <- paste("ID:", current_id)
+  
+  df_measures <- data_teste[[i, "measures"]][[1]]
+  
+  df_measures_default <- df_measures %>% 
+    mutate(coarse_comparison = coarse_before_mg > coarse_after_mg,
+           fine_comparison = fine_before_mg > fine_after_mg,
+           outside_comparison = outside_before_mg > outside_after_mg) %>%
+    select(treatment, replicate, coarse_comparison,
+           fine_comparison, outside_comparison)
+  
+  # Gera a tabela formatada no PDF
+  grid.table(df_measures_default)
+}
 
+dev.off()
+
+
+# TODO CONFERIR NOME DAS COLUNAS 
 # SAVE DATA AFTER VALIDATIONS  ----
 nested_database_cleaned <- data_teste %>%
   select(-c(nrow_traits,nrow_abundance, validation)) %>%

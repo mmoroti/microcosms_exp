@@ -1310,8 +1310,9 @@ celine_canopy_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-celine_canopy_fa <- celine_canopy_fa %>%
-  mutate(across(all_of(names(celine_canopy_fa[,3:5])), as.numeric))
+celine_canopy_fa_adjust <- celine_canopy_fa %>%
+  mutate(across(all_of(names(celine_canopy_fa[,3:5])), as.numeric)) %>%
+  filter(Treatment != "Managed forest" | Replicate != "pot.8")
 
 # list
 head(celine_canopy_list)
@@ -1334,7 +1335,7 @@ celine_canopy_frenchguyana_data <- tibble(
   locality = "FrenchGuyana", 
   roof_treatment = NA,
   heigth_treatment = 2,
-  abundance = list(tibble(celine_canopy_fa)),
+  abundance = list(tibble(celine_canopy_fa_adjust)),
   list = list(tibble(celine_canopy_list)),
   traits=list(tibble(celine_canopy_traits)),
   measures=list(tibble(celine_canopy_measures)),
@@ -3711,7 +3712,7 @@ rodrigo_data <- tibble(
   researcher = "RodrigoFreire",
   locality = "ParanaDelta_Argentina",
   roof_treatment = NA,
-  abundance = list(tibble(rodrigo_fa)),
+  abundance = list(tibble(rodrigo_fa_adjust)),
   list = list(tibble(rodrigo_list)),
   traits= list(tibble(rodrigo_traits)),
   measures=list(tibble(rodrigo_measures_adjust)),
