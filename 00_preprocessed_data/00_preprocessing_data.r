@@ -4652,6 +4652,144 @@ save(yoshida_karasawayama_data,
      file = file.path(yoshida_karasawayama,
                       "yoshida_karasawayama.RData"))
 
+# MD70 --- Musa, SouthAfrica ----
+musa_southafrica <- file.path(local_directory,
+                                  "Musa_SouthAfrica")
+
+musa_southafrica_fa <- read_xlsx(
+  file.path(
+    musa_southafrica,
+  "NEW_SA_Musa.xlsx"),
+  "fauna_abundance")
+
+musa_southafrica_list <- read_xlsx(
+  file.path(
+    musa_southafrica,
+    "NEW_SA_Musa.xlsx"),
+  "Fauna_morphospecies_list")
+
+musa_southafrica_traits <- read_xlsx(
+  file.path(
+    musa_southafrica,
+    "NEW_SA_Musa.xlsx"),
+  "Fauna_traits")
+
+musa_southafrica_measures <- read_xlsx(
+  file.path(
+    musa_southafrica,
+    "NEW_SA_Musa.xlsx"),
+  "measures_decomposition_geograph")
+
+names(musa_southafrica_fa)
+head(musa_southafrica_list)
+head(musa_southafrica_traits)
+View(musa_southafrica_measures)
+
+musa_southafrica_measures_adjust <- musa_southafrica_measures %>%
+  rename(Remaining_water_volume = "Final water volume (ml)") %>% 
+  mutate("detritus dry mass (fine)" = NA,
+         "detritus dry mass (coarse)" = NA) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+musa_southafrica_data <- tibble(
+  researcher = "Musa",
+  locality = "South Africa",
+  roof_treatment = NA,
+  abundance = list(tibble(musa_southafrica_fa)),
+  list = list(tibble(musa_southafrica_list)),
+  traits= list(tibble(musa_southafrica_traits)),
+  measures=list(tibble(musa_southafrica_measures_adjust)),
+  obs = NA)
+
+save(musa_southafrica_data, 
+     file = file.path(musa_southafrica,
+                      "musa_southafrica.RData"))
+
+# MD71 --- Martin, Freising, Germany ----
+martin_freising <- file.path(local_directory,
+                              "MartinGossner_Freising")
+
+martin_freising_fa <- read_xlsx(
+  file.path(
+    martin_freising,
+    "Sanabria_Gossner_Freising_FIN.xlsx"),
+  "fauna_abundance")
+
+martin_freising_list <- read_xlsx(
+  file.path(
+    martin_freising,
+    "Sanabria_Gossner_Freising_FIN.xlsx"),
+  "Fauna_morphospecies_list")
+
+martin_freising_traits <- read_xlsx(
+  file.path(
+    martin_freising,
+    "Sanabria_Gossner_Freising_FIN.xlsx"),
+  "Fauna_traits")
+
+martin_freising_measures <- read_xlsx(
+  file.path(
+    martin_freising,
+    "Sanabria_Gossner_Freising_FIN.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+unique(martin_freising_fa$Stratum)
+
+martin_freising_fa_low <- martin_freising_fa %>%
+  filter(Stratum == "low") %>%
+  select(-Stratum, -SampleID, -'Morphospecies.7')
+
+# colSums(martin_freising_fa_low[,-c(1:2)])
+
+#martin_freising_fa_middle <- martin_freising_fa %>%
+#  filter(Stratum == "middle")
+#martin_freising_fa_upper <- martin_freising_fa %>%
+#  filter(Stratum == "upper") 
+  
+martin_freising_list_low <- martin_freising_list %>%
+  filter(Morfospecies_name != 'Morphospecies.7')
+
+martin_freising_traits_low <- martin_freising_traits %>%
+  filter(Morfospecies_name != 'Morphospecies.7')
+
+martin_freising_measures_low <- martin_freising_measures %>%
+  filter(low_middle_upper == "low") %>%
+  mutate(turbidity_NTU = str_replace(turbidity_NTU, ">1000", "1000")) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "turbidity" = "turbidity_NTU",  
+    "CDOM" = "CDOM_µg_L",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg_L",
+    #"canopy openness " = "canopy openness beginning (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+martin_freising_data <- tibble(
+  researcher = "MartinGossner",
+  locality = "Freising, Germany",
+  roof_treatment = NA,
+  abundance = list(tibble(martin_freising_fa_low)),
+  list = list(tibble(martin_freising_list_low)),
+  traits= list(tibble(martin_freising_traits_low)),
+  measures=list(tibble(martin_freising_measures_low)),
+  obs = "Unidade de medidas nas colunas originais de 'measures'")
+
+save(martin_freising_data, 
+     file = file.path(martin_freising,
+                      "martin_freising.RData"))
+
 #--- Nested dataframe ----
 ### ATENCAO ###
 # FUNDAMENTAL NAO ALTERAR A ORDEM DOS DATAFRAMES INSERIDOS AQUI
@@ -4728,14 +4866,16 @@ nested_df <- bind_rows(boukal_czech_roof,
                        gonzales_site2_nonroof_data,
                        gonzales_site3_nonroof_data,
                        cotriguacu_romero_data_low_nonroof,
-                       nock_data_mf2)
+                       nock_data_mf2,
+                       musa_southafrica_data,
+                       martin_freising_data)
 
 data_number <- column_id(nested_df, "MD")
 
 data_number <- data_number %>%
   relocate(heigth_treatment, 
          .after = roof_treatment)
-
+View(data_number)
 # Save in data_preprocessing
 # This data is original traits by the authors
 # salva no github
