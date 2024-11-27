@@ -1,3 +1,9 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
 # MICROcosm: a protocol for a global microcosm experiment
 
 <img src="http://img.shields.io/static/v1?label=STATUS&amp;message=EM%20DESENVOLVIMENTO&amp;color=GREEN&amp;style=for-the-badge"/> <img src="http://img.shields.io/static/v1?label=STATUS&amp;message=IN%20DEVELOPMENT&amp;color=GREEN&amp;style=for-the-badge"/>

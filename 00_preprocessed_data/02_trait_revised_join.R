@@ -20,7 +20,7 @@ load(here::here("00_preprocessed_data",
 # WITH SPECIES_NEW AND SPECIES_OLD NAMES
 traits_new <- readxl::read_xlsx(
   file.path(local_directory,
-            "list_traits_microcosms_UPDATEJ.xlsx"))
+            "list_traits_microcosms_UPDATEJ_NOV.xlsx"))
 
 # UNIFYING DATAFRAME TRAITS_NEW IN NESTED_DF_ORIGINAL ----
 # catch all columns to transform

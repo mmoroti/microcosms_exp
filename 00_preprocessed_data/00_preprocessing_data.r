@@ -4652,7 +4652,7 @@ save(yoshida_karasawayama_data,
      file = file.path(yoshida_karasawayama,
                       "yoshida_karasawayama.RData"))
 
-# MD70 --- Musa, SouthAfrica ----
+#--- MD70 --- Musa, SouthAfrica ----
 musa_southafrica <- file.path(local_directory,
                                   "Musa_SouthAfrica")
 
@@ -4707,7 +4707,7 @@ save(musa_southafrica_data,
      file = file.path(musa_southafrica,
                       "musa_southafrica.RData"))
 
-# MD71 --- Martin, Freising, Germany ----
+#--- MD71 --- Martin, Freising, Germany ----
 martin_freising <- file.path(local_directory,
                               "MartinGossner_Freising")
 
@@ -4875,7 +4875,7 @@ data_number <- column_id(nested_df, "MD")
 data_number <- data_number %>%
   relocate(heigth_treatment, 
          .after = roof_treatment)
-View(data_number)
+#View(data_number)
 # Save in data_preprocessing
 # This data is original traits by the authors
 # salva no github
