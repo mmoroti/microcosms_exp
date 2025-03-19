@@ -104,14 +104,14 @@ glimpse(boukal_roofs_list)
 glimpse(boukal_roofs_traits)
 
 # rename variables with data dictionary
-boukal_roofs_measures <- boukal_roofs_measures %>%
-  mutate(Remaining_water_volume = NA) %>%
+boukal_roofs_measures_adj <- boukal_roofs_measures %>%
+  rename("Remaining_water_volume" = "Remaining water volume") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
   mutate(across(where(is.character), ~ na_if(.x, "NA")))
 
-glimpse(boukal_roofs_measures)
+glimpse(boukal_roofs_measures_adj)
 
 # boukal_czech_roof
 boukal_czech_roof <- tibble(
@@ -121,7 +121,7 @@ boukal_czech_roof <- tibble(
   abundance = list(tibble(boukal_roofs_fa)),
   list = list(tibble(boukal_roofs_list)),
   traits=list(tibble(boukal_roofs_traits)),
-  measures=list(tibble(boukal_roofs_measures))
+  measures=list(tibble(boukal_roofs_measures_adj))
   )
 
 #View(boukal_czech_roof)
@@ -168,8 +168,8 @@ glimpse(boukal_nonroofs_list)
 glimpse(boukal_nonroofs_traits)
 
 # rename variables with data dictionary
-boukal_nonroofs_measures <- boukal_nonroofs_measures %>%
-  mutate(Remaining_water_volume = NA) %>%
+boukal_nonroofs_measures_adj <- boukal_nonroofs_measures %>%
+  rename("Remaining_water_volume" = "Remaining water volume") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -185,7 +185,7 @@ boukal_czech_nonroof <- tibble(
   abundance = list(tibble(boukal_nonroofs_fa)),
   list = list(tibble(boukal_nonroofs_list)),
   traits=list(tibble(boukal_nonroofs_traits)),
-  measures=list(tibble(boukal_nonroofs_measures)))
+  measures=list(tibble(boukal_nonroofs_measures_adj)))
 
 ###---- Boukal_Czech (TODO: third treatment?)
 boukal_plesnelake_fa <- read_xlsx(
@@ -233,9 +233,9 @@ boukal_plesnelake_traits <- boukal_plesnelake_traits %>%
 
 # rename variables with data dictionary
 # gambiarra para renomear as colunas
-boukal_plesnelake_measures <- 
+boukal_plesnelake_measures_adj <- 
   boukal_plesnelake_measures %>%
-  mutate(Remaining_water_volume = NA) %>%
+  rename("Remaining_water_volume" = "Remaining water volume") %>%
   rename("dissolved_O2" = "dissolved_O2 (%)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -251,8 +251,7 @@ boukal_czech_plesnelake <- tibble(
   abundance = list(tibble(boukal_plesnelake_fa)),
   list = list(tibble(boukal_plesnelake_list)),
   traits=list(tibble(boukal_plesnelake_traits)),
-  measures=list(tibble(boukal_plesnelake_measures)))
-
+  measures=list(tibble(boukal_plesnelake_measures_adj)))
 
 # save .RData from Boukal
 save(boukal_czech_roof,
@@ -424,9 +423,9 @@ head(romero_stavirginia_list)
 
 head(romero_stavirginia_traits)
 
-romero_stavirginia_measures <- 
+romero_stavirginia_measures_adj <- 
   romero_stavirginia_measures %>%
-  mutate(Remaining_water_volume = "Final water volume (ml)") %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(tree_dbh = tree_dbh / pi) %>% 
   mutate(across(all_of(var_char), as.character)) %>%
@@ -441,7 +440,7 @@ romero_stavirginia_data <- tibble(
   abundance = list(tibble(romero_stavirginia_fa)),
   list = list(tibble(romero_stavirginia_list)),
   traits=list(tibble(romero_stavirginia_traits)),
-  measures=list(tibble(romero_stavirginia_measures)))
+  measures=list(tibble(romero_stavirginia_measures_adj)))
 
 # save .RData from romero
 save(romero_stavirginia_data,
@@ -562,10 +561,10 @@ cardinale_fa <- cardinale_fa %>%
 # pattern change in forest patch to managed forest
 # filter replicates excluded
 # rename variables with data dictionary
-cardinale_measures <- 
+cardinale_measures_adj <- 
   cardinale_measures %>%
   mutate(Treatment = str_replace(Treatment,"Forest Patch","Managed forest")) %>%
-  mutate("Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Replicate != "pot.4" | Treatment != "Natural forest") %>%
   filter(Replicate != "pot.7" | Treatment != "Natural forest") %>%
   filter(Replicate != "pot.1" | Treatment != "Managed forest") %>%
@@ -584,7 +583,7 @@ cardinale_usa_data <- tibble(
   abundance = list(tibble(cardinale_fa)),
   list = list(tibble(cardinale_list)),
   traits=list(tibble(cardinale_traits)),
-  measures=list(tibble(cardinale_measures)))
+  measures=list(tibble(cardinale_measures_adj)))
 
 # save .RData from Boukal
 save(cardinale_usa_data,
@@ -626,10 +625,10 @@ romero_cardoso_measures <- read_xlsx(
 #View(romero_cardoso_traits)
 
 # rename variables with data dictionary
-romero_cardoso_measures <- 
+romero_cardoso_measures_adj <- 
   romero_cardoso_measures %>%
   rename("canopy openness" = "canopy openness_Daiane") %>%
-  mutate("Remaining_water_volume" = "Final water volume (ml)") %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   rename("microcosm position (N, S, E, W)" = "microcosm position (N. S. E. W)") %>%
   rename(all_of(dict_names)) %>%
   mutate(tree_dbh = tree_dbh / pi) %>% 
@@ -645,7 +644,7 @@ romero_cardoso_data <- tibble(
   abundance = list(tibble(romero_cardoso_fa)),
   list = list(tibble(romero_cardoso_list)),
   traits=list(tibble(romero_cardoso_traits)),
-  measures=list(tibble(romero_cardoso_measures)))
+  measures=list(tibble(romero_cardoso_measures_adj)))
 
 #--- MD6 --- Collyer_Japan ----
 collyer_japan <- file.path(local_directory,
@@ -1591,7 +1590,7 @@ gonzales_measures[63,8] <- "154.68"
 gonzales_measures[71,8] <- "164.14"
 
 gonzales_site1_roof_measures <- gonzales_measures %>% 
-  mutate(Remaining_water_volume = NA) %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Site == "Site 1" & Roof == "yes") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -1612,7 +1611,7 @@ gonzales_site1_roof_measures <- gonzales_measures %>%
            treatment == "Natural forest" & replicate == "pot.20" ))
 
 gonzales_site1_nonroof_measures <- gonzales_measures %>% 
-  mutate(Remaining_water_volume = NA) %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Site == "Site 1" & Roof == "no") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -1633,7 +1632,7 @@ gonzales_site1_nonroof_measures <- gonzales_measures %>%
            treatment == "Natural forest" & replicate == "pot.20" ))
 
 gonzales_site2_roof_measures <- gonzales_measures %>% 
-  mutate(Remaining_water_volume = NA) %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Site == "Site 2" & Roof == "yes") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -1648,7 +1647,7 @@ gonzales_site2_roof_measures <- gonzales_measures %>%
              #treatment == "Natural forest" & replicate == "pot.11" ))
 
 gonzales_site2_nonroof_measures <- gonzales_measures %>% 
-  mutate(Remaining_water_volume = NA) %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Site == "Site 2" & Roof == "no") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -1663,7 +1662,7 @@ gonzales_site2_nonroof_measures <- gonzales_measures %>%
              #treatment == "Natural forest" & replicate == "pot.11" ))
 
 gonzales_site3_roof_measures <- gonzales_measures %>% 
-  mutate(Remaining_water_volume = NA) %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Site == "Site 3" & Roof == "yes") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
@@ -1678,7 +1677,7 @@ gonzales_site3_roof_measures <- gonzales_measures %>%
 
 
 gonzales_site3_nonroof_measures <- gonzales_measures %>% 
-  mutate(Remaining_water_volume = NA) %>%
+  rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   filter(Site == "Site 3" & Roof == "no") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
