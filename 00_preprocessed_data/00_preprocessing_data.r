@@ -4742,13 +4742,6 @@ martin_freising_fa_low <- martin_freising_fa %>%
   filter(Stratum == "low") %>%
   select(-Stratum, -SampleID, -'Morphospecies.7')
 
-# colSums(martin_freising_fa_low[,-c(1:2)])
-
-#martin_freising_fa_middle <- martin_freising_fa %>%
-#  filter(Stratum == "middle")
-#martin_freising_fa_upper <- martin_freising_fa %>%
-#  filter(Stratum == "upper") 
-  
 martin_freising_list_low <- martin_freising_list %>%
   filter(Morfospecies_name != 'Morphospecies.7')
 
@@ -5400,7 +5393,8 @@ martin_sihlwald_fa
 martin_sihlwald_list
 # trait
 martin_sihlwald_traits_adj <- martin_sihlwald_traits %>%
-  rename(total_length = `total_length (mean_mm)`)
+  rename(total_length = `total_length (mean_mm)`) %>%
+  filter(Morfospecies_name != "Morphospecies.6")
 
 # measures
 martin_sihlwald_measures_adj <- martin_sihlwald_measures %>%
@@ -5438,7 +5432,7 @@ martin_sihlwald_data <- tibble(
   list = list(tibble(martin_sihlwald_list)),
   traits= list(tibble(martin_sihlwald_traits_adj)),
   measures=list(tibble(martin_sihlwald_measures_adj)),
-  obs = "")
+  obs = "Morphospecie.6 no traits removida, checar")
 
 save(martin_sihlwald_data, 
      file = file.path(martin_sihlwald,
@@ -5472,6 +5466,7 @@ martin_demmin_measures <- read_xlsx(
     "Martin Gossner_NorthGermany_DemminFIN.xlsx"),
   "measures_decomposition_geograph")
 
+# ausente no lower
 remove <- c("Morphospecies.2", "Morphospecies.3")
 
 # abundance
@@ -5487,7 +5482,8 @@ martin_demmin_list_adj <- martin_demmin_list %>%
 
 # trait
 martin_demmin_traits_adj <- martin_demmin_traits %>%
-  rename(total_length = `total_length (mean_mm)`)
+  rename(total_length = `total_length (mean_mm)`) %>%
+  filter(!Morfospecies_name %in% remove)
 
 # measures
 martin_demmin_measures_adj <- martin_demmin_measures %>%
