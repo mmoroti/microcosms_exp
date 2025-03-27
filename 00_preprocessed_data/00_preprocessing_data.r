@@ -2048,7 +2048,7 @@ save(romero_roof_japi_data,
 #--- MD20 --- Jari Finland ----
 jari_finland <- file.path(local_directory,
                     "Jari_Finland",
-                    "JariKouki-Finland-draft-data.xlsx")
+                    "Finland_JariKouki_FIN.xlsx")
 
 jari_fa <- read_xlsx(
   file.path(
@@ -2071,29 +2071,30 @@ jari_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-jari_fa <- jari_fa %>%
-  select(-"...3") %>%
-  mutate(across(-c(1, 2), ~ replace_na(., 0)))
+#jari_fa <- jari_fa %>%
+#  select(-"...3") %>%
+#  mutate(across(-c(1, 2), ~ replace_na(., 0)))
 
 names(jari_fa)
 # list
-jari_list <- jari_list %>%
-       bind_rows(tibble(Morfospecies_name = "Morphospecies.38")) # present in
+#jari_list <- jari_list %>%
+#       bind_rows(tibble(Morfospecies_name = "Morphospecies.38")) # present in
 # traits, but ausent in list
-
+jari_list
 # traits
-jari_traits <- jari_traits[-c(39:46),] # retirando as linhas a mais
+#jari_traits <- jari_traits[-c(39:46),] # retirando as linhas a mais
 
 jari_traits <- jari_traits %>% 
-  rename("total_length" = "total_length (mm)")
+  rename("total_length" = "total_length (mm)") %>%
+  mutate(total_length = as.double(total_length))
 
-jari_traits$total_length <- as.double(jari_traits$total_length)
+#jari_traits$total_length <- as.double(jari_traits$total_length)
 
 # measures
-jari_measures <- jari_measures %>%
+jari_measures_adj <- jari_measures %>%
   mutate(
     `detritus dry mass (fine)` = `detritus dry mass (filterpaper <0,2 mm)` +
-      `detritus dry mass mg (fine 0,5 mm-0,2 mm)`
+      `detritus_dry_mass_(fine)_0.2-0.5mm`
   ) %>% 
   rename("Remaining_water_volume" = "volume of the water in sample") %>%
   rename(all_of(dict_names)) %>%
@@ -2101,7 +2102,7 @@ jari_measures <- jari_measures %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
   select(-"detritus dry mass (filterpaper <0,2 mm)",
-         -"detritus dry mass mg (fine 0,5 mm-0,2 mm)")
+         -"detritus_dry_mass_(fine)_0.2-0.5mm")
 
 jari_data <- tibble(
   researcher = "Jari",
@@ -2110,7 +2111,7 @@ jari_data <- tibble(
   abundance = list(tibble(jari_fa)),
   list = list(tibble(jari_list)),
   traits=list(tibble(jari_traits)),
-  measures=list(tibble(jari_measures)),
+  measures=list(tibble(jari_measures_adj)),
   obs = "")
 
 save(jari_data,
@@ -4789,6 +4790,815 @@ save(martin_freising_data,
      file = file.path(martin_freising,
                       "martin_freising.RData"))
 
+#--- MD72 --- Yatsiuk, Oblast, Ukraine ----
+yatsiuk_ukraine <- file.path(local_directory,
+                             "Yatsiuk_Ukraine")
+
+yatsiuk_ukraine_fa <- read_xlsx(
+  file.path(
+    yatsiuk_ukraine,
+    "Ukraine_Yatsiuk_FIN.xlsx"),
+  "fauna_abundance")
+
+yatsiuk_ukraine_list <- read_xlsx(
+  file.path(
+    yatsiuk_ukraine,
+    "Ukraine_Yatsiuk_FIN.xlsx"),
+  "Fauna_morphospecies_list")
+
+yatsiuk_ukraine_traits <- read_xlsx(
+  file.path(
+    yatsiuk_ukraine,
+    "Ukraine_Yatsiuk_FIN.xlsx"),
+  "Fauna_traits")
+
+yatsiuk_ukraine_measures <- read_xlsx(
+  file.path(
+    yatsiuk_ukraine,
+    "Ukraine_Yatsiuk_FIN.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+yatsiuk_ukraine_fa
+# list
+yatsiuk_ukraine_list
+# trait
+yatsiuk_ukraine_traits_adj <- yatsiuYatsiukk_ukraine_traits %>%
+  rename(total_length = `total_length (mean_mm)`)
+# measures
+yatsiuk_ukraine_measures_adj <- yatsiuk_ukraine_measures %>%
+  rename(
+    "canopy openness" = "canopy openness (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    "Remaining_water_volume" = "water volume_end_ml") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+yatsiuk_ukraine_data <- tibble(
+  researcher = "Yatsiuk",
+  locality = "Oblast, Ukraine",
+  roof_treatment = NA,
+  abundance = list(tibble(yatsiuk_ukraine_fa)),
+  list = list(tibble(yatsiuk_ukraine_list)),
+  traits= list(tibble(yatsiuk_ukraine_traits_adj)),
+  measures=list(tibble(yatsiuk_ukraine_measures_adj)),
+  obs = "")
+
+save(yatsiuk_ukraine_data, 
+     file = file.path(yatsiuk_ukraine,
+                      "yatsiuk_ukraine.RData"))
+
+#--- MD73 --- Martin, Leipzig, Germany ----
+martin_leipzig <- file.path(local_directory,
+                             "MartinGossner_Leipzig")
+
+martin_leipzig_fa <- read_xlsx(
+  file.path(
+    martin_leipzig,
+    "Leipzig_Germany_Gossner_FIN.xlsx"),
+  "fauna_abundance")
+
+martin_leipzig_list <- read_xlsx(
+  file.path(
+    martin_leipzig,
+    "Leipzig_Germany_Gossner_FIN.xlsx"),
+  "Fauna_morphospecies_list")
+
+martin_leipzig_traits <- read_xlsx(
+  file.path(
+    martin_leipzig,
+    "Leipzig_Germany_Gossner_FIN.xlsx"),
+  "Fauna_traits")
+
+martin_leipzig_measures <- read_xlsx(
+  file.path(
+    martin_leipzig,
+    "Leipzig_Germany_Gossner_FIN.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+martin_leipzig_fa_adj <- martin_leipzig_fa %>% 
+  filter(Stratum == "low" & Year == "2023") %>%
+  select(-SampleID, -Stratum, -Year)
+
+# colSums(martin_leipzig_fa_adj[,-c(1:2)]) # todas spp presentes
+# list
+martin_leipzig_list
+# trait
+martin_leipzig_traits_adj <- martin_leipzig_traits %>%
+  rename(total_length = `total_length (mean_mm)`)
+
+# measures
+#martin_leipzig_measures_adj <- 
+martin_leipzig_measures_adj <- martin_leipzig_measures %>%
+  filter(low_middle_upper == "low" & year == "2023") %>% 
+  mutate(detritus_filter_paper_g = as.numeric(detritus_filter_paper_g),
+         `detritus_dry_mass_(fine)_0.25-0.5mm_g` = as.numeric(`detritus_dry_mass_(fine)_0.25-0.5mm_g`)) %>%
+  mutate(`detritus dry mass (fine)` = 
+    `detritus_filter_paper_g` + `detritus_dry_mass_(fine)_0.25-0.5mm_g`
+  ) %>%
+  select(-`detritus_filter_paper_g`, -`detritus_dry_mass_(fine)_0.25-0.5mm_g`) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "CDOM" = "CDOM_µg_L",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_mg_L",
+    "canopy openness" = "canopy openness beginning (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    #"detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+  
+martin_leipzig_data <- tibble(
+  researcher = "Martin Gossner",
+  locality = "Leipzig, Germany",
+  roof_treatment = NA,
+  abundance = list(tibble(martin_leipzig_fa_adj)),
+  list = list(tibble(martin_leipzig_list)),
+  traits= list(tibble(martin_leipzig_traits_adj)),
+  measures=list(tibble(martin_leipzig_measures_adj)),
+  obs = "")
+
+save(martin_leipzig_data, 
+     file = file.path(martin_leipzig,
+                      "martin_leipzig.RData"))
+
+#--- MD74 --- Cakpo, Benin ----
+cakpo_benin <- file.path(local_directory,
+                            "Cakpo_Benin")
+
+cakpo_benin_fa <- read_xlsx(
+  file.path(
+    cakpo_benin,
+    "Benin_FIN.xlsx"),
+  "fauna_abundance")
+
+cakpo_benin_list <- read_xlsx(
+  file.path(
+    cakpo_benin,
+    "Benin_FIN.xlsx"),
+  "Fauna_morphospecies_list")
+
+cakpo_benin_traits <- read_xlsx(
+  file.path(
+    cakpo_benin,
+    "Benin_FIN.xlsx"),
+  "Fauna_traits")
+
+cakpo_benin_measures <- read_xlsx(
+  file.path(
+    cakpo_benin,
+    "Benin_FIN.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+cakpo_benin_fa
+
+# colSums(martin_leipzig_fa_adj[,-c(1:2)]) # todas spp presentes
+# list
+cakpo_benin_list
+# trait
+cakpo_benin_traits_adj <- cakpo_benin_traits %>%
+  rename(total_length = `total_length (mean_mm)`)
+
+# measures
+#martin_leipzig_measures_adj <- 
+cakpo_benin_measures_adj <- cakpo_benin_measures %>%
+  mutate(
+    `detritus dry mass (fine)` = `detritus filter paper (g)` + `detritus_dry_mass_(fine)_0.25mm_g` + `detritus_dry_mass_(fine)_0.025mm_g`,
+    Remaining_water_volume = NA,
+    `Elevation (m a.s.l.)` = trimws(sub(" ±.*", "", `Elevation (m a.s.l.)`)) # Remove ± e desvio padrão
+  ) %>%
+  mutate(
+    `Elevation (m a.s.l.)` = gsub(",", ".", `Elevation (m a.s.l.)`), # Substitui apenas vírgulas por pontos
+    `Elevation (m a.s.l.)` = as.numeric(`Elevation (m a.s.l.)`)      # Converte para numérico
+  ) %>%
+  select(-`detritus filter paper (g)`, -`detritus_dry_mass_(fine)_0.25mm_g`, -`detritus_dry_mass_(fine)_0.025mm_g`) %>%
+  rename(
+    "canopy openness" = "canopy openness (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_0.5mm_g",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
+
+cakpo_benin_data <- tibble(
+  researcher = "Cakpo",
+  locality = "Benin",
+  roof_treatment = NA,
+  abundance = list(tibble(cakpo_benin_fa)),
+  list = list(tibble(cakpo_benin_list)),
+  traits= list(tibble(cakpo_benin_traits_adj)),
+  measures=list(tibble(cakpo_benin_measures_adj)),
+  obs = "")
+
+save(cakpo_benin_data, 
+     file = file.path(cakpo_benin,
+                      "cakpo_benin.RData"))
+
+#--- MD75 --- Lachat tariche, Switzerland ----
+lachat_tariche <- file.path(local_directory,
+                         "Lachat_Tariche")
+
+lachat_tariche_fa <- read_xlsx(
+  file.path(
+    lachat_tariche,
+    "Tariche_CH_Gossner.xlsx"),
+  "fauna_abundance")
+
+lachat_tariche_list <- read_xlsx(
+  file.path(
+    lachat_tariche,
+    "Tariche_CH_Gossner.xlsx"),
+  "Fauna_morphospecies_list")
+
+lachat_tariche_traits <- read_xlsx(
+  file.path(
+    lachat_tariche,
+    "Tariche_CH_Gossner.xlsx"),
+  "Fauna_traits")
+
+lachat_tariche_measures <- read_xlsx(
+  file.path(
+    lachat_tariche,
+    "Tariche_CH_Gossner.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+lachat_tariche_fa
+
+# colSums(martin_leipzig_fa_adj[,-c(1:2)]) # todas spp presentes
+# list
+lachat_tariche_list
+# trait
+lachat_tariche_adj <- lachat_tariche_traits %>%
+  rename(total_length = `total_length (mean_mm)`)
+
+# measures
+lachat_tariche_measures_adj <- lachat_tariche_measures %>%
+  select(-"detritus dry mass (fine)") %>% # Apenas NA's
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "turbidity" = "turbidity_NTU",  
+    "CDOM" = "CDOM_µg_L",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg_L",
+    "canopy openness" = "canopy openness end (%)",
+    "Remaining_water_volume" = "remaining_water_volume_sampling_mL",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (fine)" = "detritus filter paper <0.5mm (g)",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
+
+lachat_tariche_data <- tibble(
+  researcher = "Lachat",
+  locality = "Clos du Doubs, Switzerland",
+  roof_treatment = NA,
+  abundance = list(tibble(lachat_tariche_fa)),
+  list = list(tibble(lachat_tariche_list)),
+  traits= list(tibble(lachat_tariche_adj)),
+  measures=list(tibble(lachat_tariche_measures_adj)),
+  obs = "")
+
+save(lachat_tariche_data, 
+     file = file.path(lachat_tariche,
+                      "lachat_tariche.RData"))
+
+#--- MD76 --- Lachat satigny, Switzerland ----
+lachat_satigny <- file.path(local_directory,
+                            "Lachat_Satigny")
+
+lachat_satigny_fa <- read_xlsx(
+  file.path(
+    lachat_satigny,
+    "Satigny_CH_Gossner.xlsx"),
+  "fauna_abundance")
+
+lachat_satigny_list <- read_xlsx(
+  file.path(
+    lachat_satigny,
+    "Satigny_CH_Gossner.xlsx"),
+  "Fauna_morphospecies_list")
+
+lachat_satigny_traits <- read_xlsx(
+  file.path(
+    lachat_satigny,
+    "Satigny_CH_Gossner.xlsx"),
+  "Fauna_traits")
+
+lachat_satigny_measures <- read_xlsx(
+  file.path(
+    lachat_satigny,
+    "Satigny_CH_Gossner.xlsx"),
+  "measures_decomposition_geograph")
+
+# 
+lachat_satigny_fa_adj <- lachat_satigny_fa  %>% 
+  select(-c(Code, Site, Date, Sample))
+
+# colSums(martin_leipzig_fa_adj[,-c(1:2)]) # todas spp presentes
+# list
+lachat_satigny_list
+# trait
+lachat_satigny_traits_adj <- lachat_satigny_traits %>%
+  rename(total_length = `total_length (mean_mm)`)
+
+# measures
+# aqui precisamos filtrar para usar apenas as amostras correspondentes em abun.
+lachat_code <- lachat_satigny_fa %>%
+  pull(Code)
+
+lachat_satigny_measures_adj <- lachat_satigny_measures %>%
+  filter(ID %in% lachat_code) %>%
+  select(-"detritus dry mass (fine)") %>% # Apenas NA's
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "turbidity" = "turbidity_NTU",  
+    "CDOM" = "CDOM_µg_L",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg_L",
+    "canopy openness" = "canopy openness end (%)",
+    "Remaining_water_volume" = "remaining_water_volume_sampling_mL",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (fine)" = "detritus filter paper <0.5mm (g)",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
+
+lachat_satigny_data <- tibble(
+  researcher = "Lachat",
+  locality = "Satigny, Switzerland",
+  roof_treatment = NA,
+  abundance = list(tibble(lachat_satigny_fa_adj)),
+  list = list(tibble(lachat_satigny_list)),
+  traits= list(tibble(lachat_satigny_traits_adj)),
+  measures=list(tibble(lachat_satigny_measures_adj)),
+  obs = "Nome dos potes em abundance e measures nao bate")
+
+save(lachat_satigny_data, 
+     file = file.path(lachat_satigny,
+                      "lachat_satigny.RData"))
+
+#--- MD77 --- Fontana, Freiburg, Germany ----
+fontana_freiburg <- file.path(local_directory,
+                            "Fontana_Freiburg")
+
+fontana_freiburg_fa <- read_xlsx(
+  file.path(
+    fontana_freiburg,
+    "FreiburgGermany_Gossner.xlsx"),
+  "fauna_abundance")
+
+fontana_freiburg_list <- read_xlsx(
+  file.path(
+    fontana_freiburg,
+    "FreiburgGermany_Gossner.xlsx"),
+  "Fauna_morphospecies_list")
+
+fontana_freiburg_traits <- read_xlsx(
+  file.path(
+    fontana_freiburg,
+    "FreiburgGermany_Gossner.xlsx"),
+  "Fauna_traits")
+
+fontana_freiburg_measures <- read_xlsx(
+  file.path(
+    fontana_freiburg,
+    "FreiburgGermany_Gossner.xlsx"),
+  "measures_decomposition_geograph")
+
+# 
+fontana_freiburg_fa_adj <- fontana_freiburg_fa  %>% 
+  select(-c("Treatment...11", "Replicate...12", "ProjectsID", "SiteID")) %>%
+  rename(Treatment = `Treatment...1`,
+         Replicate = `Replicate...2`)
+
+# colSums(martin_leipzig_fa_adj[,-c(1:2)]) # todas spp presentes
+# list
+fontana_freiburg_list
+# trait
+fontana_freiburg_traits_adj <- fontana_freiburg_traits %>%
+  rename(total_length = "total_length (mean mm)")
+
+# measures
+fontana_freiburg_measures_adj <- fontana_freiburg_measures %>%
+  select(-c("Treatment...32", "Replicate...33", "ProjectsID", "SiteID")) %>%
+  rename(Treatment = `Treatment...1`,
+         Replicate = `Replicate...2`) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "CDOM" = "CDOM_RFU",
+    "ammonium_concentration" = "ammonium_concentration_ppm",
+    "nitrate_concentration" = "nitrate_concentration_ppm",
+    "chlorophyll-a" = "chlorophyll-a_RFU",
+    "canopy openness" = "canopy openness (%)",
+    "Remaining_water_volume" = "Final water volume_ml",
+    "Tree dbh" = "Tree dbh (cm)",
+    "detritus dry mass (fine)" = "detritus dry mass (fine)_g",
+    "detritus dry mass (coarse)" = "detritus dry mass (coarse)_g",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(c("detritus_fine",
+                       "detritus_coarse"), ~ .x * 1000))
+
+fontana_freiburg_data <- tibble(
+  researcher = "Fontana",
+  locality = "Germany",
+  roof_treatment = NA,
+  abundance = list(tibble(fontana_freiburg_fa_adj)),
+  list = list(tibble(fontana_freiburg_list)),
+  traits= list(tibble(fontana_freiburg_traits_adj)),
+  measures=list(tibble(fontana_freiburg_measures_adj)),
+  obs = "")
+
+save(fontana_freiburg_data, 
+     file = file.path(fontana_freiburg,
+                      "fontana_freiburg.RData"))
+
+#--- MD78 --- Cernusak, Australia ----
+cernusak_australia <- file.path(local_directory,
+                              "Cernusak_Australia")
+
+cernusak_australia_fa <- read_xlsx(
+  file.path(
+    cernusak_australia,
+    "AUS_Cernusak_DaintreeRainforest_Gossner.xlsx"),
+  "fauna_abundance")
+
+cernusak_australia_list <- read_xlsx(
+  file.path(
+    cernusak_australia,
+    "AUS_Cernusak_DaintreeRainforest_Gossner.xlsx"),
+  "Fauna_morphospecies_list")
+
+cernusak_australia_traits <- read_xlsx(
+  file.path(
+    cernusak_australia,
+    "AUS_Cernusak_DaintreeRainforest_Gossner.xlsx"),
+  "Fauna_traits")
+
+cernusak_australia_measures <- read_xlsx(
+  file.path(
+    cernusak_australia,
+    "AUS_Cernusak_DaintreeRainforest_Gossner.xlsx"),
+  "measures_decomposition_geograph")
+
+# 
+cernusak_australia_fa_adj <- cernusak_australia_fa  %>% 
+  select(-c("Stratum", "SampleID"))
+
+# colSums(martin_leipzig_fa_adj[,-c(1:2)]) # todas spp presentes
+# list
+cernusak_australia_list
+# trait
+cernusak_australia_traits_adj <- cernusak_australia_traits %>%
+  rename(total_length = "total_length (mean mm)")
+
+# measures
+cernusak_australia_measures_adj <- cernusak_australia_measures %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2 (mg/L)",
+    "canopy openness" = "canopy openness (proportion)",
+    "detritus dry mass (fine)" = "detritus dry mass (fine) <0.55mm",
+    "detritus dry mass (coarse)" = "detritus dry mass (coarse) > 0.5mm") %>%
+  mutate("Remaining_water_volume" = NA) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
+
+cernusak_australia_data <- tibble(
+  researcher = "Cernusak",
+  locality = "Australia",
+  roof_treatment = NA,
+  abundance = list(tibble(cernusak_australia_fa_adj)),
+  list = list(tibble(cernusak_australia_list)),
+  traits= list(tibble(cernusak_australia_traits_adj)),
+  measures=list(tibble(cernusak_australia_measures_adj)),
+  obs = "")
+
+save(cernusak_australia_data, 
+     file = file.path(cernusak_australia,
+                      "cernusak_australia.RData"))
+
+#--- MD79 --- Amini, Iran ----
+amini_iran <- file.path(local_directory,
+                          "amini_iran")
+
+amini_iran_fa <- read_xlsx(
+  file.path(
+    amini_iran,
+    "Gossner_Iran_FIN.xlsx"),
+  "fauna_abundance")
+
+amini_iran_list <- read_xlsx(
+  file.path(
+    amini_iran,
+    "Gossner_Iran_FIN.xlsx"),
+  "Fauna_morphospecies_list")
+
+amini_iran_traits <- read_xlsx(
+  file.path(
+    amini_iran,
+    "Gossner_Iran_FIN.xlsx"),
+  "Fauna_traits")
+
+amini_iran_measures <- read_xlsx(
+  file.path(
+    amini_iran,
+    "Gossner_Iran_FIN.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+amini_iran_fa
+# list
+amini_iran_list
+# trait
+amini_iran_traits_adj <- amini_iran_traits %>%
+  rename(total_length = `total_length (mean in mm)`)
+
+# measures
+amini_iran_measures_adj <- amini_iran_measures %>%
+  rename(
+    "CDOM" = "CDOM/DCOD",
+    "turbidity" = "turbidity_NTU",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_mg_m3",
+    "detritus dry mass (fine)" = "detritus_dry_mass_(fine)_less than 0.5",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_more than 0.5",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  mutate("Remaining_water_volume" = NA) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
+
+amini_iran_data <- tibble(
+  researcher = "Amini",
+  locality = "Iran",
+  roof_treatment = NA,
+  abundance = list(tibble(amini_iran_fa)),
+  list = list(tibble(amini_iran_list)),
+  traits= list(tibble(amini_iran_traits_adj)),
+  measures=list(tibble(amini_iran_measures_adj)),
+  obs = "")
+
+save(amini_iran_data, 
+     file = file.path(amini_iran,
+                      "amini_iran.RData"))
+
+#--- MD80 --- MartinGossner Sihlwald ----
+martin_sihlwald <- file.path(local_directory,
+                            "MartinGossner_Sihlwald")
+
+martin_sihlwald_fa <- read_xlsx(
+  file.path(
+    martin_sihlwald,
+    "Martin Gossner_Sihlwald_SwitzerlandFIN.xlsx"),
+  "fauna_abundance")
+
+martin_sihlwald_list <- read_xlsx(
+  file.path(
+    martin_sihlwald,
+    "Martin Gossner_Sihlwald_SwitzerlandFIN.xlsx"),
+  "Fauna_morphospecies_list")
+
+martin_sihlwald_traits <- read_xlsx(
+  file.path(
+    martin_sihlwald,
+    "Martin Gossner_Sihlwald_SwitzerlandFIN.xlsx"),
+  "Fauna_traits")
+
+martin_sihlwald_measures <- read_xlsx(
+  file.path(
+    martin_sihlwald,
+    "Martin Gossner_Sihlwald_SwitzerlandFIN.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+martin_sihlwald_fa 
+# list
+martin_sihlwald_list
+# trait
+martin_sihlwald_traits_adj <- martin_sihlwald_traits %>%
+  rename(total_length = `total_length (mean_mm)`)
+
+# measures
+martin_sihlwald_measures_adj <- martin_sihlwald_measures %>%
+  mutate(`detritus filter paper (g)` = as.numeric(`detritus filter paper (g)`),
+         `detritus_dry_mass_(fine)_0.25-0.5mm_g` = as.numeric(`detritus_dry_mass_(fine)_0.25-0.5mm_g`)) %>%
+  mutate(`detritus filter paper (g)` = replace_na(`detritus filter paper (g)`, 0)) %>%
+  mutate(`detritus dry mass (fine)` = 
+           `detritus filter paper (g)` + `detritus_dry_mass_(fine)_0.25-0.5mm_g`
+  ) %>%
+  select(-`detritus filter paper (g)`, -`detritus_dry_mass_(fine)_0.25-0.5mm_g`) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "CDOM" = "CDOM_µg_L",
+    "turbidity" = "turbidity_NTU" ,
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg_L",
+    "canopy openness" = "canopy openness end (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_sampling_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(c("detritus_fine",
+                  "detritus_coarse"), ~ .x * 1000))
+
+martin_sihlwald_data <- tibble(
+  researcher = "Martin Gossner",
+  locality = "Horgen, Switzerland",
+  roof_treatment = NA,
+  abundance = list(tibble(martin_sihlwald_fa)),
+  list = list(tibble(martin_sihlwald_list)),
+  traits= list(tibble(martin_sihlwald_traits_adj)),
+  measures=list(tibble(martin_sihlwald_measures_adj)),
+  obs = "")
+
+save(martin_sihlwald_data, 
+     file = file.path(martin_sihlwald,
+                      "martin_sihlwald.RData"))
+
+#--- MD81 --- Martin Gossner, Demmin ----
+martin_demmin <- file.path(local_directory,
+                             "MartinGossner_Demmin")
+
+martin_demmin_fa <- read_xlsx(
+  file.path(
+    martin_demmin,
+    "Martin Gossner_NorthGermany_DemminFIN.xlsx"),
+  "fauna_abundance")
+
+martin_demmin_list <- read_xlsx(
+  file.path(
+    martin_demmin,
+    "Martin Gossner_NorthGermany_DemminFIN.xlsx"),
+  "Fauna_morphospecies_list")
+
+martin_demmin_traits <- read_xlsx(
+  file.path(
+    martin_demmin,
+    "Martin Gossner_NorthGermany_DemminFIN.xlsx"),
+  "Fauna_traits")
+
+martin_demmin_measures <- read_xlsx(
+  file.path(
+    martin_demmin,
+    "Martin Gossner_NorthGermany_DemminFIN.xlsx"),
+  "measures_decomposition_geograph")
+
+remove <- c("Morphospecies.2", "Morphospecies.3")
+
+# abundance
+martin_demmin_fa_adj <- martin_demmin_fa %>%
+  filter(Stratum == "Lower") %>% 
+  select(-all_of(remove)) %>%
+  select(-Stratum, -SampleID) %>%
+  mutate(across(everything(), ~ replace_na(.x, 0)))
+
+# list
+martin_demmin_list_adj <- martin_demmin_list %>%
+  filter(!Morfospecies_name %in% remove)
+
+# trait
+martin_demmin_traits_adj <- martin_demmin_traits %>%
+  rename(total_length = `total_length (mean_mm)`)
+
+# measures
+martin_demmin_measures_adj <- martin_demmin_measures %>%
+  filter(str_detect(ID, "_L")) %>%
+  mutate(`detritus filter paper (g)` = as.numeric(`detritus filter paper (g)`),
+         `detritus_dry_mass_(fine)_0.25-0.5mm_g` = as.numeric(`detritus_dry_mass_(fine)_0.25-0.5mm_g`)) %>%
+  mutate(`detritus filter paper (g)` = replace_na(`detritus filter paper (g)`, 0)) %>%
+  mutate(`detritus dry mass (fine)` = 
+           `detritus filter paper (g)` + `detritus_dry_mass_(fine)_0.25-0.5mm_g`
+  ) %>%
+  select(-`detritus filter paper (g)`, -`detritus_dry_mass_(fine)_0.25-0.5mm_g`) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "CDOM" = "CDOM_µg_L",
+    "turbidity" = "turbidity_NTU" ,
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg_L",
+    "canopy openness" = "canopy openness end (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(c("detritus_fine",
+                  "detritus_coarse"), ~ .x * 1000))
+
+martin_demmin_data <- tibble(
+  researcher = "Martin Gossner",
+  locality = "Demmin, Germany",
+  roof_treatment = NA,
+  abundance = list(tibble(martin_demmin_fa_adj)),
+  list = list(tibble(martin_demmin_list_adj)),
+  traits= list(tibble(martin_demmin_traits_adj)),
+  measures=list(tibble(martin_demmin_measures_adj)),
+  obs = "")
+
+save(martin_demmin_data, 
+     file = file.path(martin_demmin,
+                      "martin_demmin.RData"))
+
+#--- MD82 --- Anikka ----
+annika_schweiz <- file.path(local_directory,
+                           "Annika_Schweiz")
+
+annika_schweiz_fa <- read_xlsx(
+  file.path(
+    annika_schweiz,
+    "Annika Busse_SächsischeSchweiz_MG.xlsx"),
+  "fauna_abundance")
+
+annika_schweiz_list <- read_xlsx(
+  file.path(
+    annika_schweiz,
+    "Annika Busse_SächsischeSchweiz_MG.xlsx"),
+  "Fauna_morphospecies_list")
+
+annika_schweiz_traits <- read_xlsx(
+  file.path(
+    annika_schweiz,
+    "Annika Busse_SächsischeSchweiz_MG.xlsx"),
+  "Fauna_traits")
+
+annika_schweiz_measures <- read_xlsx(
+  file.path(
+    annika_schweiz,
+    "Annika Busse_SächsischeSchweiz_MG.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+annika_schweiz_fa
+
+# list
+annika_schweiz_list
+
+# trait
+annika_schweiz_traits_adj <- annika_schweiz_traits %>%
+  rename(total_length = `total_length (mean_mm)`)
+
+# measures
+annika_schweiz_measures_adj <- annika_schweiz_measures %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg/L",
+    "canopy openness" = "canopy openness (%)",
+    "detritus dry mass (coarse)" = "detritus dry mass (coarse)_g",
+    "detritus dry mass (fine)" = "detritus dry mass (fine)_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(c("detritus_fine",
+                  "detritus_coarse"), ~ .x * 1000))
+
+annika_schweiz_data <- tibble(
+  researcher = "Anikka",
+  locality = "Lohmen, Germany",
+  roof_treatment = NA,
+  abundance = list(tibble(annika_schweiz_fa)),
+  list = list(tibble(annika_schweiz_list)),
+  traits= list(tibble(annika_schweiz_traits_adj)),
+  measures=list(tibble(annika_schweiz_measures_adj)),
+  obs = "")
+
+save(annika_schweiz_data, 
+     file = file.path(annika_schweiz,
+                      "annika_schweiz.RData"))
+
 #--- Nested dataframe ----
 ### ATENCAO ###
 # FUNDAMENTAL NAO ALTERAR A ORDEM DOS DATAFRAMES INSERIDOS AQUI
@@ -4867,7 +5677,18 @@ nested_df <- bind_rows(boukal_czech_roof,
                        cotriguacu_romero_data_low_nonroof,
                        nock_data_mf2,
                        musa_southafrica_data,
-                       martin_freising_data)
+                       martin_freising_data,
+                       yatsiuk_ukraine_data,
+                       martin_leipzig_data,
+                       cakpo_benin_data,
+                       lachat_tariche_data,
+                       lachat_satigny_data,
+                       fontana_freiburg_data,
+                       cernusak_australia_data,
+                       amini_iran_data,
+                       martin_sihlwald_data,
+                       martin_demmin_data,
+                       annika_schweiz_data)
 
 data_number <- column_id(nested_df, "MD")
 
