@@ -20,7 +20,7 @@ load(here::here("00_preprocessed_data",
 # WITH SPECIES_NEW AND SPECIES_OLD NAMES
 traits_new <- readxl::read_xlsx(
   file.path(local_directory,
-            "list_traits_microcosms_UPDATEJ_NOV.xlsx"))
+            "list_traits_microcosms_UPDATEJ_MAR_2025.xlsx"))
 
 # UNIFYING DATAFRAME TRAITS_NEW IN NESTED_DF_ORIGINAL ----
 # catch all columns to transform
@@ -31,7 +31,7 @@ traits_new_nested <- traits_new %>%
   mutate_at(vars(transform_columns), as.integer) %>%
   mutate(total_length = as.double(total_length)) %>%
   select(
-    -"researcher", -"locality",
+    -"Column1", -"researcher", -"locality",
     -"notes", -"OBS.y", -"notes_combined", 
     -"possible classification", -"reference", -"Column1",
     -"life_cycle", -"feeding_guild", -"defense", -"habitat") %>%
