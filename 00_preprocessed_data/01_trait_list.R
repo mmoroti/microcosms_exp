@@ -57,15 +57,14 @@ View(list_traits)
 
 # aqui geramos a lista para preenchimento dos traits no excel. Para isso, eh so
 # definir no vetor 'mds_to_fill' quais MDs precisam preencher os traits
-mds_to_fill <- c("MD72", "MD73", 
-                 "MD74", "MD75", "MD76",
-                 "MD77", "MD78", "MD79",
-                 "MD80", "MD81", "MD82")
+mds_to_fill <- c("MD83", "MD84")
 
 list_traits_unnest <- list_traits %>% 
        filter(ID %in% mds_to_fill) %>%
        select("ID","researcher","locality","trait_list") %>%
-       unnest(cols="trait_list")
+       unnest(cols="trait_list") %>%
+  mutate(total_length = as.numeric(total_length))
 
+glimpse(list_traits_unnest)
 # Salva no repositorio local para preencher manualmente no excel
 write.csv2(list_traits_unnest, "need_revision.csv")

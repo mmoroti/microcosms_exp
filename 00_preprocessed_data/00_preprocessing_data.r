@@ -5595,6 +5595,146 @@ save(annika_schweiz_data,
      file = file.path(annika_schweiz,
                       "annika_schweiz.RData"))
 
+#--- MD83 --- Boyero, Spain ----
+boyero_spain <- file.path(local_directory,
+                            "Boyero_Spain")
+
+boyero_spain_fa <- read_xlsx(
+  file.path(
+    boyero_spain,
+    "LuzBoyero_SiteBE.xlsx"),
+  "fauna_abundance")
+
+boyero_spain_list <- read_xlsx(
+  file.path(
+    boyero_spain,
+    "LuzBoyero_SiteBE.xlsx"),
+  "Fauna_morphospecies_list")[-c(8:9),]
+
+boyero_spain_traits <- read_xlsx(
+  file.path(
+    boyero_spain,
+    "LuzBoyero_SiteBE.xlsx"),
+  "Fauna_traits")[-c(8:14),] 
+
+boyero_spain_measures <- read_xlsx(
+  file.path(
+    boyero_spain,
+    "LuzBoyero_SiteBE.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+boyero_spain_fa_adj <- boyero_spain_fa %>%
+  mutate(across(3:ncol(.), as.numeric)) %>% 
+  mutate(Morphospecies.1 = Morphospecies.1 + Morphospecies.7) %>% 
+  select(-Morphospecies.7)
+
+# list
+boyero_spain_list_adj <- boyero_spain_list %>%
+  filter(Morfospecies_name != 'Morphospecies.7')
+
+# trait
+boyero_spain_traits_adj <- boyero_spain_traits %>%
+  rename(total_length = `total_length (mm)`) %>%
+  filter(Morfospecies_name != 'Morphospecies.7')
+
+# measures
+names(boyero_spain_measures)
+boyero_spain_measures_adj <- boyero_spain_measures %>%
+  rename(
+    "detritus dry mass (coarse)" = "detritus dry mass (coarse) (g)",
+    "detritus dry mass (fine)" = "detritus dry mass (fine) (g)") %>%
+  mutate("Remaining_water_volume" = NA) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(c("detritus_fine",
+                  "detritus_coarse"), ~ .x * 1000))
+
+boyero_spain_data <- tibble(
+  researcher = "Boyero",
+  locality = "Spain",
+  roof_treatment = NA,
+  abundance = list(tibble(boyero_spain_fa_adj)),
+  list = list(tibble(boyero_spain_list_adj)),
+  traits= list(tibble(boyero_spain_traits_adj)),
+  measures=list(tibble(boyero_spain_measures_adj)),
+  obs = "")
+
+save(boyero_spain_data, 
+     file = file.path(boyero_spain,
+                      "boyero_spain.RData"))
+
+#--- MD84 --- Perez, Spain ----
+perez_spain <- file.path(local_directory,
+                          "Perez_Spain")
+
+perez_spain_fa <- read_xlsx(
+  file.path(
+    perez_spain,
+    "JavierP_SiteHP.xlsx"),
+  "fauna_abundance")
+
+perez_spain_list <- read_xlsx(
+  file.path(
+    perez_spain,
+    "JavierP_SiteHP.xlsx"),
+  "Fauna_morphospecies_list")[-c(6:10),]
+
+perez_spain_traits <- read_xlsx(
+  file.path(
+    perez_spain,
+    "JavierP_SiteHP.xlsx"),
+  "Fauna_traits")[-c(6:14),] 
+
+perez_spain_measures <- read_xlsx(
+  file.path(
+    perez_spain,
+    "JavierP_SiteHP.xlsx"),
+  "measures_decomposition_geograph")
+
+# abundance
+perez_spain_fa_adj <- perez_spain_fa %>%
+  mutate(across(3:ncol(.), as.numeric)) %>% 
+  mutate(Morphospecies.3 = Morphospecies.3 + Morphospecies.4) %>% 
+  select(-Morphospecies.4)
+
+# list
+perez_spain_list_adj <- perez_spain_list %>%
+  filter(Morfospecies_name != 'Morphospecies.4')
+
+# trait
+perez_spain_traits_adj <- perez_spain_traits %>%
+  rename(total_length = `total_ (mm)`) %>%
+  filter(Morfospecies_name != 'Morphospecies.4')
+
+# measures
+names(perez_spain_measures)
+perez_spain_measures_adj <- perez_spain_measures %>%
+  rename(
+    "detritus dry mass (coarse)" = "detritus dry mass (coarse) (g)",
+    "detritus dry mass (fine)" = "detritus dry mass (fine) (g)",
+    "Tree dbh" = "Tree dbh (cm)") %>%
+  mutate("Remaining_water_volume" = NA) %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(c("detritus_fine",
+                  "detritus_coarse"), ~ .x * 1000))
+
+perez_spain_data <- tibble(
+  researcher = "Perez",
+  locality = "Spain",
+  roof_treatment = NA,
+  abundance = list(tibble(perez_spain_fa_adj)),
+  list = list(tibble(perez_spain_list_adj)),
+  traits= list(tibble(perez_spain_traits_adj)),
+  measures=list(tibble(perez_spain_measures_adj)),
+  obs = "")
+
+save(perez_spain_data, 
+     file = file.path(perez_spain,
+                      "perez_spain.RData"))
 #--- Nested dataframe ----
 ### ATENCAO ###
 # FUNDAMENTAL NAO ALTERAR A ORDEM DOS DATAFRAMES INSERIDOS AQUI
@@ -5684,7 +5824,9 @@ nested_df <- bind_rows(boukal_czech_roof,
                        amini_iran_data,
                        martin_sihlwald_data,
                        martin_demmin_data,
-                       annika_schweiz_data)
+                       annika_schweiz_data,
+                       boyero_spain_data,
+                       perez_spain_data)
 
 data_number <- column_id(nested_df, "MD")
 
