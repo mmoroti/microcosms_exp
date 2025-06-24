@@ -20,7 +20,7 @@ load(here::here("00_preprocessed_data",
 # WITH SPECIES_NEW AND SPECIES_OLD NAMES
 traits_new <- readxl::read_xlsx(
   file.path(local_directory,
-            "list_traits_microcosms_UPDATEJ_MAR_2025.xlsx"))
+            "list_traits_microcosms_JUN_2025.xlsx"))
 
 # UNIFYING DATAFRAME TRAITS_NEW IN NESTED_DF_ORIGINAL ----
 # catch all columns to transform
@@ -235,3 +235,5 @@ save(nested_database_cleaned,
 # salva no github
 save(nested_database_cleaned,
      file = here::here("nested_df.RData"))
+
+View(nested_database_cleaned)
