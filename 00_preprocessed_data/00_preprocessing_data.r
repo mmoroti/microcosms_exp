@@ -4816,7 +4816,7 @@ yatsiuk_ukraine_fa
 # list
 yatsiuk_ukraine_list
 # trait
-yatsiuk_ukraine_traits_adj <- yatsiuYatsiukk_ukraine_traits %>%
+yatsiuk_ukraine_traits_adj <- yatsiuk_ukraine_traits %>%
   rename(total_length = `total_length (mean_mm)`)
 # measures
 yatsiuk_ukraine_measures_adj <- yatsiuk_ukraine_measures %>%
@@ -5643,8 +5643,8 @@ names(boyero_spain_measures)
 boyero_spain_measures_adj <- boyero_spain_measures %>%
   rename(
     "detritus dry mass (coarse)" = "detritus dry mass (coarse) (g)",
-    "detritus dry mass (fine)" = "detritus dry mass (fine) (g)") %>%
-  mutate("Remaining_water_volume" = NA) %>%
+    "detritus dry mass (fine)" = "detritus dry mass (fine) (g)",
+    "Remaining_water_volume" = "water_volume") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -5709,13 +5709,12 @@ perez_spain_traits_adj <- perez_spain_traits %>%
   filter(Morfospecies_name != 'Morphospecies.4')
 
 # measures
-names(perez_spain_measures)
 perez_spain_measures_adj <- perez_spain_measures %>%
   rename(
     "detritus dry mass (coarse)" = "detritus dry mass (coarse) (g)",
     "detritus dry mass (fine)" = "detritus dry mass (fine) (g)",
-    "Tree dbh" = "Tree dbh (cm)") %>%
-  mutate("Remaining_water_volume" = NA) %>%
+    "Tree dbh" = "Tree dbh (cm)",
+    "Remaining_water_volume" = "water_volume") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
