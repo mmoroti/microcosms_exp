@@ -2957,7 +2957,7 @@ save(moretti_site1_data,
                  "MMoretti Lab_BR",
                  "moretti_br.RData"))
 
-#--- MD48 & MD49 --- Nakamura_China ---- 
+#--- MD48 & MD49 & MD105 & MD106--- Nakamura_China ---- 
 nakamura <- file.path(local_directory,
                   "Nakamura_China")
 
@@ -2985,48 +2985,114 @@ nakamura_site1_measures <- read_xlsx(
     "Nakamura_AilaoMountainYunnanChina_MICROcosm.xlsx"),
   "measures_decomposition_geograph")
 
+# Ailao Mountain
 # abundance
 nakamura_site1_fa[is.na(nakamura_site1_fa)] <- 0
 
-nakamura_site1_fa <- nakamura_site1_fa %>%
-  mutate(Treatment = str_replace_all(
-    Treatment,c(
-      "Natural forest Understory" = "Natural forest",
-      "Natural forest Midstory" = "Natural forest",
-      "Natural forest Canopy" = "Natural forest"))) 
+nakamura_site1_low <- nakamura_site1_fa %>%
+  filter(Treatment == "Natural forest Understory") %>%
+  mutate(Treatment = "Natural forest") %>%
+  select(-"Anura sp.", -"Stratiomyidae sp.")
+colSums(nakamura_site1_low[,-c(1:2)])
+
+nakamura_site1_middle <- nakamura_site1_fa %>%
+  filter(Treatment == "Natural forest Midstory") %>%
+  mutate(Treatment = "Natural forest") %>%
+  select("Treatment", "Replicate", "Aedes sp.", 
+         "Ceratopogonidae sp.", "Oligochaeta sp.", "Stratiomyidae sp.")
+colSums(nakamura_site1_middle[,-c(1:2)])
+
+nakamura_site1_upper <- nakamura_site1_fa %>%
+  filter(Treatment == "Natural forest Canopy") %>%
+  mutate(Treatment = "Natural forest") %>%
+  select("Treatment", "Replicate", "Ceratopogonidae sp.", "Anura sp.")
+colSums(nakamura_site1_upper[,-c(1:2)])
 
 # list
-head(nakamura_site1_list)
+nakamura_site1_list_low <- nakamura_site1_list %>%
+  filter(!Morfospecies_name %in% c("Anura sp.", "Stratiomyidae sp."))
+
+nakamura_site1_list_middle <- nakamura_site1_list %>%
+  filter(Morfospecies_name %in% c("Aedes sp.", "Ceratopogonidae sp.", 
+                                   "Oligochaeta sp.", "Stratiomyidae sp."))
+
+nakamura_site1_list_upper <- nakamura_site1_list %>%
+  filter(Morfospecies_name %in% c("Ceratopogonidae sp.", "Anura sp."))
 
 # traits
-head(nakamura_site1_traits)
+nakamura_site1_traits_low <- nakamura_site1_traits %>%
+  filter(!Morfospecies_name %in% c("Anura sp.", "Stratiomyidae sp."))
+
+nakamura_site1_traits_middle <- nakamura_site1_traits %>%
+  filter(Morfospecies_name %in% c("Aedes sp.", "Ceratopogonidae sp.", 
+                                  "Oligochaeta sp.", "Stratiomyidae sp."))
+
+nakamura_site1_traits_upper <- nakamura_site1_traits %>%
+  filter(Morfospecies_name %in% c("Ceratopogonidae sp.", "Anura sp."))
 
 # measures
 # rename variables with data dictionary
-nakamura_site1_measures <- 
-  nakamura_site1_measures %>%
+nakamura_site1_measures_low <- nakamura_site1_measures %>%
+  filter(Treatment == "Natural forest Understory") %>%
+  mutate(Treatment = "Natural forest") %>%
   rename(Remaining_water_volume = "Final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
   mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
-# join works!
-#View(left_join(nakamura_site1_list,
-#               nakamura_site1_traits,
-#          by = "Morfospecies_name"))
+nakamura_site1_measures_middle <- nakamura_site1_measures %>%
+  filter(Treatment == "Natural forest Midstory") %>%
+  mutate(Treatment = "Natural forest") %>%
+  rename(Remaining_water_volume = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
 
-nakamura_site1_data <- tibble(
+nakamura_site1_measures_upper <- nakamura_site1_measures %>%
+  filter(Treatment == "Natural forest Canopy") %>%
+  mutate(Treatment = "Natural forest") %>%
+  rename(Remaining_water_volume = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000))
+
+nakamura_site1_data_low <- tibble(
   researcher = "Nakamura",
   locality = "AilaoMountain_China", 
   roof_treatment = NA,
-  abundance = list(tibble(nakamura_site1_fa)),
+  heigth_treatment = 1,
+  abundance = list(tibble(nakamura_site1_low)),
   list = list(tibble(nakamura_site1_list)),
   traits=list(tibble(nakamura_site1_traits)),
   measures=list(tibble(nakamura_site1_measures)),
-  obs = "Excluir MD")
+  obs = "Apenas Natural forest")
 
-# site 2
+nakamura_site1_data_middle <- tibble(
+  researcher = "Nakamura",
+  locality = "AilaoMountain_China", 
+  roof_treatment = NA,
+  heigth_treatment = 2,
+  abundance = list(tibble(nakamura_site1_middle)),
+  list = list(tibble(nakamura_site1_list)),
+  traits=list(tibble(nakamura_site1_traits)),
+  measures=list(tibble(nakamura_site1_measures)),
+  obs = "Apenas Natural forest")
+
+nakamura_site1_data_upper <- tibble(
+  researcher = "Nakamura",
+  locality = "AilaoMountain_China", 
+  roof_treatment = NA,
+  heigth_treatment = 3,
+  abundance = list(tibble(nakamura_site1_upper)),
+  list = list(tibble(nakamura_site1_list_upper)),
+  traits=list(tibble(nakamura_site1_traits_upper)),
+  measures=list(tibble(nakamura_site1_measures_upper)),
+  obs = "Apenas Natural forest")
+
+# Bubeng
 nakamura_site2_fa <- read_xlsx(
   file.path(
     nakamura,
@@ -3063,12 +3129,6 @@ nakamura_site2_fa_adjust <- nakamura_site2_fa %>%
 
 # colSums(nakamura_site2_fa_adjust[,-c(1:2)])  
 
-# list
-head(nakamura_site2_list)
-
-# traits
-View(nakamura_site2_traits)
-
 # measures
 # rename variables with data dictionary
 nakamura_site2_measures_adjust <- 
@@ -3088,26 +3148,106 @@ nakamura_site2_measures_adjust <-
       "Natural forest Understory" = "Natural forest",
       "Managed forest Rubber plantation" = "Managed forest"))) 
 
-# join works!
-#View(left_join(nakamura_site2_list,
-#               nakamura_site2_traits,
-#          by = "Morfospecies_name"))
-
 nakamura_site2_data <- tibble(
   researcher = "Nakamura",
   locality = "Bubeng_China", 
   roof_treatment = NA,
+  heigth_treatment = 1,
   abundance = list(tibble(nakamura_site2_fa_adjust)),
   list = list(tibble(nakamura_site2_list)),
   traits=list(tibble(nakamura_site2_traits)),
   measures=list(tibble(nakamura_site2_measures_adjust)),
   obs = "Falta tamanho do corpo")
 
+# Middle
+nakamura_site2_fa_middle <- nakamura_site2_fa %>%
+  filter(Treatment == "Natural forest Midstory") %>%
+  mutate(Treatment = "Natural forest") %>%
+  select("Treatment", "Replicate", "Aedes sp.", "Tipulidae sp.",
+       "Psychodidae sp.", "Ceratopogonidae sp.")
+colSums(nakamura_site2_fa_middle[,-c(1:2)])  
+
+# list
+nakamura_site2_list_middle <- nakamura_site2_list %>%
+  filter(Morfospecies_name %in% c("Aedes sp.", "Tipulidae sp.",
+                                  "Psychodidae sp.", "Ceratopogonidae sp."))
+
+# traits
+nakamura_site2_traits_middle <- nakamura_site2_traits %>%
+  filter(Morfospecies_name %in% c("Aedes sp.", "Tipulidae sp.",
+                                  "Psychodidae sp.", "Ceratopogonidae sp."))
+
+# measures
+# rename variables with data dictionary
+nakamura_site2_measures_middle <- nakamura_site2_measures %>%
+  filter(Treatment == "Natural forest Midstory") %>%
+  mutate("biomass_cotton_stripes_outside_bag_after (mg)" = NA,
+         "biomass_cotton_stripes_outside_bag_before (mg)" = NA,
+         "Natural tree hole.1" = NA,
+         "Natural tree hole.2" = NA) %>%
+  rename(Remaining_water_volume = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000)) 
+
+nakamura_site2_data_middle <- tibble(
+  researcher = "Nakamura",
+  locality = "Bubeng_China", 
+  roof_treatment = NA,
+  heigth_treatment = 2,
+  abundance = list(tibble(nakamura_site2_fa_middle)),
+  list = list(tibble(nakamura_site2_list_middle)),
+  traits=list(tibble(nakamura_site2_traits_middle)),
+  measures=list(tibble(nakamura_site2_measures_middle)),
+  obs = "Falta tamanho do corpo")
+
+# Upper
+nakamura_site2_fa_upper <- nakamura_site2_fa %>%
+  filter(Treatment == "Natural forest Canopy") %>%
+  mutate(Treatment = "Natural forest") %>%
+  select("Treatment", "Replicate", "Aedes sp.", "Tipulidae sp.",
+         "Psychodidae sp.", "Ceratopogonidae sp.")
+colSums(nakamura_site2_fa_upper[,-c(1:2)]) # without specimens  
+
+# list
+
+# traits
+
+# measures
+# rename variables with data dictionary
+nakamura_site2_measures_upper <- nakamura_site2_measures %>%
+  filter(Treatment == "Natural forest Canopy") %>%
+  mutate("biomass_cotton_stripes_outside_bag_after (mg)" = NA,
+         "biomass_cotton_stripes_outside_bag_before (mg)" = NA,
+         "Natural tree hole.1" = NA,
+         "Natural tree hole.2" = NA) %>%
+  rename(Remaining_water_volume = "Final water volume (ml)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(all_of(cols_to_convert_g_to_mg), ~ .x * 1000)) 
+
+nakamura_site2_data_upper <- tibble(
+  researcher = "Nakamura",
+  locality = "Bubeng_China", 
+  roof_treatment = NA,
+  heigth_treatment = 3,
+  abundance = NA,
+  list = NA,
+  traits= NA,
+  measures=list(tibble(nakamura_site2_measures_upper)),
+  obs = "Sem nenhuma morfoespécie")
+
 # save .RData from romero
-save(nakamura_site1_data,
-     nakamura_site2_data,
-     file = file.path(nakamura,
-                 "nakamura_china.RData"))
+save(
+  nakamura_site1_data_low,
+  nakamura_site1_data_middle,
+  nakamura_site1_data_upper,
+  nakamura_site2_data,
+  nakamura_site2_data_middle,
+  nakamura_site2_data_upper,
+  file = file.path(nakamura, "nakamura_china.RData"))
 
 #--- MD34 & MD69 --- Nock ----
 nock_canada <- file.path(local_directory,
@@ -4187,7 +4327,7 @@ save(claas_data,
      file = file.path(claas_newzealand,
                  "claas_newzealand.RData"))
 
-#--- MD55 & MD56 --- Martin Gossner ----
+#--- MD55 & MD56 & MD85 & MD86 & MD87 & MD100 --- Martin Gossner ----
 martin_suica <- file.path(local_directory,
                          "MartinGossner_Holsetein")
 
@@ -4219,35 +4359,65 @@ martin_measures <- read_xlsx(
 # martin_fa_2022 low = md do 2021
 # martin_fa_2022 middle = md do 2022
 
-#martin_fa_2021 <- martin_fa %>% filter(Year == "2021") %>%
-#  relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
-#  select(-Morphospecies.1, -Morphospecies.4,
-#         -Morphospecies.5, -Morphospecies.11)
-
-#colSums(martin_fa_2021[,-c(1:5)]) 
-# 0 Morphospecies.1, Morphospecies.4,
-# 0 Morphospecies.5, Morphospecies.11
-
 martin_fa_2022 <- martin_fa %>% filter(Year == "2022") %>%
   relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
   select(-Morphospecies.12, -Morphospecies.7) # ausentes
 #colSums(martin_fa_2022[,-c(1:5)]) 
-# 0 Morphospecies.7 and Morphospecies.12
 
+# MD55
 martin_fa_low <- martin_fa_2022 %>% 
   filter(Stratum == "low") %>%
-  select(-Stratum, -Year,-SampleID, -Morphospecies.10)
-#colSums(martin_fa_low[,-c(1:3)]) 
+  select(-Stratum, -Year,-SampleID, 
+         -Morphospecies.10)
+# colSums(martin_fa_low[,-c(1:5)]) 
 # 0 Morphospecies.10
 
+# MD56
 martin_fa_middle <- martin_fa_2022 %>%
   filter(Stratum == "middle") %>%
-  select(-Stratum, -Year,-SampleID, -Morphospecies.4,
-         -Morphospecies.5,  -Morphospecies.6, -Morphospecies.11)
-#colSums(martin_fa_middle[,-c(1:3)]) 
-# 0 Morphospecies.4, Morphospecies.5, Morphospecies.6, Morphospecies.11
+  select(-Stratum, -Year,-SampleID, 
+         -Morphospecies.4, -Morphospecies.5,  -Morphospecies.6, -Morphospecies.11)
+# colSums(martin_fa_middle[,-c(1:5)]) 
 
-# list
+# NEW MD87 - Upper
+martin_fa_upper <- martin_fa_2022 %>%
+  filter(Stratum == "upper") %>%
+  select(-Stratum, -Year,-SampleID, -Morphospecies.4,
+         -Morphospecies.5,  -Morphospecies.6, -Morphospecies.9,
+         -Morphospecies.10, -Morphospecies.11)
+# colSums(martin_fa_upper[,-c(1:5)]) 
+
+# NEW MD85 2021
+martin_fa_2021_low <- martin_fa %>% filter(Year == "2021" & Stratum == "low") %>%
+  relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
+  select(-Stratum, -Year,-SampleID,
+         -Morphospecies.1, -Morphospecies.4, -Morphospecies.5,
+         -Morphospecies.8, -Morphospecies.11)
+# colSums(martin_fa_2021[,-c(1:5)]) 
+
+# NEW MD100 2021
+martin_fa_2021_middle <- martin_fa %>% 
+  filter(Year == "2021" & Stratum == "middle") %>%
+  relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
+  select(-Stratum, -Year,-SampleID,
+         -Morphospecies.1, -Morphospecies.4, -Morphospecies.5,
+         -Morphospecies.6, -Morphospecies.7,  
+         -Morphospecies.8, -Morphospecies.10, -Morphospecies.11,
+         -Morphospecies.12)
+#colSums(martin_fa_2021_middle[,-c(1:2)]) 
+
+# NEW MD86 2021
+martin_fa_2021_upper <- martin_fa %>% 
+  filter(Year == "2021" & Stratum == "upper") %>%
+  relocate(c(SampleID, Stratum, Year), .after = Replicate) %>%
+  select(-Stratum, -Year,-SampleID,
+         -Morphospecies.1, -Morphospecies.3, -Morphospecies.4, -Morphospecies.5,
+         -Morphospecies.6, -Morphospecies.7, -Morphospecies.10, -Morphospecies.11,
+         -Morphospecies.12)
+#colSums(martin_fa_2021_upper[,-c(1:2)]) 
+
+# list to remove 
+# 2022
 filter_species_low <- c("Morphospecies.7","Morphospecies.10",
                         "Morphospecies.12")
 
@@ -4255,46 +4425,60 @@ filter_species_middle <- c("Morphospecies.7","Morphospecies.4",
                            "Morphospecies.5","Morphospecies.6",
                            "Morphospecies.11", "Morphospecies.12")
 
-#martin_list_2021 <- martin_list %>% filter(
-#  Morfospecies_name != "Morphospecies.1" &
-#  Morfospecies_name != "Morphospecies.4" &
-#  Morfospecies_name != "Morphospecies.5" &
-#  Morfospecies_name != "Morphospecies.11"
-#  )
+filter_species_upper <- c("Morphospecies.7","Morphospecies.4",
+                           "Morphospecies.5","Morphospecies.1",
+                           "Morphospecies.11", "Morphospecies.8", "Morphospecies.12")
 
+# 2021
+filter_species_low_2021 <- names(martin_fa_2021_low[,-c(1:2)])
+
+filter_species_middle_2021 <- names(martin_fa_2021_middle[,-c(1:2)])
+
+filter_species_upper_2021 <- names(martin_fa_2021_upper[,-c(1:2)])
+
+# 2022
 martin_list_low <- martin_list %>% 
   filter(!(Morfospecies_name %in% filter_species_low)) 
   
 martin_list_middle <- martin_list %>% 
   filter(!(Morfospecies_name %in% filter_species_middle)) 
 
+martin_list_upper <- martin_list %>% 
+  filter(!(Morfospecies_name %in% filter_species_upper)) 
+
+# 2021
+martin_list_low_2021 <- martin_list %>% 
+  filter(Morfospecies_name %in% filter_species_low_2021)
+
+martin_list_middle_2021 <- martin_list %>% 
+  filter(Morfospecies_name %in% filter_species_middle_2021)
+
+martin_list_upper_2021 <- martin_list %>% 
+  filter(Morfospecies_name %in% filter_species_upper_2021)
+
 # traits
+# 2022
 martin_traits_low <- martin_traits %>% 
   filter(!(Morfospecies_name %in% filter_species_low)) 
 
 martin_traits_middle <- martin_traits %>% 
   filter(!(Morfospecies_name %in% filter_species_middle)) 
 
-# measures
-#martin_measures_2021 <- martin_measures %>%
-#  filter(year == 2021) %>%
-#  rename(dissolved_O2 = "dissolved_O2_mg_L") %>%
-#  rename(CDOM = "CDOM_µg_L") %>%
-#  rename(turbidity = "turbidity_NTU") %>%
-#  rename(ammonium_concentration = "ammonium_concentration_mg_L") %>%
-#  rename(nitrate_concentration = "nitrate_concentration_mg_L") %>%
-#  rename("chlorophyll-a" = "chlorophyll-a_µg_L") %>%
-#  rename("canopy openness" = "canopy openness beginning (%)") %>%
-#  rename("Tree dbh" = "Tree dbh_cm") %>%
-#  rename("detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g") %>%
-#  rename("detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g") %>%
-#  rename("Remaining_water_volume" = "remaining_water_volume_mL") %>%
-#  rename("Natural tree hole.1" = "Natural tree hole.1 (yes/no)") %>%
-#  rename("Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
-#  rename(all_of(dict_names)) %>%
-#  mutate(across(all_of(var_char), as.character)) %>%
-#  mutate(across(all_of(var_numeric), as.numeric)) 
+martin_traits_upper <- martin_traits %>% 
+  filter(!(Morfospecies_name %in% filter_species_upper)) 
 
+# 2021
+martin_traits_low_2021 <- martin_traits %>% 
+  filter(Morfospecies_name %in% filter_species_low_2021)
+
+martin_traits_middle_2021 <- martin_traits %>% 
+  filter(Morfospecies_name %in% filter_species_middle_2021)
+
+martin_traits_upper_2021 <- martin_traits %>% 
+  filter(Morfospecies_name %in% filter_species_upper_2021)
+
+# measures
+# 2022
 martin_measures_low <- martin_measures %>%
   filter(year == 2022) %>% # apenas os de 2022
   mutate(SampleID = sub(".*_", "", ID)) %>% 
@@ -4339,6 +4523,28 @@ martin_measures_middle <- martin_measures %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric))
 
+martin_measures_upper <- martin_measures %>%
+  filter(year == 2022) %>% # apenas os de 2022
+  mutate(SampleID = sub(".*_", "", ID)) %>% # criando sampleid que tem na abundance
+  filter(grepl("_U", ID)) %>% # Upper
+  relocate(SampleID, .after = Replicate) %>%
+  rename(dissolved_O2 = "dissolved_O2_mg_L") %>%
+  rename(CDOM = "CDOM_µg_L") %>%
+  rename(turbidity = "turbidity_NTU") %>%
+  rename(ammonium_concentration = "ammonium_concentration_mg_L") %>%
+  rename(nitrate_concentration = "nitrate_concentration_mg_L") %>%
+  rename("chlorophyll-a" = "chlorophyll-a_µg_L") %>%
+  rename("canopy openness" = "canopy openness beginning (%)") %>%
+  rename("Tree dbh" = "Tree dbh_cm") %>%
+  rename("detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g") %>%
+  rename("detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g") %>%
+  rename("Remaining_water_volume" = "remaining_water_volume_mL") %>%
+  rename("Natural tree hole.1" = "Natural tree hole.1 (yes/no)") %>%
+  rename("Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
 martin_data_low <- tibble(
   #ID = "MD55", 
   researcher = "MartinGossner",
@@ -4349,7 +4555,7 @@ martin_data_low <- tibble(
   list = list(tibble(martin_list_low)),
   traits= list(tibble(martin_traits_low)),
   measures=list(tibble(martin_measures_low)),
-  obs = "Unidades de medidas estao nas colunas originais")
+  obs = "Unidades de medidas estao nas colunas originais - 2022")
 
 martin_data_middle <- tibble(
   #ID = "MD56", 
@@ -4361,11 +4567,127 @@ martin_data_middle <- tibble(
   list = list(tibble(martin_list_middle)),
   traits= list(tibble(martin_traits_middle)),
   measures=list(tibble(martin_measures_middle)),
-  obs = "Apenas natural forest. Diferenca nos replicates de 'abundance' e 'measures'")
+  obs = "Apenas natural forest - 2022")
 
+martin_data_upper <- tibble(
+  #ID = "MD87", 
+  researcher = "MartinGossner",
+  locality = "Holstein_Switzerland",
+  roof_treatment = NA,
+  heigth_treatment = 3,
+  abundance = list(tibble(martin_fa_upper)),
+  list = list(tibble(martin_list_upper)),
+  traits= list(tibble(martin_traits_upper)),
+  measures=list(tibble(martin_measures_upper)),
+  obs = "Apenas natural forest - 2022")
+
+# 2021
+martin_measures_2021 <- martin_measures %>%
+  filter(year == 2021 & low_middle_upper == "low") %>%
+  rename(dissolved_O2 = "dissolved_O2_mg_L") %>%
+  rename(CDOM = "CDOM_µg_L") %>%
+  rename(turbidity = "turbidity_NTU") %>%
+  rename(ammonium_concentration = "ammonium_concentration_mg_L") %>%
+  rename(nitrate_concentration = "nitrate_concentration_mg_L") %>%
+  rename("chlorophyll-a" = "chlorophyll-a_µg_L") %>%
+  rename("canopy openness" = "canopy openness beginning (%)") %>%
+  rename("Tree dbh" = "Tree dbh_cm") %>%
+  rename("detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g") %>%
+  rename("detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g") %>%
+  rename("Remaining_water_volume" = "remaining_water_volume_mL") %>%
+  rename("Natural tree hole.1" = "Natural tree hole.1 (yes/no)") %>%
+  rename("Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) 
+
+martin_measures_middle_2021 <- martin_measures %>%
+  filter(year == 2021) %>% # apenas os de 2021
+  mutate(SampleID = sub(".*_", "", ID)) %>% # criando sampleid que tem na abundance
+  filter(grepl("_M", ID)) %>% # Middle
+  relocate(SampleID, .after = Replicate) %>%
+  rename(dissolved_O2 = "dissolved_O2_mg_L") %>%
+  rename(CDOM = "CDOM_µg_L") %>%
+  rename(turbidity = "turbidity_NTU") %>%
+  rename(ammonium_concentration = "ammonium_concentration_mg_L") %>%
+  rename(nitrate_concentration = "nitrate_concentration_mg_L") %>%
+  rename("chlorophyll-a" = "chlorophyll-a_µg_L") %>%
+  rename("canopy openness" = "canopy openness beginning (%)") %>%
+  rename("Tree dbh" = "Tree dbh_cm") %>%
+  rename("detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g") %>%
+  rename("detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g") %>%
+  rename("Remaining_water_volume" = "remaining_water_volume_mL") %>%
+  rename("Natural tree hole.1" = "Natural tree hole.1 (yes/no)") %>%
+  rename("Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+martin_measures_upper_2021 <- martin_measures %>%
+  filter(year == 2021) %>% # apenas os de 2021
+  mutate(SampleID = sub(".*_", "", ID)) %>% # criando sampleid que tem na abundance
+  filter(grepl("_U", ID)) %>% # Upper
+  relocate(SampleID, .after = Replicate) %>%
+  rename(dissolved_O2 = "dissolved_O2_mg_L") %>%
+  rename(CDOM = "CDOM_µg_L") %>%
+  rename(turbidity = "turbidity_NTU") %>%
+  rename(ammonium_concentration = "ammonium_concentration_mg_L") %>%
+  rename(nitrate_concentration = "nitrate_concentration_mg_L") %>%
+  rename("chlorophyll-a" = "chlorophyll-a_µg_L") %>%
+  rename("canopy openness" = "canopy openness beginning (%)") %>%
+  rename("Tree dbh" = "Tree dbh_cm") %>%
+  rename("detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g") %>%
+  rename("detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g") %>%
+  rename("Remaining_water_volume" = "remaining_water_volume_mL") %>%
+  rename("Natural tree hole.1" = "Natural tree hole.1 (yes/no)") %>%
+  rename("Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+martin_data_2021 <- tibble(
+  #ID = "MD85", 
+  researcher = "MartinGossner",
+  locality = "Holstein_Switzerland",
+  roof_treatment = NA,
+  heigth_treatment = 1,
+  abundance = list(tibble(martin_fa_2021_low)),
+  list = list(tibble(martin_list_low_2021)),
+  traits= list(tibble(martin_traits_low_2021)),
+  measures=list(tibble(martin_measures_2021)),
+  obs = "Estudo pareado de 2021")
+
+martin_data_middle_2021 <- tibble(
+  #ID = "MD100", 
+  researcher = "MartinGossner",
+  locality = "Holstein_Switzerland",
+  roof_treatment = NA,
+  heigth_treatment = 2,
+  abundance = list(tibble(martin_fa_2021_middle)),
+  list = list(tibble(martin_list_middle_2021)),
+  traits= list(tibble(martin_traits_middle_2021)),
+  measures=list(tibble(martin_measures_middle_2021)),
+  obs = "Apenas Natural forest - 2021")
+
+martin_data_upper_2021 <- tibble(
+  #ID = "MD86", 
+  researcher = "MartinGossner",
+  locality = "Holstein_Switzerland",
+  roof_treatment = NA,
+  heigth_treatment = 3,
+  abundance = list(tibble(martin_fa_2021_upper)),
+  list = list(tibble(martin_list_upper_2021)),
+  traits= list(tibble(martin_traits_upper_2021)),
+  measures=list(tibble(martin_measures_upper_2021)),
+  obs = "Apenas Natural forest - 2021")
+ 
 #View(anikka_data)
-save(martin_data_low, # martin_data_2021,
-     martin_data_middle, # martin_data_2022, 
+save(martin_data_low,        # martin_data_2022,
+     martin_data_middle,     # martin_data_2022,
+     martin_data_upper,      # martin_data_2022
+     martin_data_2021,       # martin_data_2021
+     martin_data_middle_2021,# martin_data_2021
+     martin_data_upper_2021, # martin_data_2021
      file = file.path(martin_suica,
                  "martin_suica.RData"))
 
@@ -4779,7 +5101,105 @@ martin_freising_data <- tibble(
   measures=list(tibble(martin_freising_measures_low)),
   obs = "Unidade de medidas nas colunas originais de 'measures'")
 
+# Middle
+martin_freising_fa_middle <- martin_freising_fa %>%
+  filter(Stratum == "middle") %>%
+  select(-Stratum, -SampleID, 
+         -Morphospecies.1, -Morphospecies.6, -Morphospecies.7, 
+         -Morphospecies.8, -Morphospecies.9, -Morphospecies.10)
+# colSums(martin_freising_fa_middle[,-c(1:2)])
+
+middle_species <- names(martin_freising_fa_middle[,-c(1:2)])
+
+martin_freising_list_middle <- martin_freising_list %>%
+  filter(Morfospecies_name %in% middle_species)
+
+martin_freising_traits_middle <- martin_freising_traits %>%
+  filter(Morfospecies_name %in% middle_species)
+
+martin_freising_measures_middle <- martin_freising_measures %>%
+  filter(low_middle_upper == "middle") %>%
+  mutate(turbidity_NTU = str_replace(turbidity_NTU, ">1000", "1000")) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "turbidity" = "turbidity_NTU",  
+    "CDOM" = "CDOM_µg_L",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg_L",
+    #"canopy openness " = "canopy openness beginning (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+martin_freising_data_middle <- tibble(
+  researcher = "MartinGossner",
+  locality = "Freising, Germany",
+  roof_treatment = NA,
+  heigth_treatment = 2,
+  abundance = list(tibble(martin_freising_fa_middle)),
+  list = list(tibble(martin_freising_list_middle)),
+  traits= list(tibble(martin_freising_traits_middle)),
+  measures=list(tibble(martin_freising_measures_middle)),
+  obs = NA)
+
+# upper
+martin_freising_fa_upper <- martin_freising_fa %>%
+  filter(Stratum == "upper") %>%
+  select(-Stratum, -SampleID, 
+         -Morphospecies.3, -Morphospecies.4, -Morphospecies.6, 
+         -Morphospecies.8, -Morphospecies.9, -Morphospecies.10)
+colSums(martin_freising_fa_upper[,-c(1:2)])
+
+upper_species <- names(martin_freising_fa_upper[,-c(1:2)])
+
+martin_freising_list_upper <- martin_freising_list %>%
+  filter(Morfospecies_name %in% upper_species)
+
+martin_freising_traits_upper <- martin_freising_traits %>%
+  filter(Morfospecies_name %in% upper_species)
+
+martin_freising_measures_upper <- martin_freising_measures %>%
+  filter(low_middle_upper == "upper") %>%
+  mutate(turbidity_NTU = str_replace(turbidity_NTU, ">1000", "1000")) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "turbidity" = "turbidity_NTU",  
+    "CDOM" = "CDOM_µg_L",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg_L",
+    #"canopy openness " = "canopy openness beginning (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+martin_freising_data_upper <- tibble(
+  researcher = "MartinGossner",
+  locality = "Freising, Germany",
+  roof_treatment = NA,
+  heigth_treatment = 3,
+  abundance = list(tibble(martin_freising_fa_upper)),
+  list = list(tibble(martin_freising_list_upper)),
+  traits= list(tibble(martin_freising_traits_upper)),
+  measures=list(tibble(martin_freising_measures_upper)),
+  obs = NA)
+
 save(martin_freising_data, 
+     martin_freising_data_middle,
+     martin_freising_data_upper,
      file = file.path(martin_freising,
                       "martin_freising.RData"))
 
@@ -4842,7 +5262,7 @@ save(yatsiuk_ukraine_data,
      file = file.path(yatsiuk_ukraine,
                       "yatsiuk_ukraine.RData"))
 
-#--- MD73 --- Martin, Leipzig, Germany ----
+#--- MD73 & MD96 & MD97 & MD98 --- Martin, Leipzig, Germany ----
 martin_leipzig <- file.path(local_directory,
                              "MartinGossner_Leipzig")
 
@@ -4874,13 +5294,65 @@ martin_leipzig_measures <- read_xlsx(
 martin_leipzig_fa_adj <- martin_leipzig_fa %>% 
   filter(Stratum == "low" & Year == "2023") %>%
   select(-SampleID, -Stratum, -Year)
-
 # colSums(martin_leipzig_fa_adj[,-c(1:2)]) # todas spp presentes
+
+# NEW MD96
+martin_leipzig_fa_low_2022 <- martin_leipzig_fa %>% 
+  filter(Stratum == "low" & Year == "2022") %>%
+  select(-SampleID, -Stratum, -Year) %>%
+  select(-Morphospecies.12, -Morphospecies.13, -Morphospecies.14 )
+#colSums(martin_leipzig_fa_low_2022[,-c(1:2)])
+
+# NEW MD97
+martin_leipzig_fa_middle_2022 <- martin_leipzig_fa %>% 
+  filter(Stratum == "middle" & Year == "2022") %>%
+  select(-SampleID, -Stratum, -Year) %>%
+  select(-Morphospecies.1, -Morphospecies.2, -Morphospecies.3, -Morphospecies.4,
+         -Morphospecies.5, -Morphospecies.7, -Morphospecies.8, -Morphospecies.13,
+         -Morphospecies.14)
+#colSums(martin_leipzig_fa_middle_2022[,-c(1:2)])
+
+# NEW MD98
+martin_leipzig_fa_upper_2022 <- martin_leipzig_fa %>% 
+  filter(Stratum == "upper" & Year == "2022") %>%
+  select(-SampleID, -Stratum, -Year) %>%
+  select(-Morphospecies.1, -Morphospecies.2, -Morphospecies.3, -Morphospecies.4,
+         -Morphospecies.5, -Morphospecies.6, -Morphospecies.7, -Morphospecies.8,
+         -Morphospecies.9, -Morphospecies.12, -Morphospecies.13, -Morphospecies.14)
+#colSums(martin_leipzig_fa_upper_2022[,-c(1:2)])
+
 # list
 martin_leipzig_list
+
+# Selecionando especies
+species_list_low2022 <- names(martin_leipzig_fa_low_2022[,-c(1:2)])
+species_list_middle2022 <- names(martin_leipzig_fa_middle_2022[,-c(1:2)])
+species_list_upper2022 <- names(martin_leipzig_fa_upper_2022[,-c(1:2)])
+
+martin_leipzig_list_low <- martin_leipzig_list %>%
+  filter(Morfospecies_name %in% species_list_low2022)
+
+martin_leipzig_list_middle <- martin_leipzig_list %>%
+  filter(Morfospecies_name %in% species_list_middle2022)
+
+martin_leipzig_list_upper <- martin_leipzig_list %>%
+  filter(Morfospecies_name %in% species_list_upper2022)
+
 # trait
 martin_leipzig_traits_adj <- martin_leipzig_traits %>%
   rename(total_length = `total_length (mean_mm)`)
+
+martin_leipzig_traits_low <- martin_leipzig_traits %>%
+  rename(total_length = `total_length (mean_mm)`) %>%
+  filter(Morfospecies_name %in% species_list_low2022)
+
+martin_leipzig_traits_middle <- martin_leipzig_traits %>%
+  rename(total_length = `total_length (mean_mm)`) %>%
+  filter(Morfospecies_name %in% species_list_middle2022)
+
+martin_leipzig_traits_upper <- martin_leipzig_traits %>%
+  rename(total_length = `total_length (mean_mm)`) %>%
+  filter(Morfospecies_name %in% species_list_upper2022)
 
 # measures
 #martin_leipzig_measures_adj <- 
@@ -4919,7 +5391,119 @@ martin_leipzig_data <- tibble(
   measures=list(tibble(martin_leipzig_measures_adj)),
   obs = "")
 
+# 2022
+martin_leipzig_measures_low2022 <- martin_leipzig_measures %>%
+  filter(low_middle_upper == "low" & year == "2022") %>% 
+  mutate(detritus_filter_paper_g = as.numeric(detritus_filter_paper_g),
+         `detritus_dry_mass_(fine)_0.25-0.5mm_g` = as.numeric(`detritus_dry_mass_(fine)_0.25-0.5mm_g`)) %>%
+  mutate(`detritus dry mass (fine)` = 
+           `detritus_filter_paper_g` + `detritus_dry_mass_(fine)_0.25-0.5mm_g`
+  ) %>%
+  select(-`detritus_filter_paper_g`, -`detritus_dry_mass_(fine)_0.25-0.5mm_g`) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "CDOM" = "CDOM_µg_L",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_mg_L",
+    "canopy openness" = "canopy openness beginning (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    #"detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+martin_leipzig_measures_middle2022 <- martin_leipzig_measures %>%
+  filter(low_middle_upper == "middle" & year == "2022") %>% 
+  mutate(detritus_filter_paper_g = as.numeric(detritus_filter_paper_g),
+         `detritus_dry_mass_(fine)_0.25-0.5mm_g` = as.numeric(`detritus_dry_mass_(fine)_0.25-0.5mm_g`)) %>%
+  mutate(`detritus dry mass (fine)` = 
+           `detritus_filter_paper_g` + `detritus_dry_mass_(fine)_0.25-0.5mm_g`
+  ) %>%
+  select(-`detritus_filter_paper_g`, -`detritus_dry_mass_(fine)_0.25-0.5mm_g`) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "CDOM" = "CDOM_µg_L",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_mg_L",
+    "canopy openness" = "canopy openness beginning (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    #"detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+martin_leipzig_measures_upper2022 <- martin_leipzig_measures %>%
+  filter(low_middle_upper == "upper" & year == "2022") %>% 
+  mutate(detritus_filter_paper_g = as.numeric(detritus_filter_paper_g),
+         `detritus_dry_mass_(fine)_0.25-0.5mm_g` = as.numeric(`detritus_dry_mass_(fine)_0.25-0.5mm_g`)) %>%
+  mutate(`detritus dry mass (fine)` = 
+           `detritus_filter_paper_g` + `detritus_dry_mass_(fine)_0.25-0.5mm_g`
+  ) %>%
+  select(-`detritus_filter_paper_g`, -`detritus_dry_mass_(fine)_0.25-0.5mm_g`) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "CDOM" = "CDOM_µg_L",
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_mg_L",
+    "canopy openness" = "canopy openness beginning (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    #"detritus dry mass (fine)" = "detritus_dry_mass_(fine)_0.25-0.5mm_g",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric))
+
+martin_leipzig_data_low2022 <- tibble(
+  researcher = "Martin Gossner",
+  locality = "Leipzig, Germany",
+  roof_treatment = NA,
+  heigth_treatment = 1,
+  abundance = list(tibble(martin_leipzig_fa_low_2022)),
+  list = list(tibble(martin_leipzig_list_low)),
+  traits= list(tibble(martin_leipzig_traits_low)),
+  measures=list(tibble(martin_leipzig_measures_low2022)),
+  obs = "")
+
+martin_leipzig_data_middle2022 <- tibble(
+  researcher = "Martin Gossner",
+  locality = "Leipzig, Germany",
+  roof_treatment = NA,
+  heigth_treatment = 2,
+  abundance = list(tibble(martin_leipzig_fa_middle_2022)),
+  list = list(tibble(martin_leipzig_list_middle)),
+  traits= list(tibble(martin_leipzig_traits_middle)),
+  measures=list(tibble(martin_leipzig_measures_middle2022)),
+  obs = "")
+
+martin_leipzig_data_upper2022 <- tibble(
+  researcher = "Martin Gossner",
+  locality = "Leipzig, Germany",
+  roof_treatment = NA,
+  heigth_treatment = 3,
+  abundance = list(tibble(martin_leipzig_fa_upper_2022)),
+  list = list(tibble(martin_leipzig_list_upper)),
+  traits= list(tibble(martin_leipzig_traits_upper)),
+  measures=list(tibble(martin_leipzig_measures_upper2022)),
+  obs = "")
+
 save(martin_leipzig_data, 
+     martin_leipzig_data_low2022,
+     martin_leipzig_data_middle2022,
+     martin_leipzig_data_upper2022,
      file = file.path(martin_leipzig,
                       "martin_leipzig.RData"))
 
@@ -5524,7 +6108,111 @@ martin_demmin_data <- tibble(
   measures=list(tibble(martin_demmin_measures_adj)),
   obs = "")
 
+# Middle
+# abundance
+martin_demmin_fa_middle <- martin_demmin_fa %>%
+  filter(Stratum == "Middle") %>% 
+  select(-Stratum, -SampleID) %>%
+  mutate(across(everything(), ~ replace_na(.x, 0)))
+
+# list
+martin_demmin_list
+
+# trait
+martin_demmin_traits_middle <- martin_demmin_traits %>%
+  rename(total_length = `total_length (mean_mm)`)
+
+# measures
+martin_demmin_measures_middle <- martin_demmin_measures %>%
+  filter(str_detect(ID, "_M")) %>%
+  mutate(`detritus filter paper (g)` = as.numeric(`detritus filter paper (g)`),
+         `detritus_dry_mass_(fine)_0.25-0.5mm_g` = as.numeric(`detritus_dry_mass_(fine)_0.25-0.5mm_g`)) %>%
+  mutate(`detritus filter paper (g)` = replace_na(`detritus filter paper (g)`, 0)) %>%
+  mutate(`detritus dry mass (fine)` = 
+           `detritus filter paper (g)` + `detritus_dry_mass_(fine)_0.25-0.5mm_g`
+  ) %>%
+  select(-`detritus filter paper (g)`, -`detritus_dry_mass_(fine)_0.25-0.5mm_g`) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "CDOM" = "CDOM_µg_L",
+    "turbidity" = "turbidity_NTU" ,
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg_L",
+    "canopy openness" = "canopy openness end (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(c("detritus_fine",
+                  "detritus_coarse"), ~ .x * 1000))
+
+martin_demmin_data_middle <- tibble(
+  researcher = "Martin Gossner",
+  locality = "Demmin, Germany",
+  roof_treatment = NA,
+  heigth_treatment = 2,
+  abundance = list(tibble(martin_demmin_fa_middle)),
+  list = list(tibble(martin_demmin_list)),
+  traits= list(tibble(martin_demmin_traits_middle)),
+  measures=list(tibble(martin_demmin_measures_middle)),
+  obs = "")
+
+# Upper
+# abundance
+martin_demmin_fa_upper <- martin_demmin_fa %>%
+  filter(Stratum == "Upper") %>% 
+  select(-Stratum, -SampleID) %>%
+  mutate(across(everything(), ~ replace_na(.x, 0)))
+colSums(martin_demmin_fa_upper[,-c(1:2)])
+
+# measures
+martin_demmin_measures_upper <- martin_demmin_measures %>%
+  filter(str_detect(ID, "_U")) %>%
+  mutate(`detritus filter paper (g)` = as.numeric(`detritus filter paper (g)`),
+         `detritus_dry_mass_(fine)_0.25-0.5mm_g` = as.numeric(`detritus_dry_mass_(fine)_0.25-0.5mm_g`)) %>%
+  mutate(`detritus filter paper (g)` = replace_na(`detritus filter paper (g)`, 0)) %>%
+  mutate(`detritus dry mass (fine)` = 
+           `detritus filter paper (g)` + `detritus_dry_mass_(fine)_0.25-0.5mm_g`
+  ) %>%
+  select(-`detritus filter paper (g)`, -`detritus_dry_mass_(fine)_0.25-0.5mm_g`) %>%
+  rename(
+    "dissolved_O2" = "dissolved_O2_mg_L",
+    "CDOM" = "CDOM_µg_L",
+    "turbidity" = "turbidity_NTU" ,
+    "ammonium_concentration" = "ammonium_concentration_mg_L",
+    "nitrate_concentration" = "nitrate_concentration_mg_L",
+    "chlorophyll-a" = "chlorophyll-a_µg_L",
+    "canopy openness" = "canopy openness end (%)",
+    "Tree dbh" = "Tree dbh_cm",
+    "detritus dry mass (coarse)" = "detritus_dry_mass_(coarse)_>0.5mm_g",
+    "Remaining_water_volume" = "remaining_water_volume_mL",
+    "Natural tree hole.1" = "Natural tree hole.1 (yes/no)",
+    "Natural tree hole.2" = "Natural tree hole.2 (number per hectare)") %>%
+  rename(all_of(dict_names)) %>%
+  mutate(across(all_of(var_char), as.character)) %>%
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(across(c("detritus_fine",
+                  "detritus_coarse"), ~ .x * 1000))
+
+martin_demmin_data_upper <- tibble(
+  researcher = "Martin Gossner",
+  locality = "Demmin, Germany",
+  roof_treatment = NA,
+  heigth_treatment = 3,
+  abundance = NA,
+  list = NA,
+  traits= NA,
+  measures=list(tibble(martin_demmin_measures_upper)),
+  obs = "Sem nenhuma morfoespécie")
+
 save(martin_demmin_data, 
+     martin_demmin_data_middle,
+     martin_demmin_data_upper,
      file = file.path(martin_demmin,
                       "martin_demmin.RData"))
 
@@ -5734,6 +6422,8 @@ perez_spain_data <- tibble(
 save(perez_spain_data, 
      file = file.path(perez_spain,
                       "perez_spain.RData"))
+
+
 #--- Nested dataframe ----
 ### ATENCAO ###
 # FUNDAMENTAL NAO ALTERAR A ORDEM DOS DATAFRAMES INSERIDOS AQUI
@@ -5789,7 +6479,7 @@ nested_df <- bind_rows(boukal_czech_roof,
                        sweet_data,
                        thomas_data,
                        romero_stavirginia_data,
-                       nakamura_site1_data,
+                       nakamura_site1_data_low,
                        nakamura_site2_data,
                        romero_campos_data,
                        romero_cardoso_data,
@@ -5825,7 +6515,31 @@ nested_df <- bind_rows(boukal_czech_roof,
                        martin_demmin_data,
                        annika_schweiz_data,
                        boyero_spain_data,
-                       perez_spain_data)
+                       perez_spain_data,
+                       martin_data_2021,                   # MD85 pre-definido
+                       martin_data_upper_2021,             # MD86 pre-definido
+                       martin_data_upper,                  # MD87 pre-definido
+                       tibble(ID = NA),                    # MD88 pre-definido
+                       tibble(ID = NA),                    # MD89 pre-definido
+                       tibble(ID = NA),                    # MD90 pre-definido
+                       tibble(ID = NA),                    # MD91 pre-definido
+                       tibble(ID = NA),                    # MD92 pre-definido
+                       tibble(ID = NA),                    # MD93 pre-definido
+                       tibble(ID = NA),                    # MD94 pre-definido
+                       tibble(ID = NA),                    # MD95 pre-definido
+                       martin_leipzig_data_low2022,        # MD96 pre-definido
+                       martin_leipzig_data_middle2022,     # MD97 pre-definido
+                       martin_leipzig_data_upper2022,      # MD98 pre-definido
+                       tibble(ID = NA),                    # MD99 pre-definido
+                       martin_data_middle_2021,            # MD100 pre-definido
+                       martin_freising_data_middle,
+                       martin_freising_data_upper,
+                       martin_demmin_data_middle,
+                       martin_demmin_data_upper,
+                       nakamura_site1_data_middle,
+                       nakamura_site1_data_upper,
+                       nakamura_site2_data_middle,
+                       nakamura_site2_data_upper)
 
 data_number <- column_id(nested_df, "MD")
 
