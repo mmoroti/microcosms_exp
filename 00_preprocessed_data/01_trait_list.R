@@ -35,8 +35,10 @@ load(here::here("00_preprocessed_data",
 # desnecessarias e tambem os experimentos que nao possuem nenhum taxa
 list_traits <- data_number %>% 
   select(-"roof_treatment", -"abundance", -"measures", -"obs") %>%
-  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & ID != "MD53" &
-           ID != "MD69")
+  filter(!ID %in% c("MD24", "MD25", "MD34", "MD53", "MD69", "MD104", "MD108")) %>%
+  # empty MD's
+  filter(!ID %in% c("MD88", "MD89", "MD90", "MD91", "MD92",
+         "MD93", "MD94", "MD95", "MD99"))
 
 # Loop for para dar join entre list e traits
 # depois percorrer o dataframe aninhado 
@@ -57,14 +59,21 @@ View(list_traits)
 
 # aqui geramos a lista para preenchimento dos traits no excel. Para isso, eh so
 # definir no vetor 'mds_to_fill' quais MDs precisam preencher os traits
-mds_to_fill <- c("MD83", "MD84")
+mds_to_fill <- c("MD56", "MD85", "MD86", "MD87", "MD96", "MD97", "MD98",
+                 "MD100", "MD101", "MD102", "MD103", "MD105", "MD106", "MD107")
 
 list_traits_unnest <- list_traits %>% 
        filter(ID %in% mds_to_fill) %>%
        select("ID","researcher","locality","trait_list") %>%
        unnest(cols="trait_list") %>%
-  mutate(total_length = as.numeric(total_length))
+  mutate(total_length = as.numeric(total_length)) %>%
+  select("ID", "researcher", "locality",
+         "Class", "Order", "Family",
+         "Genus", "Morfospecies_name", "(morpho)Species",
+         "life_cycle", "total_length", "feeding_guild", 
+         "defense", "habitat")
 
+names(list_traits_unnest)
 glimpse(list_traits_unnest)
 # Salva no repositorio local para preencher manualmente no excel
 write.csv2(list_traits_unnest, "need_revision.csv")

@@ -3013,8 +3013,8 @@ nakamura_site1_list_low <- nakamura_site1_list %>%
   filter(!Morfospecies_name %in% c("Anura sp.", "Stratiomyidae sp."))
 
 nakamura_site1_list_middle <- nakamura_site1_list %>%
-  filter(Morfospecies_name %in% c("Aedes sp.", "Ceratopogonidae sp.", 
-                                   "Oligochaeta sp.", "Stratiomyidae sp."))
+  filter(Morfospecies_name %in% names(nakamura_site1_middle[,-c(1:2)])
+)
 
 nakamura_site1_list_upper <- nakamura_site1_list %>%
   filter(Morfospecies_name %in% c("Ceratopogonidae sp.", "Anura sp."))
@@ -3065,9 +3065,9 @@ nakamura_site1_data_low <- tibble(
   roof_treatment = NA,
   heigth_treatment = 1,
   abundance = list(tibble(nakamura_site1_low)),
-  list = list(tibble(nakamura_site1_list)),
-  traits=list(tibble(nakamura_site1_traits)),
-  measures=list(tibble(nakamura_site1_measures)),
+  list = list(tibble(nakamura_site1_list_low)),
+  traits=list(tibble(nakamura_site1_traits_low)),
+  measures=list(tibble(nakamura_site1_measures_low)),
   obs = "Apenas Natural forest")
 
 nakamura_site1_data_middle <- tibble(
@@ -3076,9 +3076,9 @@ nakamura_site1_data_middle <- tibble(
   roof_treatment = NA,
   heigth_treatment = 2,
   abundance = list(tibble(nakamura_site1_middle)),
-  list = list(tibble(nakamura_site1_list)),
-  traits=list(tibble(nakamura_site1_traits)),
-  measures=list(tibble(nakamura_site1_measures)),
+  list = list(tibble(nakamura_site1_list_middle)),
+  traits=list(tibble(nakamura_site1_traits_middle)),
+  measures=list(tibble(nakamura_site1_measures_middle)),
   obs = "Apenas Natural forest")
 
 nakamura_site1_data_upper <- tibble(
@@ -4425,9 +4425,7 @@ filter_species_middle <- c("Morphospecies.7","Morphospecies.4",
                            "Morphospecies.5","Morphospecies.6",
                            "Morphospecies.11", "Morphospecies.12")
 
-filter_species_upper <- c("Morphospecies.7","Morphospecies.4",
-                           "Morphospecies.5","Morphospecies.1",
-                           "Morphospecies.11", "Morphospecies.8", "Morphospecies.12")
+filter_species_upper <- names(martin_fa_upper[,-c(1:2)])
 
 # 2021
 filter_species_low_2021 <- names(martin_fa_2021_low[,-c(1:2)])
@@ -4444,7 +4442,7 @@ martin_list_middle <- martin_list %>%
   filter(!(Morfospecies_name %in% filter_species_middle)) 
 
 martin_list_upper <- martin_list %>% 
-  filter(!(Morfospecies_name %in% filter_species_upper)) 
+  filter(Morfospecies_name %in% filter_species_upper)
 
 # 2021
 martin_list_low_2021 <- martin_list %>% 
@@ -4459,23 +4457,29 @@ martin_list_upper_2021 <- martin_list %>%
 # traits
 # 2022
 martin_traits_low <- martin_traits %>% 
-  filter(!(Morfospecies_name %in% filter_species_low)) 
+  filter(!(Morfospecies_name %in% filter_species_low)) %>%
+  rename(total_length = `total_length (mean_mm)`)
 
 martin_traits_middle <- martin_traits %>% 
-  filter(!(Morfospecies_name %in% filter_species_middle)) 
+  filter(!(Morfospecies_name %in% filter_species_middle)) %>%
+  rename(total_length = `total_length (mean_mm)`)
 
 martin_traits_upper <- martin_traits %>% 
-  filter(!(Morfospecies_name %in% filter_species_upper)) 
+  filter(Morfospecies_name %in% filter_species_upper) %>%
+  rename(total_length = `total_length (mean_mm)`)
 
 # 2021
 martin_traits_low_2021 <- martin_traits %>% 
-  filter(Morfospecies_name %in% filter_species_low_2021)
+  filter(Morfospecies_name %in% filter_species_low_2021) %>%
+  rename(total_length = `total_length (mean_mm)`)
 
 martin_traits_middle_2021 <- martin_traits %>% 
-  filter(Morfospecies_name %in% filter_species_middle_2021)
+  filter(Morfospecies_name %in% filter_species_middle_2021) %>%
+  rename(total_length = `total_length (mean_mm)`)
 
 martin_traits_upper_2021 <- martin_traits %>% 
-  filter(Morfospecies_name %in% filter_species_upper_2021)
+  filter(Morfospecies_name %in% filter_species_upper_2021) %>%
+  rename(total_length = `total_length (mean_mm)`)
 
 # measures
 # 2022
@@ -5029,7 +5033,7 @@ save(musa_southafrica_data,
      file = file.path(musa_southafrica,
                       "musa_southafrica.RData"))
 
-#--- MD71 --- Martin, Freising, Germany ----
+#--- MD71 & MD101 & MD102 --- Martin, Freising, Germany ----
 martin_freising <- file.path(local_directory,
                               "MartinGossner_Freising")
 
@@ -5115,7 +5119,8 @@ martin_freising_list_middle <- martin_freising_list %>%
   filter(Morfospecies_name %in% middle_species)
 
 martin_freising_traits_middle <- martin_freising_traits %>%
-  filter(Morfospecies_name %in% middle_species)
+  filter(Morfospecies_name %in% middle_species) %>%
+  rename(total_length = `total_length (mean_mm)`)
 
 martin_freising_measures_middle <- martin_freising_measures %>%
   filter(low_middle_upper == "middle") %>%
@@ -5163,7 +5168,8 @@ martin_freising_list_upper <- martin_freising_list %>%
   filter(Morfospecies_name %in% upper_species)
 
 martin_freising_traits_upper <- martin_freising_traits %>%
-  filter(Morfospecies_name %in% upper_species)
+  filter(Morfospecies_name %in% upper_species) %>%
+  rename(total_length = `total_length (mean_mm)`)
 
 martin_freising_measures_upper <- martin_freising_measures %>%
   filter(low_middle_upper == "upper") %>%
@@ -6553,3 +6559,4 @@ data_number <- data_number %>%
 save(data_number,
      file = here::here("00_preprocessed_data",
                       "nested_df_original.RData"))
+

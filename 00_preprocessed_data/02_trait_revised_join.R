@@ -20,7 +20,7 @@ load(here::here("00_preprocessed_data",
 # WITH SPECIES_NEW AND SPECIES_OLD NAMES
 traits_new <- readxl::read_xlsx(
   file.path(local_directory,
-            "list_traits_microcosms_JUN_2025.xlsx"))
+            "list_traits_microcosms_JUL_2026.xlsx"))
 
 # UNIFYING DATAFRAME TRAITS_NEW IN NESTED_DF_ORIGINAL ----
 # catch all columns to transform
@@ -51,9 +51,14 @@ nested_traits_join <- left_join(
 # MD36 is an incorrect experiment (Validated information by Gustavo Romero)
 # another filter is the experiments without traits_revised
 nested_traits <- nested_traits_join %>%
+  # data without biodiversity
   filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & 
-           ID != "MD36", ID != "MD53" & ID != "MD69" & ID != "MD56" ) #%>%
-  #filter(ID != "MD57" & ID != "MD58" & ID != "MD59" & ID != "MD60" & ID != "MD61")
+           ID != "MD53" & ID != "MD69" & ID != "MD104" & ID != "MD108") %>%
+  # data are not available 
+  filter(!ID %in% c("MD88", "MD89", "MD90", "MD91",
+                    "MD92", "MD93", "MD94", "MD95", "MD99")) %>%
+  # exclude experiment
+  filter(ID != "MD36")
 
 for (i in 1:nrow(nested_traits)) {
   #nested_traits$anti_join[[i]] <- anti_join(nested_traits$list[[i]],
@@ -77,23 +82,27 @@ View(nested_traits %>%
 # If everything is correct between the crossing of the dataframes, that is,
 # validation = TRUE, you can remove the list and traits columns 
 # as this information is together in traits_revised
+
 # and exclude experiment MD36 (confirmed by Gustavo Romero and Joice Souza)
 # and exclude experiment MD64 (confirmed by Joice Souza & Gustavo Romero)
 # and exclude experiment MD56 (confirmed by Joice Souza) #only natural forest
 # and exclude experiment MD48 (confirmed by Joice Souza) #only natural forest
 nested_database <- nested_traits_join %>% 
-  filter(ID != 'MD36' & ID != "MD48" & ID != "MD64" & ID != "MD56") %>%
+  filter(ID != 'MD36') %>%
   select(-list, -traits)
 
 # CLEANING ----
 # REMOVING MORPHOSPECIES WITH ''UNCERTAIN_TRAIT == 1'' IN TRAITS AND ABUNDANCE
 # WE NEED TO RENAME NAMES IN ABUNDANCE ACCORDING TRAITS_REVISED TOO 
 data_teste <- nested_database %>%
-  filter(ID != "MD24" & ID != "MD25" & ID != "MD34",
-         ID != "MD53" & ID != "MD69") # sem dados de invertebrados
+  filter(ID != "MD24" & ID != "MD25" & ID != "MD34" & 
+           ID != "MD53" & ID != "MD69" & ID != "MD104" & ID != "MD108") %>%
+  # data are not available 
+  filter(!ID %in% c("MD88", "MD89", "MD90", "MD91",
+                    "MD92", "MD93", "MD94", "MD95", "MD99"))
 
 unir_novamente <- nested_database %>%
-  filter(ID %in% c("MD24", "MD25", "MD34", "MD53","MD69")) 
+  filter(ID %in% c("MD24", "MD25", "MD34", "MD53","MD69", "MD104", "MD108")) 
   
 remove_cols <- c("Class", "Order", "Family", "Genus", 
                  "uncertain_trait","Morfospecies_name", "(morpho)Species", "OTU")
@@ -220,7 +229,6 @@ for (i in 1:nrow(data_teste)) {
 }
 
 dev.off()
-
 
 # TODO CONFERIR NOME DAS COLUNAS 
 # SAVE DATA AFTER VALIDATIONS  ----
