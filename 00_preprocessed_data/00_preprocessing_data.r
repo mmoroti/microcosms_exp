@@ -5,6 +5,8 @@ library(readxl) # read .xlsx
 library(renv) # versioning R and packages
 library(glue) # to create acronyms
 
+#rm(list = setdiff(ls(), c())); gc()
+
 # functions
 # create a key column to join between datasets
 column_id <- function(data, acronym){
@@ -21,7 +23,7 @@ column_id <- function(data, acronym){
 }
 
 # Set directory 
-local_directory <- "G:/Meu Drive/Microcosmos/dados_microcosmos"
+local_directory <- "G:/.shortcut-targets-by-id/157r3BceH7c6xQRCq9BiF4mgUQi3iF9Gt/Dataset"
 
 # Data dictiorary ----
 dict_data <- read_xlsx(
@@ -3567,7 +3569,7 @@ pettermann_measures_adjust <- pettermann_measures %>%
   mutate(natural_tree_1 = NA) %>%
   mutate(natural_tree_2 = NA)
 
-View(pettermann_measures_adjust)
+#View(pettermann_measures_adjust)
 
 pettermann_data <- tibble(
   researcher = "Petermann",
@@ -5006,10 +5008,10 @@ musa_southafrica_measures <- read_xlsx(
     "NEW_SA_Musa.xlsx"),
   "measures_decomposition_geograph")
 
-names(musa_southafrica_fa)
-head(musa_southafrica_list)
-head(musa_southafrica_traits)
-View(musa_southafrica_measures)
+#names(musa_southafrica_fa)
+#head(musa_southafrica_list)
+#head(musa_southafrica_traits)
+#View(musa_southafrica_measures)
 
 musa_southafrica_measures_adjust <- musa_southafrica_measures %>%
   rename(Remaining_water_volume = "Final water volume (ml)") %>% 
