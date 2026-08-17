@@ -9,7 +9,6 @@ local_directory <- "G:/.shortcut-targets-by-id/1zI08lv0MwVKAzyncAsVjf3Y3DHzV2Qfd
 mds_list <- list.files(local_directory) %>%
   purrr::keep(~ grepl("^MD", .x))
 
-
 # results list
 resultados <- list()
 # tempo gasto: 15s para processar 5 MDs
