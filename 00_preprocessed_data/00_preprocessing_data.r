@@ -742,11 +742,23 @@ cornelissen_roof_measures <- read_xlsx(
 
 #abundance 
 cornelissen_roof_fa <- cornelissen_roof_fa %>% 
-  mutate(Treatment = str_replace_all(Treatment,
-                                     c(
-                                       "Eucalyptus_forest" = "Managed forest",
-                                       "Natural_forest" = "Natural forest"))
-         )
+  mutate(
+    Treatment = str_replace_all(
+      Treatment,
+      c(
+        "Eucalyptus_forest" = "Managed forest",
+        "Natural_forest" = "Natural forest"
+      )
+    ),
+    Replicate = str_replace(
+      .data[["Replicate"]],
+      "pot\\.(\\d+)",
+      function(x) {
+        num <- as.integer(str_remove(x, "pot\\."))
+        paste0("pot.", num - 10)
+      }
+    )
+  )
 
 #list
 # substituir o Undetermined por NA
@@ -774,10 +786,23 @@ cornelissen_roof_measures <- cornelissen_roof_measures %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
   mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>%
-  mutate(treatment = str_replace_all(
-    treatment,c(
-      "Eucalyptus_forest" = "Managed forest",
-      "Natural_forest" = "Natural forest")))
+  mutate(
+    treatment = str_replace_all(
+      treatment,
+      c(
+        "Eucalyptus_forest" = "Managed forest",
+        "Natural_forest" = "Natural forest"
+      )
+    ),
+    replicate = str_replace(
+      .data[["replicate"]],
+      "pot\\.(\\d+)",
+      function(x) {
+        num <- as.integer(str_remove(x, "pot\\."))
+        paste0("pot.", num - 10)
+      }
+    )
+  )
 
 # once cottomstrip is losing, multiplicate the values by two
 # duplicate values in these cells (check data_log explanation)
@@ -1168,7 +1193,17 @@ fabiola_roof_fa <- fabiola_fa %>%
   select(-"daphnia.sp.1", -"Wyeomyia.sp.1", 
          -"Isopoda.sp.1", -"Replicate...3") %>%
   rename(Replicate = "Replicate...2") %>%
-  select(-"ID. Own")
+  select(-"ID. Own") %>% 
+  mutate(
+    Replicate = str_replace(
+      .data[["Replicate"]],
+      "pot\\.(\\d+)",
+      function(x) {
+        num <- as.integer(str_remove(x, "pot\\."))
+        paste0("pot.", num - 10)
+      }
+    )
+  )
 
 #colSums(fabiola_roof_fa[,5:15])
 #rowSums(fabiola_roof_fa[,5:15])
@@ -1249,7 +1284,17 @@ fabiola_roof_measures <- fabiola_measures %>%
   select(-`ID. Own`) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
-  mutate(across(where(is.character), ~ na_if(.x, "NA")))
+  mutate(across(where(is.character), ~ na_if(.x, "NA"))) %>% 
+  mutate(
+    replicate = str_replace(
+      .data[["replicate"]],
+      "pot\\.(\\d+)",
+      function(x) {
+        num <- as.integer(str_remove(x, "pot\\."))
+        paste0("pot.", num - 10)
+      }
+    )
+  )
 
 fabiola_nonroof_measures <- fabiola_measures %>%
   filter(str_detect(fabiola_measures$`ID. Own`, "^BC|^PC")) %>%
