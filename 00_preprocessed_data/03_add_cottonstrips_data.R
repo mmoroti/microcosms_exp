@@ -4,6 +4,9 @@ library(tidyverse)
 # Set directory 
 local_directory <- "G:/.shortcut-targets-by-id/1zI08lv0MwVKAzyncAsVjf3Y3DHzV2Qfd/Cotton_strips"
 
+# salva no drive do projeto
+load(here::here("nested_df.RData"))
+
 ###---- Reading Cottonstrips data
 # Este loop do codigo percorre automaticamente a estrutura de pastas dos experimentos
 # e extrai, de cada arquivo de registro (.log), a observação correspondente ao
@@ -17,6 +20,22 @@ local_directory <- "G:/.shortcut-targets-by-id/1zI08lv0MwVKAzyncAsVjf3Y3DHzV2Qfd
 # │       ├── MD01_MF_P1_COARSE_2.log
 # │       ├── MD01_MF_P1_FINE_1.log
 # │       └── ...
+
+# Cada pasta "MD" representa uma unidade experimental/estudo.
+#
+# Dentro de cada pasta MD existe uma pasta "LOG", contendo vários arquivos
+# individuais. Cada arquivo representa uma replicate e seu nome contém os
+# metadados necessários para identificá-la.
+#
+# Exemplo:
+#
+# MD01_MF_P1_COARSE_1.log
+# │    │  │  │       │
+# │    │  │  │       └── replicate
+# │    │  │  └────────── cotton_type
+# │    │  └───────────── pot
+# │    └──────────────── treatment
+# └───────────────────── ID
 
 # identificando as pastas de MDs
 mds_list <- list.files(local_directory) %>%
@@ -116,6 +135,13 @@ for (md in mds_list[88]) {
 end <- Sys.time()
 end - start
 
+save(
+  data,
+  file = file.path(
+    "00_preprocessed_data",
+    "data_cottonstrip.RData")
+)
+
 # Preparar planilhas para preenchimento das informacoes dos cotton strip ----
 # checando por que alguns experimentos tem mais tiras do que esperado?
 # se cada MD tem no maximo 20 potes, podemos ter no maximo 120 tiras 
@@ -136,9 +162,10 @@ check_load <- data %>%
     all_duplicated_same_load = all(same_load),
     .groups = "drop"
   )
-#View(check_load) 
+any(!check_load$all_duplicated_same_load) 
 
 # clean data
+# TODO: isso pode ser adicionado no for?
 # todos os replicates duplicados correspondem ao mesmo 'load', como pegamos
 # o maior valor de load, ele pode ter acontecido mais de uma vez na mesma corrida
 # portanto pegaremos o de menor 'TIME'
@@ -174,7 +201,73 @@ data_clean <- data %>%
   rename(
     Treatment = treatment, 
     Replicate = pot
-  )
+  ) %>%
+  # ajustando algumas numeracoes dos arquivos
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      ID %in% c("MD21", "MD22") & Treatment == "Managed forest",
+      pot_num - 40,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      ID %in% c("MD50") & Treatment == "Managed forest",
+      pot_num - 50,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      ID %in% c("MD47") & Treatment == "Managed forest",
+      pot_num - 30,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      ID %in% c("MD50") & Treatment == "Natural forest",
+      pot_num - 40,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      ID %in% c("MD21", "MD22", "MD47", "") & Treatment == "Natural forest",
+      pot_num - 20,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      ID %in% c("MD23", "MD51", "MD79") & Treatment == "Natural forest",
+      pot_num - 10,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      ID %in% c("MD56") & Treatment == "Natural forest",
+      pot_num + 10,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
 
 md_nest <- data_clean %>%
   group_by(ID) %>%
@@ -187,8 +280,6 @@ md_nest <- data_clean %>%
 #  mutate(n_strips = map_int(cottonstrip, nrow)) %>%
 #  View()
 # uniao com a tabela gerada no 02_trait_revised_join.R
-load("nested_df.RData")
-
 nested_database <- nested_database_cleaned %>%
   left_join(md_nest) %>% 
   relocate(cottonstrip, .before = obs) 
@@ -198,10 +289,23 @@ nested_database <- nested_database_cleaned %>%
 # os diferentes dataframes "abundance" e "measures"
 save(
   nested_database,
-  file = "nested_df.RData"
+  file = file.path(local_directory, "nested_df.RData")
+)
+
+save(
+  nested_database,
+  file = here::here("nested_df.RData")
 )
 
 # Em construção ----
+# aqui na verdade so vou conferir integracao, os ajustes farei o maximo logo do 
+# carregamento dos dados, no script 00_preprocessing_data.R
+# a ideia é que esse script seja apenas para integração dos cottonstrips
+# como essa parte de processamento demora mais que as outras (cerca de ~1h)
+# ainda podemos optimizar esse carregamento; mas por hora importante
+# é estar funcional - entao teoricamente ele termina antes dessa secao
+# em construcao
+
 # Checando as incongruencias entre as bases
 # Agora precisamos conferir se os cotton strips estao batendo com a planilha
 # de abundance & measures para que a tabela relacional fique completa
@@ -217,8 +321,68 @@ df_nested_cottonstrip <- left_join(
 
 # TODO precisa padronizar os potes de abundance & measures para dar o match
 df_na <- df_nested_cottonstrip %>%
-  filter(if_any(everything(), is.na))
-View(df_na)
+  filter(if_any(everything(), is.na)) %>%
+  select(ID, Treatment, Replicate) %>%
+  # esses potes nao tem dados de tiras
+  filter(!ID %in% c(
+    "MD18", "MD31", "MD48", "MD49", "MD57", "MD58", "MD59",
+    "MD64", "MD70", "MD87", "MD100", "MD101", "MD102",
+    "MD103", "MD105", "MD106", "MD107"
+  ))
+
+# quantas tiras faltam por experimento/tratamento no microcosmo?
+list_missing <- df_na %>%
+  group_by(ID, Treatment) %>%
+  summarise(
+    n_missing = n(),
+    .groups = "drop"
+  ) 
+
+# BÓs para resolver
+#"MD20" # jari, os numeros de pote entre NF e MF nao batem
+
+###----
+control_list <- readxl::read_xlsx(
+  file.path(local_directory,
+            "df_fill_cottonstrip.xlsx")) %>%
+  mutate(
+    SAMPLE_OUTSIDE = na_if(SAMPLE_OUTSIDE, "NA"),
+    SAMPLE_FINE    = na_if(SAMPLE_FINE, "NA"),
+    SAMPLE_COARSE  = na_if(SAMPLE_COARSE, "NA")
+  ) %>%
+  mutate(
+    with_strip = if_else(
+      if_any(c(SAMPLE_OUTSIDE, SAMPLE_FINE, SAMPLE_COARSE), ~ !is.na(.x)),
+      1,
+      0
+    )
+  ) %>% select(ID, treatment, replicate, with_strip) %>%
+  rename(Treatment = treatment,
+         Replicate = replicate) %>%
+  mutate(
+    Treatment = case_when(
+      str_detect(Treatment, "Natural forest") ~ "Natural forest",
+      str_detect(Treatment, "Managed forest") ~ "Managed forest",
+      TRUE ~ Treatment
+    )
+  )
+
+control_summary <- control_list %>%
+  group_by(ID, Treatment) %>%
+  summarise(
+    n_present = n(),
+    .groups = "drop"
+  ) 
+
+left_join(control_summary, 
+          list_missing,
+          by = c("ID", "Treatment")) %>% View()
+
+left_join(
+  df_na,
+  control_list,
+  by = c("ID", "Treatment", "Replicate")
+) %>% View()
 
 # TODO Checar esses MDs
 abundance <-unique(df_na$ID)
@@ -229,23 +393,6 @@ abundance <-unique(df_na$ID)
 # abundance e measures; permitindo a integracao dos dados de cada tira e suas
 # replicas dentro de cada experimento - podendo ser entendido como a biodiversidade
 # e o clima atuam na decomposicao ecossistemica. 
-
-# faltam algumas tiras para esses MDs
-# "MD1"   "MD2"   "MD5"   "MD7"  "MD17"
-
-# sem dados de tira
-# "MD18"; 
-
-# conferir
-#"MD20"  "MD21"  "MD22"  "MD23" 
-# "MD26"  "MD27"  "MD28"  "MD29"  "MD30"  "MD31"
-# "MD32"  "MD33"  "MD35"  "MD42"  "MD43" 
-# "MD45"  "MD46"  "MD47"  "MD48"  "MD49"  "MD50"  
-# "MD51"  "MD54"  "MD56"  "MD57"  "MD58" 
-# "MD59"  "MD60"  "MD62"  "MD63"  "MD64"  "MD65"  
-# "MD70"  "MD72"  "MD73"  "MD74"  "MD76" 
-# "MD79"  "MD83"  "MD86"  "MD87"  "MD100" "MD101" 
-# "MD102" "MD103" "MD105" "MD106" "MD107"
 
 ## Checar o restante em measures ----
 df_cottonstrip <- nested_database_cleaned %>%
@@ -283,3 +430,25 @@ setdiff(measures, abundance)
 
 t <- nested_database_cleaned %>% filter(ID == "MD78") 
 View(t)
+
+
+## Integrar measures + abundance + cottonstrip ----
+
+# aqui na verdade so vou conferir, os ajustes farei o maximo logo do 
+# carregamento dos dados, no script 00_preprocessing_data.R
+# a ideia é que esse script seja apenas para integração dos cottonstrips
+# como essa parte de processamento demora mais que as outras (cerca de ~1h)
+# ainda podemos optimizar esse carregamento; mas por hora importante
+# é estar funcional
+
+## Salvar a base integrada ----
+save(
+  nested_database,
+  file = here::here("nested_cotton_df.RData")
+)
+
+save(
+  nested_database,
+  file = file.path(local_directory, "nested_cotton_df.RData")
+)
+

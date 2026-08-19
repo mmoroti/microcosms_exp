@@ -2122,7 +2122,7 @@ jari_measures <- read_xlsx(
 #  select(-"...3") %>%
 #  mutate(across(-c(1, 2), ~ replace_na(., 0)))
 
-names(jari_fa)
+View(jari_fa)
 # list
 #jari_list <- jari_list %>%
 #       bind_rows(tibble(Morfospecies_name = "Morphospecies.38")) # present in
@@ -2474,6 +2474,18 @@ knapp_hory_measures
 # abundance
 knapp_hory_fa[is.na(knapp_hory_fa)] <- 0
 
+knapp_hory_fa <- knapp_hory_fa %>%
+  mutate(
+    replicate_num = as.integer(str_remove(Replicate, "H")),
+    replicate_num = case_when(
+      replicate_num >= 41 & replicate_num <= 50 ~ replicate_num - 40,
+      replicate_num >= 51 & replicate_num <= 60 ~ replicate_num - 50,
+      TRUE ~ replicate_num
+    ),
+    Replicate = paste0("pot.", replicate_num)
+  ) %>%
+  select(-replicate_num)
+
 # list
 knapp_hory_list
 
@@ -2492,7 +2504,17 @@ knapp_hory_measures_filter <- knapp_hory_measures %>%
   select(-Experiment) %>%
   rename(outside_after_mg = outside_before_mg,
          outside_before_mg = outside_after_mg) %>%
-  filter(!(replicate %in% c("H44", "H48", "H52")))
+  filter(!(replicate %in% c("H44", "H48", "H52"))) %>%
+  mutate(
+    replicate_num = as.integer(str_remove(replicate, "H")),
+    replicate_num = case_when(
+      replicate_num >= 41 & replicate_num <= 50 ~ replicate_num - 40,
+      replicate_num >= 51 & replicate_num <= 60 ~ replicate_num - 50,
+      TRUE ~ replicate_num
+    ),
+    replicate = paste0("pot.", replicate_num)
+  ) %>%
+  select(-replicate_num)
 
 knapp_data <- tibble(
   researcher = "Knapp",
@@ -2540,7 +2562,17 @@ luciano_measures <- read_xlsx(
   "measures_decomposition_geograph")
 
 # abundance
-luciano_fa
+luciano_fa <- luciano_fa %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num + 10,   # soma 10
+      pot_num         # mantém como está
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
 
 # list
 luciano_list
@@ -2615,7 +2647,27 @@ martins_roof_fa <- martins_fa %>%
   mutate(Treatment = str_replace_all(
     Treatment,c(
       "Managed forest - roof" = "Managed forest",
-      "Natural forest - roof" = "Natural forest"))) 
+      "Natural forest - roof" = "Natural forest"))) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Natural forest",
+      pot_num - 10,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num - 40,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
+
 
 martins_nonroof_fa <- martins_fa %>%
   filter(Treatment == "Managed forest - standard experiment" |
@@ -2626,7 +2678,17 @@ martins_nonroof_fa <- martins_fa %>%
   mutate(Treatment = str_replace_all(
     Treatment,c(
       "Managed forest - standard experiment" = "Managed forest",
-      "Natural forest - standard experiment" = "Natural forest"))) 
+      "Natural forest - standard experiment" = "Natural forest"))) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num - 30,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
   
 martins_mid_fa <- martins_fa %>%
   filter(Treatment == "Managed forest - 15m" |
@@ -2637,7 +2699,26 @@ martins_mid_fa <- martins_fa %>%
   mutate(Treatment = str_replace_all(
     Treatment,c(
       "Managed forest - 15m" = "Managed forest",
-      "Natural forest - 15m" = "Natural forest"))) 
+      "Natural forest - 15m" = "Natural forest"))) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Natural forest",
+      pot_num - 20,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num - 50,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
   
 martins_roof_fa[is.na(martins_roof_fa)] <- 0
 martins_nonroof_fa[is.na(martins_nonroof_fa)] <- 0
@@ -2735,26 +2816,86 @@ martins_measures_adjusts$'Final water volume (ml)' <- gsub(
 martins_roof_measures <- martins_measures_adjusts %>%
   filter(Treatment == "Managed forest - roof" |
          Treatment == "Natural forest - roof") %>%
+  mutate(Treatment = str_replace_all(
+    Treatment,c(
+      "Managed forest - roof" = "Managed forest",
+      "Natural forest - roof" = "Natural forest"))) %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
-  mutate(across(all_of(var_numeric), as.numeric))
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(
+    pot_num = as.integer(str_remove(replicate, "pot\\.")),
+    pot_num = if_else(
+      treatment == "Natural forest",
+      pot_num - 10,
+      pot_num
+    ),
+    replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(replicate, "pot\\.")),
+    pot_num = if_else(
+      treatment == "Managed forest",
+      pot_num - 40,
+      pot_num
+    ),
+    replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
 
 martins_nonroof_measures <- martins_measures_adjusts %>%
   filter(Treatment == "Managed forest - standard experiment" |
          Treatment == "Natural forest - standard experiment") %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  mutate(Treatment = str_replace_all(
+    Treatment,c(
+      "Managed forest - standard experiment" = "Managed forest",
+      "Natural forest - standard experiment" = "Natural forest"))) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
-  mutate(across(all_of(var_numeric), as.numeric))
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(
+    pot_num = as.integer(str_remove(replicate, "pot\\.")),
+    pot_num = if_else(
+      treatment == "Managed forest",
+      pot_num - 30,
+      pot_num
+    ),
+    replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
 
 martins_mid_measures <- martins_measures_adjusts %>%
   filter(Treatment == "Managed forest - 15m" |
         Treatment == "Natural forest - 15m") %>%
   rename("Remaining_water_volume" = "Final water volume (ml)") %>%
+  mutate(Treatment = str_replace_all(
+    Treatment,c(
+      "Managed forest - 15m" = "Managed forest",
+      "Natural forest - 15m" = "Natural forest"))) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
-  mutate(across(all_of(var_numeric), as.numeric))
+  mutate(across(all_of(var_numeric), as.numeric)) %>%
+  mutate(
+    pot_num = as.integer(str_remove(replicate, "pot\\.")),
+    pot_num = if_else(
+      treatment == "Natural forest",
+      pot_num - 20,
+      pot_num
+    ),
+    replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(replicate, "pot\\.")),
+    pot_num = if_else(
+      treatment == "Managed forest",
+      pot_num - 50,
+      pot_num
+    ),
+    replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
 
 # data
 martins_roof_data <- tibble(
@@ -2889,6 +3030,17 @@ moretti_site1_measures <- read_xlsx(
 
 # abundance
 head(moretti_site1_fa)
+moretti_site1_fa <- moretti_site1_fa %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num - 10,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
 moretti_site1_fa[is.na(moretti_site1_fa)] <- 0
 
 # list
@@ -2919,6 +3071,16 @@ moretti_site1_measures_adjust <- moretti_site1_measures %>%
     "biomass_cotton_stripes_outside_bag_after (mg)" = "biomass_cotton_stripes_outside_bag_before (mg)",
     "biomass_cotton_stripes_outside_bag_before (mg)" = "biomass_cotton_stripes_outside_bag_after (mg)"
   ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num - 10,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -2950,7 +3112,28 @@ moretti_site2_measures <- read_xlsx(
   "Measures_decomposition_geograph")
 
 # abundance
-head(moretti_site2_fa)
+head(moretti_site2_fa,20)
+
+moretti_site2_fa <- moretti_site2_fa %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num - 30,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Natural forest",
+      pot_num - 20,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
 moretti_site2_fa[is.na(moretti_site2_fa)] <- 0
 
 # list
@@ -2971,6 +3154,25 @@ moretti_site2_measures_adjust <- moretti_site2_measures %>%
     "biomass_cotton_stripes_outside_bag_after (mg)" = "biomass_cotton_stripes_outside_bag_before (mg)",
     "biomass_cotton_stripes_outside_bag_before (mg)" = "biomass_cotton_stripes_outside_bag_after (mg)"
   ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num - 30,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Natural forest",
+      pot_num - 20,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -4460,7 +4662,17 @@ martin_fa_2021_upper <- martin_fa %>%
   select(-Stratum, -Year,-SampleID,
          -Morphospecies.1, -Morphospecies.3, -Morphospecies.4, -Morphospecies.5,
          -Morphospecies.6, -Morphospecies.7, -Morphospecies.10, -Morphospecies.11,
-         -Morphospecies.12)
+         -Morphospecies.12) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Natural forest",
+      pot_num - 20,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  select(-pot_num)
 #colSums(martin_fa_2021_upper[,-c(1:2)]) 
 
 # list to remove 
@@ -6606,4 +6818,3 @@ data_number <- data_number %>%
 save(data_number,
      file = here::here("00_preprocessed_data",
                       "nested_df_original.RData"))
-

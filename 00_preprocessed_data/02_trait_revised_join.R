@@ -8,6 +8,8 @@ library(gridExtra)
 # the 01_trait_list script and filled in Excel by Gustavo Romero.
 
 # LOAD DATA ----
+local_directory <- "G:/.shortcut-targets-by-id/157r3BceH7c6xQRCq9BiF4mgUQi3iF9Gt/Dataset"
+
 # load nested dataframe generate by 00_preprocessing_data
 load(here::here("00_preprocessed_data",
                 "nested_df_original.RData"))
@@ -169,66 +171,66 @@ View(data_teste %>%
        relocate(c(nrow_traits,nrow_abundance, validation), 
                 .after = ID)) 
 
-# MAPEAR NA's NAS TRES PLANILHAS
-# traits
-pdf("missing_traitdata.pdf")
-for (i in seq_len(nrow(data_teste))) {
-  
-  # Extrai o ID e o dataframe aninhado
-  current_id <- data_teste$ID[i]
-  current_df <- data_teste$traits_revised[[i]]
-  
-  # Título com a chave 'ID'
-  title <- paste("ID:", current_id)
-  
-  # Cria a visualização de dados ausentes com vis_miss
-  vis_plot <- vis_miss(current_df)
-  
-  # Plota a visualização e o título
-  grid.arrange(vis_plot, top = title)
-}
-dev.off()
-
-# measures
-pdf("missing_measuresdata.pdf")
-for (i in seq_len(nrow(data_teste))) {
-  
-  # Extrai o ID e o dataframe aninhado
-  current_id <- data_teste$ID[i]
-  current_df <- data_teste$measures[[i]]
-  
-  # Título com a chave 'ID'
-  title <- paste("ID:", current_id)
-  
-  # Cria a visualização de dados ausentes com vis_miss
-  vis_plot <- vis_miss(current_df)
-  
-  # Plota a visualização e o título
-  grid.arrange(vis_plot, top = title)
-}
-dev.off()
-
-# TODO CONFERIR BEFORE > AFTER
-pdf("beforeafter_validation.pdf")
-for (i in 1:nrow(data_teste)) {
-  
-  current_id <- data_teste$ID[i]
-  title <- paste("ID:", current_id)
-  
-  df_measures <- data_teste[[i, "measures"]][[1]]
-  
-  df_measures_default <- df_measures %>% 
-    mutate(coarse_comparison = coarse_before_mg > coarse_after_mg,
-           fine_comparison = fine_before_mg > fine_after_mg,
-           outside_comparison = outside_before_mg > outside_after_mg) %>%
-    select(treatment, replicate, coarse_comparison,
-           fine_comparison, outside_comparison)
-  
-  # Gera a tabela formatada no PDF
-  grid.table(df_measures_default)
-}
-
-dev.off()
+## MAPEAR NA's NAS TRES PLANILHAS
+## traits
+#pdf("missing_traitdata.pdf")
+#for (i in seq_len(nrow(data_teste))) {
+#  
+#  # Extrai o ID e o dataframe aninhado
+#  current_id <- data_teste$ID[i]
+#  current_df <- data_teste$traits_revised[[i]]
+#  
+#  # Título com a chave 'ID'
+#  title <- paste("ID:", current_id)
+#  
+#  # Cria a visualização de dados ausentes com vis_miss
+#  vis_plot <- vis_miss(current_df)
+#  
+#  # Plota a visualização e o título
+#  grid.arrange(vis_plot, top = title)
+#}
+#dev.off()
+#
+## measures
+#pdf("missing_measuresdata.pdf")
+#for (i in seq_len(nrow(data_teste))) {
+#  
+#  # Extrai o ID e o dataframe aninhado
+#  current_id <- data_teste$ID[i]
+#  current_df <- data_teste$measures[[i]]
+#  
+#  # Título com a chave 'ID'
+#  title <- paste("ID:", current_id)
+#  
+#  # Cria a visualização de dados ausentes com vis_miss
+#  vis_plot <- vis_miss(current_df)
+#  
+#  # Plota a visualização e o título
+#  grid.arrange(vis_plot, top = title)
+#}
+#dev.off()
+#
+## TODO CONFERIR BEFORE > AFTER
+#pdf("beforeafter_validation.pdf")
+#for (i in 1:nrow(data_teste)) {
+#  
+#  current_id <- data_teste$ID[i]
+#  title <- paste("ID:", current_id)
+#  
+#  df_measures <- data_teste[[i, "measures"]][[1]]
+#  
+#  df_measures_default <- df_measures %>% 
+#    mutate(coarse_comparison = coarse_before_mg > coarse_after_mg,
+#           fine_comparison = fine_before_mg > fine_after_mg,
+#           outside_comparison = outside_before_mg > outside_after_mg) %>%
+#    select(treatment, replicate, coarse_comparison,
+#           fine_comparison, outside_comparison)
+#  
+#  # Gera a tabela formatada no PDF
+#  grid.table(df_measures_default)
+#}
+#
+#dev.off()
 
 # TODO CONFERIR NOME DAS COLUNAS 
 # SAVE DATA AFTER VALIDATIONS  ----
@@ -243,5 +245,3 @@ save(nested_database_cleaned,
 # salva no github
 save(nested_database_cleaned,
      file = here::here("nested_df.RData"))
-
-View(nested_database_cleaned)
