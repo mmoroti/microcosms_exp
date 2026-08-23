@@ -202,7 +202,17 @@ data_clean <- data %>%
     Treatment = treatment, 
     Replicate = pot
   ) %>%
-  # ajustando algumas numeracoes dos arquivos
+  # ajustando algumas numeracoes dos arquivos log para dar match com as
+  # planilhas de abundancia e measures
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      ID %in% c("MD27") & Treatment == "Managed forest",
+      pot_num - 10,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
   mutate(
     pot_num = as.integer(str_remove(Replicate, "pot\\.")),
     pot_num = if_else(
@@ -221,7 +231,6 @@ data_clean <- data %>%
     ),
     Replicate = paste0("pot.", pot_num)
   ) %>%
-  
   mutate(
     pot_num = as.integer(str_remove(Replicate, "pot\\.")),
     pot_num = if_else(
@@ -267,7 +276,19 @@ data_clean <- data %>%
     ),
     Replicate = paste0("pot.", pot_num)
   ) %>%
-  select(-pot_num)
+  select(-pot_num) %>%
+  # trocar managed e natural no MD20
+  mutate(
+    Treatment = if_else(
+      ID == "MD20",
+      case_when(
+        Treatment == "Managed forest" ~ "Natural forest",
+        Treatment == "Natural forest" ~ "Managed forest",
+        TRUE ~ Treatment
+      ),
+      Treatment
+    )
+  )
 
 md_nest <- data_clean %>%
   group_by(ID) %>%
@@ -287,6 +308,7 @@ nested_database <- nested_database_cleaned %>%
 # Salvar uma primeira versao; vou agora entender quais MDs estamos perdendo
 # por erro no cruzamento, com isso a base vai poder estar 100% integrada entre
 # os diferentes dataframes "abundance" e "measures"
+local_directory <- "G:/.shortcut-targets-by-id/1zI08lv0MwVKAzyncAsVjf3Y3DHzV2Qfd/Cotton_strips"
 save(
   nested_database,
   file = file.path(local_directory, "nested_df.RData")
@@ -298,6 +320,10 @@ save(
 )
 
 # Em construção ----
+
+# abundancia e measures teoricamente tem que ter o mesmo n de dados faltantes
+# os dados tem que bater com a control list
+
 # aqui na verdade so vou conferir integracao, os ajustes farei o maximo logo do 
 # carregamento dos dados, no script 00_preprocessing_data.R
 # a ideia é que esse script seja apenas para integração dos cottonstrips
@@ -309,37 +335,34 @@ save(
 # Checando as incongruencias entre as bases
 # Agora precisamos conferir se os cotton strips estao batendo com a planilha
 # de abundance & measures para que a tabela relacional fique completa
-test <- nested_database_cleaned %>%
+abundance_id <- nested_database_cleaned %>%
   select(ID, abundance) %>%
   unnest() %>%
   select(ID, Treatment, Replicate)
 
 df_nested_cottonstrip <- left_join(
-  test,
+  abundance_id,
   data_clean,
   by = c("ID", "Treatment", "Replicate")) 
 
 # TODO precisa padronizar os potes de abundance & measures para dar o match
-df_na <- df_nested_cottonstrip %>%
+df_na_abund <- df_nested_cottonstrip %>%
   filter(if_any(everything(), is.na)) %>%
   select(ID, Treatment, Replicate) %>%
   # esses potes nao tem dados de tiras
   filter(!ID %in% c(
     "MD18", "MD31", "MD48", "MD49", "MD57", "MD58", "MD59",
     "MD64", "MD70", "MD87", "MD100", "MD101", "MD102",
-    "MD103", "MD105", "MD106", "MD107"
+    "MD103", "MD105", "MD106", "MD107", "MD104", "MD108"
   ))
 
 # quantas tiras faltam por experimento/tratamento no microcosmo?
-list_missing <- df_na %>%
+list_missing_abund <- df_na_abund %>%
   group_by(ID, Treatment) %>%
   summarise(
     n_missing = n(),
     .groups = "drop"
   ) 
-
-# BÓs para resolver
-#"MD20" # jari, os numeros de pote entre NF e MF nao batem
 
 ###----
 control_list <- readxl::read_xlsx(
@@ -370,22 +393,35 @@ control_list <- readxl::read_xlsx(
 control_summary <- control_list %>%
   group_by(ID, Treatment) %>%
   summarise(
-    n_present = n(),
+    n_present = sum(with_strip == 1, na.rm = TRUE),
     .groups = "drop"
-  ) 
+  ) %>%
+  # em relacao aos dados faltantes, 
+  filter(ID %in% list_missing$ID)
 
-left_join(control_summary, 
-          list_missing,
-          by = c("ID", "Treatment")) %>% View()
+# TODO tem que checar a origem dos NAs
+# replicas com dados de tiras mas que estao vazias
+left_join(df_na_abund,
+          control_list, 
+          by = c("ID", "Treatment", "Replicate")) %>%
+  filter(with_strip == 1)
 
-left_join(
-  df_na,
-  control_list,
-  by = c("ID", "Treatment", "Replicate")
-) %>% View()
+left_join(list_missing,
+          control_summary, 
+          by = c("ID", "Treatment")) %>% 
+  mutate(soma = n_missing + n_present) %>%
+  View()
+
+# teoricamente todos tem que somar 10
+# TODO checar o que não soma	
+# MD22
+# Managed forest
+# MD33
+# Natural forest
+# MD54
 
 # TODO Checar esses MDs
-abundance <-unique(df_na$ID)
+abundance <-unique (df_na_abund$ID)
 
 # Precisamos conferir quem são os NA's na base agora. Esses são os
 # MDs que tem potes sem correspondencia na tira. Precisamos também 
@@ -408,28 +444,41 @@ df_nested_cottonstrip <- left_join(
          c("replicate" = "Replicate")))
 
 # TODO precisa padronizar os potes de abundance & measures para dar o match
-df_na <- df_nested_cottonstrip %>%
-  filter(if_any(everything(), is.na))
+df_na_measures <- df_nested_cottonstrip %>%
+  filter(if_any(everything(), is.na)) %>%
+  # esses potes nao tem dados de tiras
+  filter(!ID %in% c(
+    "MD18", "MD31", "MD48", "MD49", "MD57", "MD58", "MD59",
+    "MD64", "MD70", "MD87", "MD100", "MD101", "MD102",
+    "MD103", "MD105", "MD106", "MD107", "MD104", "MD108"
+  ))
+
+# quantas tiras faltam por experimento/tratamento no microcosmo?
+list_missing_measures <- df_na_measures %>%
+  group_by(ID, treatment) %>%
+  summarise(
+    n_missing_measures = n(),
+    .groups = "drop"
+  ) %>%
+  rename(Treatment = treatment)
+
+check_measures <- left_join(
+  list_missing_measures,
+  list_missing_abund,
+  by = c("ID", "Treatment")
+) %>%
+  # as que estiverem batendo é por que o merge ta funcionando!
+  filter(n_missing_measures != n_missing | is.na(n_missing)) #%>%
+
+View(check_measures)
 
 # TODO Checar esses MDs
-measures <- unique(df_na$ID)
-# "MD1"   "MD2"   "MD5"   "MD7"   "MD10"  "MD17"  
-# "MD18"  "MD20"  "MD21"  "MD22"  "MD23" 
-# "MD26"  "MD27"  "MD28"  "MD29"  "MD30"  "MD31"
-# "MD32"  "MD33"  "MD35"  "MD42"  "MD43" 
-# "MD45"  "MD46"  "MD47"  "MD48"  "MD49"  "MD50"  
-# "MD51"  "MD54"  "MD56"  "MD57"  "MD58" 
-# "MD59"  "MD60"  "MD62"  "MD63"  "MD64"  "MD65"  
-# "MD70"  "MD72"  "MD73"  "MD74"  "MD76" 
-# "MD78"  "MD79"  "MD83"  "MD86"  "MD87"  "MD100" 
-# "MD101" "MD102" "MD103" "MD105" "MD106"
-#"MD107" "MD24"  "MD25"  "MD34"  "MD69"  "MD104" "MD108"
+measures <- unique(check_measures$ID)
+# measures
+# "MD34" "MD56" "MD69" "MD76"
 
 setdiff(abundance, measures)
 setdiff(measures, abundance)
-
-t <- nested_database_cleaned %>% filter(ID == "MD78") 
-View(t)
 
 
 ## Integrar measures + abundance + cottonstrip ----

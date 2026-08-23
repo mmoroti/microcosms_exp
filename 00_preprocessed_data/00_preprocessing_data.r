@@ -353,6 +353,14 @@ caliman_roof_measures <- caliman_measures %>%
   filter(Replicate != "pot.1" & Replicate != "pot.3" & Replicate != "pot.6" &
            Replicate != "pot.8" | 
            Treatment != "Managed forest (allochthonous detritus)") %>%
+  mutate(
+    Treatment = case_when(
+      Treatment == "Managed forest (allochthonous detritus)" ~
+        "Managed forest",
+      Treatment == "Natural forest (allochthonous detritus)" ~
+        "Natural forest",
+      TRUE ~ Treatment
+    )) %>%
   rename("Elevation (m a.s.l.)" = "Elevation (m.s.l.)") %>%
   rename("Remaining_water_volume" = "final water volume (ml)") %>%
   rename(all_of(dict_names)) %>%
@@ -2140,6 +2148,15 @@ jari_traits <- jari_traits %>%
 # measures
 jari_measures_adj <- jari_measures %>%
   mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num + 10,   # soma 10
+      pot_num         # mantém como está
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
     `detritus dry mass (fine)` = `detritus dry mass (filterpaper <0,2 mm)` +
       `detritus_dry_mass_(fine)_0.2-0.5mm`
   ) %>% 
@@ -2407,6 +2424,24 @@ knapp_measures <- read_xlsx(
 # measures
 knapp_roof_measures <- knapp_measures %>%
   filter(Experiment == "roof") %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "L")),
+    pot_num = if_else(
+      Treatment == "Natural forest",
+      pot_num - 10,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num - 30,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -2414,6 +2449,24 @@ knapp_roof_measures <- knapp_measures %>%
 
 knapp_nonroof_measures <- knapp_measures %>%
   filter(Experiment == "standard") %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "L")),
+    pot_num = if_else(
+      Treatment == "Natural forest",
+      pot_num,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
+  mutate(
+    pot_num = as.integer(str_remove(Replicate, "pot\\.")),
+    pot_num = if_else(
+      Treatment == "Managed forest",
+      pot_num - 20,
+      pot_num
+    ),
+    Replicate = paste0("pot.", pot_num)
+  ) %>%
   rename(all_of(dict_names)) %>%
   mutate(across(all_of(var_char), as.character)) %>%
   mutate(across(all_of(var_numeric), as.numeric)) %>%
@@ -3567,8 +3620,14 @@ nock_measures_adjust_mf1 <- nock_measures_adjust %>%
   filter(treatment == "Managed forest" | treatment == "Natural forest")
 
 nock_measures_adjust_mf2 <- nock_measures_adjust %>%
-  filter(treatment == "Managed forest 2" | treatment == "Natural forest")
-
+  filter(treatment == "Managed forest 2" | treatment == "Natural forest") %>%
+  mutate(
+    treatment = case_when(
+      treatment == "Managed forest 2" ~ "Managed forest",
+      TRUE ~ treatment
+    )
+  )
+  
 nock_data_mf1 <- tibble(
   researcher = "Nock",
   locality = "Alberta_Canada",
@@ -6117,6 +6176,13 @@ cernusak_australia_traits_adj <- cernusak_australia_traits %>%
 
 # measures
 cernusak_australia_measures_adj <- cernusak_australia_measures %>%
+  mutate(
+    Treatment = case_when(
+      Treatment == "Managed forest - lower" ~ "Managed forest",
+      Treatment == "Natural forest - lower" ~ "Natural forest",
+      TRUE ~ Treatment
+    )
+  ) %>%
   rename(
     "dissolved_O2" = "dissolved_O2 (mg/L)",
     "canopy openness" = "canopy openness (proportion)",
